@@ -70,6 +70,7 @@ public class NewInvoice extends javax.swing.JFrame {
                 sellingDiscountTextField.setText(selectedSellingDiscount);
                 sellingPriceTextField.setText(selectedSellingPrice);
                 quantityLabel.setText("Quantity in " + selectedMeasUnit);
+                quantityTextField.setText("1");
                 quantityTextField.grabFocus();
                 quantityTextField.selectAll();
                 stockBarcodeTextField.setEditable(false);
@@ -155,15 +156,15 @@ public class NewInvoice extends javax.swing.JFrame {
             this.invoiceTotal = invoiceTotal;
 
             totalValueLabel.setText(Numbers.formatPrice(invoiceTotal));
-            discountValueLabel.setText(Numbers.formatPrice(invoiceTotal));
-            netTotalValueLabel.setText(Numbers.formatPrice(invoiceTotal - invoiceTotal));
+            discountValueLabel.setText(Numbers.formatPrice(invoiceDiscount));
+            netTotalValueLabel.setText(Numbers.formatPrice(invoiceTotal - invoiceDiscount));
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "Something Went Wrong", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
     }
 
-    private void setGrnDiscount() {
+    private void setInvoiceDiscount() {
         if (!(presentageDiscountRadioButton.isSelected() || amountDiscountRadioButton.isSelected())) {
             JOptionPane.showMessageDialog(this, "Please Select Discount Type", "Warning", JOptionPane.WARNING_MESSAGE);
         } else if (grnDiscountFromattedTextField.getText().equals("0.00")) {
@@ -284,7 +285,7 @@ public class NewInvoice extends javax.swing.JFrame {
         setTitle("New Customer Invoice");
         setMinimumSize(new java.awt.Dimension(1090, 696));
 
-        jPanel11.setLayout(new java.awt.GridLayout());
+        jPanel11.setLayout(new java.awt.GridLayout(1, 0));
 
         jPanel12.setForeground(new java.awt.Color(255, 51, 51));
 
@@ -643,7 +644,7 @@ public class NewInvoice extends javax.swing.JFrame {
         saveAndPrintButton.setToolTipText("Add New Product");
         saveAndPrintButton.setBorder(null);
 
-        saveOnlyButton.setText("Save Only");
+        saveOnlyButton.setText("Save");
         saveOnlyButton.setToolTipText("Add New Product");
         saveOnlyButton.setBorder(null);
         saveOnlyButton.addActionListener(new java.awt.event.ActionListener() {
@@ -1025,12 +1026,12 @@ public class NewInvoice extends javax.swing.JFrame {
     }//GEN-LAST:event_removeAllButtonActionPerformed
 
     private void grnDiscountFromattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_grnDiscountFromattedTextFieldActionPerformed
-        setGrnDiscount();
+        setInvoiceDiscount();
 
     }//GEN-LAST:event_grnDiscountFromattedTextFieldActionPerformed
 
     private void grnSetDiscountButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_grnSetDiscountButtonActionPerformed
-        setGrnDiscount();
+        setInvoiceDiscount();
         grnSetDiscountButton.grabFocus();
     }//GEN-LAST:event_grnSetDiscountButtonActionPerformed
 

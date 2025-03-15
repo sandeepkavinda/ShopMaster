@@ -814,7 +814,7 @@
                     </Component>
                     <Component class="javax.swing.JButton" name="saveOnlyButton">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Save Only"/>
+                        <Property name="text" type="java.lang.String" value="Save"/>
                         <Property name="toolTipText" type="java.lang.String" value="Add New Product"/>
                         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                           <Border info="null"/>
