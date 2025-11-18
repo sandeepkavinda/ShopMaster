@@ -1,11 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package GUI;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import javax.swing.UIManager;
+import util.LoggerUtil;
+import java.util.logging.*;
 
 /**
  *
@@ -13,9 +11,8 @@ import javax.swing.UIManager;
  */
 public class Signin extends javax.swing.JFrame {
 
-    /**
-     * Creates new form Signin
-     */
+    private static final Logger logger = LoggerUtil.getLogger();
+   
     public Signin() {
         initComponents();
     }
@@ -34,7 +31,7 @@ public class Signin extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
+        signinButton = new javax.swing.JButton();
         jPasswordField1 = new javax.swing.JPasswordField();
         jButton2 = new javax.swing.JButton();
 
@@ -51,11 +48,11 @@ public class Signin extends javax.swing.JFrame {
 
         jLabel3.setText("Password");
 
-        jButton1.setText("Sign In");
-        jButton1.setPreferredSize(new java.awt.Dimension(233, 35));
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        signinButton.setText("Sign In");
+        signinButton.setPreferredSize(new java.awt.Dimension(233, 35));
+        signinButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                signinButtonActionPerformed(evt);
             }
         });
 
@@ -68,7 +65,7 @@ public class Signin extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 234, Short.MAX_VALUE)
+                    .addComponent(signinButton, javax.swing.GroupLayout.DEFAULT_SIZE, 234, Short.MAX_VALUE)
                     .addComponent(jTextField1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPasswordField1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel2Layout.createSequentialGroup()
@@ -96,7 +93,7 @@ public class Signin extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPasswordField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(signinButton, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(42, Short.MAX_VALUE))
         );
 
@@ -153,12 +150,13 @@ public class Signin extends javax.swing.JFrame {
         System.exit(0);
     }//GEN-LAST:event_jButton2ActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void signinButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_signinButtonActionPerformed
         // TODO add your handling code here:
         Home home = new Home();
         home.setVisible(true);
         this.dispose();
-    }//GEN-LAST:event_jButton1ActionPerformed
+        logger.info("User Logged");
+    }//GEN-LAST:event_signinButtonActionPerformed
     
     /**
      * @param args the command line arguments
@@ -177,7 +175,6 @@ public class Signin extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -186,5 +183,6 @@ public class Signin extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPasswordField jPasswordField1;
     private javax.swing.JTextField jTextField1;
+    private javax.swing.JButton signinButton;
     // End of variables declaration//GEN-END:variables
 }

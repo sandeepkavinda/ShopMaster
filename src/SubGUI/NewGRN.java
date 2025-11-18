@@ -22,6 +22,7 @@ import model.Numbers;
 import model.Validation;
 import javax.swing.table.DefaultTableCellRenderer;
 import model.Generate;
+import model.IdGenerater;
 import panels.GrnManagement;
 
 /**
@@ -1585,15 +1586,9 @@ public class NewGRN extends javax.swing.JFrame {
             if (rowCount < 1) {
                 JOptionPane.showMessageDialog(this, "No Items in the GRN", "Warning", JOptionPane.WARNING_MESSAGE);
             } else {
-                //Generate GRN Barcode
                 try {
-                    //Generate New Barcode
-                    String lastbarcode = "50000000";
-                    ResultSet resultset = MySQL.execute("SELECT `barcode` FROM `grn` ORDER BY `barcode` DESC LIMIT 1");
-                    if (resultset.next()) {
-                        lastbarcode = resultset.getString("barcode");
-                    }
-                    String newBarcode = Generate.GenerateNextGrnBarcode(lastbarcode);
+                //Generate GRN Barcode
+                    String newBarcode = IdGenerater.generateId("grn", "barcode", "GRN");
 
                     //Set Date and Time
                     String dateTime = "";

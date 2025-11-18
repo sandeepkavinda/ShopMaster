@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.Vector;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import model.Numbers;
 
@@ -22,7 +24,6 @@ import model.Numbers;
  */
 public class InvoiceManagement extends javax.swing.JPanel {
 
-    private Home home;
     private HashMap<String, String> paymentMethodMap = new HashMap<>();
 
     /**
@@ -32,6 +33,25 @@ public class InvoiceManagement extends javax.swing.JPanel {
         initComponents();
         loadPaymentMethods();
         loadInvoiceTable();
+
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+
+        DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
+        rightRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
+
+        invoiceTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
+        invoiceTable.getColumnModel().getColumn(1).setCellRenderer(rightRenderer);
+        invoiceTable.getColumnModel().getColumn(2).setCellRenderer(rightRenderer);
+        invoiceTable.getColumnModel().getColumn(3).setCellRenderer(rightRenderer);
+        invoiceTable.getColumnModel().getColumn(4).setCellRenderer(rightRenderer);
+        invoiceTable.getColumnModel().getColumn(5).setCellRenderer(rightRenderer);
+        invoiceTable.getColumnModel().getColumn(6).setCellRenderer(rightRenderer);
+        invoiceTable.getColumnModel().getColumn(7).setCellRenderer(rightRenderer);
+        invoiceTable.getColumnModel().getColumn(8).setCellRenderer(centerRenderer);
+        invoiceTable.getColumnModel().getColumn(9).setCellRenderer(centerRenderer);
+        invoiceTable.getColumnModel().getColumn(10).setCellRenderer(centerRenderer);
+
     }
 
     private void loadPaymentMethods() {
@@ -63,75 +83,90 @@ public class InvoiceManagement extends javax.swing.JPanel {
             String sortByType = "";
 
             if (sortBy == 0) {
-                sortByColumn = "`invoice`.`datetime`";
+                sortByColumn = "datetime";
                 sortByType = "DESC";
             } else if (sortBy == 1) {
-                sortByColumn = "`invoice`.`datetime`";
+                sortByColumn = "datetime";
                 sortByType = "ASC";
-            } else if (sortBy == 2) {
-                sortByColumn = "`invoice`.`items_count`";
+            }  else if (sortBy == 2) {
+                sortByColumn = "total_amount";
                 sortByType = "DESC";
             } else if (sortBy == 3) {
-                sortByColumn = "`invoice`.`items_count`";
+                sortByColumn = "total_amount";
                 sortByType = "ASC";
             } else if (sortBy == 4) {
-                sortByColumn = "`invoice`.`total`";
+                sortByColumn = "discount";
                 sortByType = "DESC";
             } else if (sortBy == 5) {
-                sortByColumn = "`invoice`.`total`";
+                sortByColumn = "discount";
                 sortByType = "ASC";
             } else if (sortBy == 6) {
-                sortByColumn = "`invoice`.`discount`";
+                sortByColumn = "net_total";
                 sortByType = "DESC";
             } else if (sortBy == 7) {
-                sortByColumn = "`invoice`.`discount`";
+                sortByColumn = "net_total";
                 sortByType = "ASC";
             } else if (sortBy == 8) {
-                sortByColumn = "`net_total`";
+                sortByColumn = "return_payment_amount";
                 sortByType = "DESC";
             } else if (sortBy == 9) {
-                sortByColumn = "`net_total`";
+                sortByColumn = "i.return_payment_amount";
                 sortByType = "ASC";
             } else if (sortBy == 10) {
-                sortByColumn = "`invoice`.`paid_amount`";
+                sortByColumn = "payable_amount";
                 sortByType = "DESC";
             } else if (sortBy == 11) {
-                sortByColumn = "`invoice`.`paid_amount`";
+                sortByColumn = "payable_amount";
                 sortByType = "ASC";
             } else if (sortBy == 12) {
-                sortByColumn = "`balance`";
+                sortByColumn = "paid_amount";
                 sortByType = "DESC";
             } else if (sortBy == 13) {
-                sortByColumn = "`balance`";
+                sortByColumn = "paid_amount";
+                sortByType = "ASC";
+            } else if (sortBy == 14) {
+                sortByColumn = "balance";
+                sortByType = "DESC";
+            } else if (sortBy == 15) {
+                sortByColumn = "balance";
+                sortByType = "ASC";
+            }else if (sortBy == 16) {
+                sortByColumn = "item_count";
+                sortByType = "DESC";
+            } else if (sortBy == 17) {
+                sortByColumn = "item_count";
                 sortByType = "ASC";
             }
+            
             String searchByPaymentMethodQueryPart = "";
 
             if (paymentMethodId != null) {
-                searchByPaymentMethodQueryPart = "AND `invoice`.`payment_method_id` = '" + paymentMethodId + "%' ";
+                searchByPaymentMethodQueryPart = "AND i.payment_method_id = '" + paymentMethodId + "%' ";
             }
 
             DefaultTableModel model = (DefaultTableModel) invoiceTable.getModel();
             model.setRowCount(0);
 
             ResultSet results = MySQL.execute(""
-                    + "SELECT *,(`total` - `discount`) AS `net_total`,(`paid_amount`-(`total` - `discount`)) AS `balance` FROM `invoice` "
-                    + "INNER JOIN `payment_method` ON `invoice`.`payment_method_id` = `payment_method`.`id` "
-                    + "WHERE (`invoice`.`invoice_id` LIKE '%" + search + "%' OR `invoice`.`datetime` LIKE '%" + search + "%') "
+                    + "SELECT * FROM invoice i "
+                    + "INNER JOIN payment_method pm ON i.payment_method_id = pm.id  "
+                    + "WHERE (i.invoice_id LIKE '%" + search + "%' OR i.datetime LIKE '%" + search + "%') "
                     + searchByPaymentMethodQueryPart
-                    + "ORDER BY " + sortByColumn + " " + sortByType + "");
+                    + "ORDER BY " + sortByColumn + " " + sortByType + " ");
 
             while (results.next()) {
                 Vector v = new Vector();
-                v.add(results.getString("invoice_id"));
-                v.add(results.getString("datetime"));
-                v.add(results.getString("items_count"));
-                v.add(Numbers.formatPrice(Double.parseDouble(results.getString("total"))));
+                v.add(results.getString("i.invoice_id"));
+                v.add(Numbers.formatPrice(Double.parseDouble(results.getString("total_amount"))));
                 v.add(Numbers.formatPrice(Double.parseDouble(results.getString("discount"))));
                 v.add(Numbers.formatPrice(Double.parseDouble(results.getString("net_total"))));
+                v.add(Numbers.formatPrice(Double.parseDouble(results.getString("return_payment_amount"))));
+                v.add(Numbers.formatPrice(Double.parseDouble(results.getString("payable_amount"))));
                 v.add(Numbers.formatPrice(Double.parseDouble(results.getString("paid_amount"))));
                 v.add(results.getString("balance"));
-                v.add(results.getString("payment_method.name"));
+                v.add(results.getString("pm.name"));
+                v.add(results.getString("i.item_count"));
+                v.add(results.getString("datetime"));
                 model.addRow(v);
             }
         } catch (Exception e) {
@@ -162,26 +197,37 @@ public class InvoiceManagement extends javax.swing.JPanel {
                 DefaultTableModel model = (DefaultTableModel) invoiceTable.getModel();
                 model.setRowCount(0);
 
-                ResultSet results = MySQL.execute("SELECT *,(`total` - `discount`) AS `net_total`,(`paid_amount`-(`total` - `discount`)) AS `balance` FROM `invoice` "
-                        + "INNER JOIN `payment_method` ON `invoice`.`payment_method_id` = `payment_method`.`id` "
-                        + "WHERE `invoice_id`='" + invoiceId + "'");
+                ResultSet results = MySQL.execute(""
+                        + "SELECT "
+                        + "i.*, "
+                        + "pm.name, "
+                        + "COUNT(ii.id) AS item_count, "
+                        + "SUM(s.marked_price - s.selling_discount) AS total_amount, "
+                        + "(SUM(s.marked_price - s.selling_discount) - i.discount) AS net_total, "
+                        + "(i.paid_amount - (SUM(s.marked_price - s.selling_discount) - i.discount)) AS `balance` "
+                        + "FROM invoice_item ii  "
+                        + "INNER JOIN stock s ON ii.stock_barcode = s.barcode "
+                        + "INNER JOIN invoice i ON ii.invoice_id = i.invoice_id "
+                        + "INNER JOIN payment_method pm ON i.payment_method_id = pm.id  "
+                        + "WHERE (i.invoice_id = '" + invoiceId + "') "
+                        + "GROUP BY i.invoice_id ");
 
                 if (results.next()) {
 
                     Vector v = new Vector();
-                    v.add(results.getString("invoice_id"));
+                    v.add(results.getString("i.invoice_id"));
                     v.add(results.getString("datetime"));
-                    v.add(results.getString("items_count"));
-                    v.add(Numbers.formatPrice(Double.parseDouble(results.getString("total"))));
+                    v.add(results.getString("item_count"));
+                    v.add(Numbers.formatPrice(Double.parseDouble(results.getString("total_amount"))));
                     v.add(Numbers.formatPrice(Double.parseDouble(results.getString("discount"))));
                     v.add(Numbers.formatPrice(Double.parseDouble(results.getString("net_total"))));
                     v.add(Numbers.formatPrice(Double.parseDouble(results.getString("paid_amount"))));
                     v.add(results.getString("balance"));
-                    v.add(results.getString("payment_method.name"));
+                    v.add(results.getString("pm.name"));
                     model.addRow(v);
 
                 } else {
-                    JOptionPane.showMessageDialog(this, "Not Found This Barcode", "Warning", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Invalid Barcode/Id", "Warning", JOptionPane.WARNING_MESSAGE);
                     clearSearch();
                     loadInvoiceTable();
                 }
@@ -363,7 +409,7 @@ public class InvoiceManagement extends javax.swing.JPanel {
 
         jPanel4.setForeground(new java.awt.Color(255, 51, 51));
 
-        sortByComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Newest to Oldest", "Oldest to Newest", "Number Of Items (High to Low)", "Number Of Items (Low to High)", "Total (High to Low)", "Total (Low to High)", "Discount (High to Low)", "Discount (Low to High)", "Net Total (High to Low)", "Net Total (Low to High)", "Paid Amount (High to Low)", "Paid Amount (Low to High)", "Balance (High to Low)", "Balance (Low to High)" }));
+        sortByComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Newest to Oldest", "Oldest to Newest", "Total (High to Low)", "Total (Low to High)", "Discount (High to Low)", "Discount (Low to High)", "Net Total (High to Low)", "Net Total (Low to High)", "Return Payment (High to Low)", "Return Payment (Low to High)", "Payable Amount (High to Low)", "Payable Amount (Low to High)", "Paid Amount (High to Low)", "Paid Amount (Low to High)", "Balance (High to Low)", "Balance (Low to High)", "Item Count (High to Low)", "Item Count (Low to High)" }));
         sortByComboBox.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 sortByComboBoxItemStateChanged(evt);
@@ -464,11 +510,11 @@ public class InvoiceManagement extends javax.swing.JPanel {
 
             },
             new String [] {
-                "Invoice Id", "Issued Date Time", "Number of items", "Total", "Discount", "Net Total", "Paid Amount", "Balance", "Payment Method"
+                "Invoice Id", "Total", "Discount", "Net Total", "Return Payment", "Payable Amount", "Paid Amount", "Balance", "Payment Method", "Item Count", "Issued Date Time"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -478,8 +524,8 @@ public class InvoiceManagement extends javax.swing.JPanel {
         invoiceTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane1.setViewportView(invoiceTable);
         if (invoiceTable.getColumnModel().getColumnCount() > 0) {
-            invoiceTable.getColumnModel().getColumn(1).setMinWidth(150);
-            invoiceTable.getColumnModel().getColumn(1).setPreferredWidth(150);
+            invoiceTable.getColumnModel().getColumn(10).setMinWidth(150);
+            invoiceTable.getColumnModel().getColumn(10).setPreferredWidth(150);
         }
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);

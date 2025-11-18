@@ -832,7 +832,7 @@ public class Home extends javax.swing.JFrame {
     }//GEN-LAST:event_invoiceManagementButtonActionPerformed
 
     private void returnManagementButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_returnManagementButtonActionPerformed
-        loadPanel(new ReturnManagement(), returnManagementButton, returnManagementActiveBar);
+        loadPanel(new ReturnManagement(this), returnManagementButton, returnManagementActiveBar);
     }//GEN-LAST:event_returnManagementButtonActionPerformed
 
     private void quatationsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_quatationsButtonActionPerformed

@@ -1,7 +1,11 @@
 package SubGUI;
 
+import DTO.InvoiceItem;
+import DTO.InvoicePaymentData;
 import java.awt.Toolkit;
 import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Vector;
 import javax.swing.ImageIcon;
@@ -13,6 +17,8 @@ import model.MySQL;
 import model.Numbers;
 import model.Validation;
 import javax.swing.table.DefaultTableCellRenderer;
+import model.Generate;
+import model.IdGenerater;
 import panels.InvoiceManagement;
 
 /**
@@ -23,16 +29,12 @@ public class NewInvoice extends javax.swing.JFrame {
 
     //Inisilize Varables
     private HashMap<String, Integer> rowNumberMap = new HashMap<String, Integer>();
-    private String selectedStockBarcode;
-    private String selectedProductName;
-    private String selectedMarkedPrice;
-    private String selectedSellingDiscount;
-    private String selectedSellingPrice;
-    private String selectedMeasUnit;
-    private double selectedAvalibleQuantity;
-    private boolean isConfirmed;
+
+    private InvoiceItem selectedInoviceItem;
+
     private double invoiceTotal;
     private double invoiceDiscount;
+    private double invoiceNetTotal;
     private InvoiceManagement invoiceManagement;
 
     public NewInvoice(InvoiceManagement invoiceManagement) {
@@ -42,12 +44,12 @@ public class NewInvoice extends javax.swing.JFrame {
         stockBarcodeTextField.grabFocus();
     }
 
-    public void setStock(String stockBarcode) {
+    public void setInvoiceItem(String stockBarcode) {
         //Set Stock Datails For Row inputs
         try {
-            ResultSet results = MySQL.execute("SELECT *,(`marked_price`-`selling_discount`) as `selling_price` FROM `stock` "
-                    + "INNER JOIN `product` ON `stock`.`product_id`=`product`.`id` "
-                    + "INNER JOIN `measurement_unit` ON `product`.`measurement_unit_id`=`measurement_unit`.`id` "
+            ResultSet results = MySQL.execute("SELECT * FROM stock s "
+                    + "INNER JOIN product p ON s.product_id=p.id "
+                    + "INNER JOIN measurement_unit mu ON p.measurement_unit_id=mu.id "
                     + "WHERE `barcode`='" + stockBarcode + "'");
 
             if (results.next()) {
@@ -56,27 +58,31 @@ public class NewInvoice extends javax.swing.JFrame {
                 double sellingDiscount = Double.parseDouble(results.getString("selling_discount"));
                 double sellingPrice = Double.parseDouble(results.getString("selling_price"));
 
-                selectedStockBarcode = results.getString("stock.barcode");
-                selectedProductName = results.getString("product.name");
-                selectedMarkedPrice = Numbers.formatPrice(markedPrice);
-                selectedSellingDiscount = Numbers.formatPrice(sellingDiscount);
-                selectedSellingPrice = Numbers.formatPrice(sellingPrice);
-                selectedMeasUnit = results.getString("measurement_unit.short_form");
-                selectedAvalibleQuantity = Double.parseDouble(results.getString("current_quantity"));
+                selectedInoviceItem = new InvoiceItem();
 
-                stockBarcodeTextField.setText(selectedStockBarcode);
-                productNameTextField.setText(selectedProductName);
-                markedPriceTextField.setText(selectedMarkedPrice);
-                sellingDiscountTextField.setText(selectedSellingDiscount);
-                sellingPriceTextField.setText(selectedSellingPrice);
-                quantityLabel.setText("Quantity in " + selectedMeasUnit);
+                selectedInoviceItem.setStockBarcode(results.getString("s.barcode"));
+                selectedInoviceItem.setProductName(results.getString("p.name"));
+                selectedInoviceItem.setMarkedPrice(Numbers.formatPrice(markedPrice));
+                selectedInoviceItem.setSellingDiscount(Numbers.formatPrice(sellingDiscount));
+                selectedInoviceItem.setSellingPrice(Numbers.formatPrice(sellingPrice));
+                selectedInoviceItem.setMeasurementUnit(results.getString("mu.short_form"));
+                selectedInoviceItem.setAvalibleQuantity(Double.parseDouble(results.getString("current_quantity")));
+
+                stockBarcodeTextField.setText(selectedInoviceItem.getStockBarcode());
+                productNameTextField.setText(selectedInoviceItem.getProductName());
+                markedPriceTextField.setText(selectedInoviceItem.getMarkedPrice());
+                sellingDiscountTextField.setText(selectedInoviceItem.getSellingDiscount());
+                sellingPriceTextField.setText(selectedInoviceItem.getSellingPrice());
                 quantityTextField.setText("1");
+
                 quantityTextField.grabFocus();
                 quantityTextField.selectAll();
                 stockBarcodeTextField.setEditable(false);
                 quantityTextField.setEditable(true);
+
             } else {
-                JOptionPane.showMessageDialog(this, "Something Went Wrong", "Unexpected Error", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Barcode Not Found", "Warning", JOptionPane.WARNING_MESSAGE);
+
             }
 
         } catch (Exception ex) {
@@ -85,7 +91,91 @@ public class NewInvoice extends javax.swing.JFrame {
 
     }
 
-    private void cleanRowInputs() {
+    private void addInvoiceItem() {
+
+        try {
+            String quantity = quantityTextField.getText();
+
+            if (selectedInoviceItem == null) {
+                JOptionPane.showMessageDialog(this, "Please Select the Stock", "Warning", JOptionPane.WARNING_MESSAGE);
+            } else if (quantity.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please Enter Quantity", "Warning", JOptionPane.WARNING_MESSAGE);
+                quantityTextField.grabFocus();
+            } else if (!Validation.isValidQuantity(quantity)) {
+                JOptionPane.showMessageDialog(this, "<html>Quantity must be a whole number or decimal<br>(e.g., 10 or 10.5).</html>", "Warning", JOptionPane.WARNING_MESSAGE);
+                quantityTextField.grabFocus();
+                quantityTextField.selectAll();
+            } else if (Double.parseDouble(quantity) == 0) {
+                JOptionPane.showMessageDialog(this, "Quantity Can't be \"0\"", "Warning", JOptionPane.WARNING_MESSAGE);
+                quantityTextField.grabFocus();
+                quantityTextField.selectAll();
+            } else if (Double.parseDouble(quantity) < 0) {
+                JOptionPane.showMessageDialog(this, "Quantity Can't be Negetive", "Warning", JOptionPane.WARNING_MESSAGE);
+                quantityTextField.grabFocus();
+                quantityTextField.selectAll();
+            } else {
+
+                if (rowNumberMap.containsKey(selectedInoviceItem.getStockBarcode())) {
+
+                    //Already Have a row from this stock
+                    int rowNumber = rowNumberMap.get(selectedInoviceItem.getStockBarcode());
+                    double currentQty = Double.parseDouble(String.valueOf(invoiceItemsTable.getValueAt(rowNumber, 6)));
+                    double newQuantity = Double.parseDouble(quantity);
+
+                    if (selectedInoviceItem.getAvalibleQuantity() < (currentQty + newQuantity)) {
+                        JOptionPane.showMessageDialog(this, "<html>Only <b>" + Numbers.formatQuantity(selectedInoviceItem.getAvalibleQuantity()) + selectedInoviceItem.getMeasurementUnit() + "</b> are available in stock.<html>", "Available Quantity exceed", JOptionPane.WARNING_MESSAGE);
+                        quantityTextField.grabFocus();
+                        quantityTextField.selectAll();
+                    } else {
+                        invoiceItemsTable.setValueAt(Numbers.formatQuantity(currentQty + newQuantity), rowNumber, 6);
+                        invoiceItemsTable.setRowSelectionInterval(rowNumber, rowNumber);
+                        stockBarcodeTextField.grabFocus();
+                        calculateTotal();
+                        cleanInvoiceItemInputs();
+                    }
+
+                } else {
+
+                    if (selectedInoviceItem.getAvalibleQuantity() < Double.parseDouble(quantity)) {
+                        JOptionPane.showMessageDialog(this, "<html>Only <b>" + Numbers.formatQuantity(selectedInoviceItem.getAvalibleQuantity()) + selectedInoviceItem.getMeasurementUnit() + "</b> are available in stock.<html>", "Available Quantity exceed", JOptionPane.WARNING_MESSAGE);
+                        quantityTextField.grabFocus();
+                        quantityTextField.selectAll();
+                    } else {
+
+                        //Add New Row
+                        DefaultTableModel model = (DefaultTableModel) invoiceItemsTable.getModel();
+                        int rowCount = invoiceItemsTable.getRowCount();
+
+                        //Input To Invoice items Table
+                        Vector v = new Vector();
+                        v.add(rowCount + 1);
+                        v.add(selectedInoviceItem.getStockBarcode());
+                        v.add(selectedInoviceItem.getProductName());
+                        v.add(selectedInoviceItem.getMarkedPrice());
+                        v.add(selectedInoviceItem.getSellingDiscount());
+                        v.add(selectedInoviceItem.getSellingPrice());
+                        v.add(Numbers.formatQuantity(Double.parseDouble(quantity)));
+                        v.add(selectedInoviceItem.getMeasurementUnit());
+                        model.addRow(v);
+
+                        //Add To Row Numbers Hashmap
+                        rowNumberMap.put(selectedInoviceItem.getStockBarcode(), rowCount);
+                        invoiceItemsTable.setRowSelectionInterval(rowCount, rowCount);
+                        stockBarcodeTextField.grabFocus();
+                        calculateTotal();
+                        cleanInvoiceItemInputs();
+                    }
+
+                }
+
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Something Went Wrong Try Again", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }
+
+    private void cleanInvoiceItemInputs() {
         stockBarcodeTextField.setText("");
         stockBarcodeTextField.setEditable(true);
         productNameTextField.setText("");
@@ -97,67 +187,31 @@ public class NewInvoice extends javax.swing.JFrame {
         sellingDiscountTextField.setText("");
         quantityLabel.setText("Quantity");
 
-        selectedStockBarcode = null;
-        selectedProductName = null;
-        selectedMarkedPrice = null;
-        selectedSellingDiscount = null;
-        selectedSellingPrice = null;
-        selectedMeasUnit = null;
+        selectedInoviceItem = null;
     }
 
-    private void calculateTotals() {
-        double invoiceTotal = 0.00;
-        double invoiceDiscount = 0.00;
+    private void calculateTotal() {
 
         try {
+
+            invoiceTotal = 0.00;
+
             int numOfRows = invoiceItemsTable.getRowCount();
+
             for (int i = 0; i < numOfRows; i++) {
-                double markedPrice = Double.parseDouble(String.valueOf(invoiceItemsTable.getValueAt(i, 3)));
+                double markedPrice = Double.parseDouble(String.valueOf(invoiceItemsTable.getValueAt(i, 3)).replace(",", ""));
                 double discount = Double.parseDouble(String.valueOf(invoiceItemsTable.getValueAt(i, 4)).replace(",", ""));
-                double quantity = Double.parseDouble(String.valueOf(invoiceItemsTable.getValueAt(i, 6)));
+                double quantity = Double.parseDouble(String.valueOf(invoiceItemsTable.getValueAt(i, 6)).replace(",", ""));
                 double itemTotal = (markedPrice - discount) * quantity;
                 invoiceItemsTable.setValueAt(Numbers.formatPrice(itemTotal), i, 8);
                 invoiceTotal += itemTotal;
-
             }
-
-            if (presentageDiscountRadioButton.isSelected()) {
-                double discountPresentage = Double.parseDouble(grnDiscountFromattedTextField.getText());
-                if (discountPresentage > 100) {
-                    JOptionPane.showMessageDialog(this, "GRN discount must be less than 100%", "Warning", JOptionPane.WARNING_MESSAGE);
-                    discountTextLabel.setText("Disount (Rs.) :");
-                    grnDiscountFromattedTextField.setText("0.00");
-                } else if (discountPresentage < 0) {
-                    JOptionPane.showMessageDialog(this, "GRN discount should not be negative", "Warning", JOptionPane.WARNING_MESSAGE);
-                    discountTextLabel.setText("Disount (Rs.) :");
-                    grnDiscountFromattedTextField.setText("0.00");
-                } else {
-                    discountTextLabel.setText(Numbers.formatPresentage(discountPresentage) + "% Disount (Rs.) :");
-                    invoiceDiscount = invoiceTotal * (discountPresentage / 100);
-                }
-            }
-
-            if (amountDiscountRadioButton.isSelected()) {
-                double discountAmount = Double.parseDouble(grnDiscountFromattedTextField.getText());
-                if (discountAmount > invoiceTotal) {
-                    JOptionPane.showMessageDialog(this, "GRN discount must be less than Total Amount", "Warning", JOptionPane.WARNING_MESSAGE);
-                    discountTextLabel.setText("Disount (Rs.) :");
-                    grnDiscountFromattedTextField.setText("0.00");
-                } else if (discountAmount < 0) {
-                    JOptionPane.showMessageDialog(this, "GRN discount should not be negative", "Warning", JOptionPane.WARNING_MESSAGE);
-                    discountTextLabel.setText("Disount (Rs.) :");
-                    grnDiscountFromattedTextField.setText("0.00");
-                } else {
-                    invoiceDiscount = discountAmount;
-                }
-            }
-
-            this.invoiceDiscount = invoiceDiscount;
-            this.invoiceTotal = invoiceTotal;
 
             totalValueLabel.setText(Numbers.formatPrice(invoiceTotal));
             discountValueLabel.setText(Numbers.formatPrice(invoiceDiscount));
-            netTotalValueLabel.setText(Numbers.formatPrice(invoiceTotal - invoiceDiscount));
+            invoiceNetTotal = invoiceTotal - invoiceDiscount;
+            netTotalValueLabel.setText(Numbers.formatPrice(invoiceNetTotal));
+
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "Something Went Wrong", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
@@ -165,15 +219,51 @@ public class NewInvoice extends javax.swing.JFrame {
     }
 
     private void setInvoiceDiscount() {
+
         if (!(presentageDiscountRadioButton.isSelected() || amountDiscountRadioButton.isSelected())) {
             JOptionPane.showMessageDialog(this, "Please Select Discount Type", "Warning", JOptionPane.WARNING_MESSAGE);
-        } else if (grnDiscountFromattedTextField.getText().equals("0.00")) {
+        } else if (invoiceDiscountFromattedTextField.getText().equals("0.00")) {
             JOptionPane.showMessageDialog(this, "Please enter a discount to set.", "Warning", JOptionPane.WARNING_MESSAGE);
-            grnDiscountFromattedTextField.grabFocus();
-            grnDiscountFromattedTextField.selectAll();
+            invoiceDiscountFromattedTextField.grabFocus();
+            invoiceDiscountFromattedTextField.selectAll();
         } else {
-            calculateTotals();
+
+            if (presentageDiscountRadioButton.isSelected()) {
+                double discountPresentage = Double.parseDouble(invoiceDiscountFromattedTextField.getText());
+                if (discountPresentage > 100) {
+                    JOptionPane.showMessageDialog(this, "Invoice discount must be less than 100%", "Warning", JOptionPane.WARNING_MESSAGE);
+                    invoiceDiscountFromattedTextField.setText("0.00");
+                } else if (discountPresentage < 0) {
+                    JOptionPane.showMessageDialog(this, "Invoice discount should not be negative", "Warning", JOptionPane.WARNING_MESSAGE);
+                    invoiceDiscountFromattedTextField.setText("0.00");
+                } else {
+                    discountTextLabel.setText(Numbers.formatPresentage(discountPresentage) + "% Disount (Rs.) :");
+                    invoiceDiscount = invoiceTotal * (discountPresentage / 100);
+                }
+            }
+
+            if (amountDiscountRadioButton.isSelected()) {
+                double discountAmount = Double.parseDouble(invoiceDiscountFromattedTextField.getText());
+                if (discountAmount > invoiceTotal) {
+                    JOptionPane.showMessageDialog(this, "Invoice discount must be less than Total Amount", "Warning", JOptionPane.WARNING_MESSAGE);
+                    invoiceDiscountFromattedTextField.setText("0.00");
+                } else if (discountAmount < 0) {
+                    JOptionPane.showMessageDialog(this, "Invoice discount should not be negative", "Warning", JOptionPane.WARNING_MESSAGE);
+                    invoiceDiscountFromattedTextField.setText("0.00");
+                } else {
+                    invoiceDiscount = discountAmount;
+                    discountTextLabel.setText("Disount (Rs.) :");
+                }
+            }
         }
+        calculateTotal();
+    }
+
+    private void removeDiscount() {
+        invoiceDiscount = 0.00;
+        invoiceDiscountFromattedTextField.setText("0.00");
+        discountTextLabel.setText("Disount (Rs.) :");
+        calculateTotal();
     }
 
     private void deleteSelectedRow() {
@@ -198,10 +288,132 @@ public class NewInvoice extends javax.swing.JFrame {
                     String stockId = String.valueOf(invoiceItemsTable.getValueAt(i, 1));
                     rowNumberMap.put(stockId, i);
                 }
+                calculateTotal();
             }
         } else {
             JOptionPane.showMessageDialog(this, "Please Select a Row Remove", "Warning", JOptionPane.WARNING_MESSAGE);
         }
+    }
+
+    private void openStockSelector() {
+        invoiceItemsTable.clearSelection();
+        cleanInvoiceItemInputs();
+        SelectStock selectStock = new SelectStock(this, true, null, this);
+        selectStock.setVisible(true);
+    }
+
+    private void removeAllInvoiceItems() {
+        int rowCount = invoiceItemsTable.getRowCount();
+        if (rowCount < 1) {
+            JOptionPane.showMessageDialog(this, "No Items To Remove", "Warning", JOptionPane.WARNING_MESSAGE);
+        } else {
+            int result = JOptionPane.showConfirmDialog(
+                    this,
+                    "<html>Are you sure you want to remove all items<html>",
+                    "Clear Items",
+                    JOptionPane.YES_NO_OPTION
+            );
+
+            if (result == JOptionPane.YES_OPTION) {
+                DefaultTableModel model = (DefaultTableModel) invoiceItemsTable.getModel();
+                model.setRowCount(0);
+                rowNumberMap.clear();
+                JOptionPane.showMessageDialog(this, "Removed All Items Successfully", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));
+            }
+        }
+        removeDiscount();
+        calculateTotal();
+    }
+
+    public String saveInvoice(String returnVoucherId, double returnPaymentAmount, double paidAmount, String paymentMethodId, double usedReturnedVoucherAmount) {
+        int rowCount = invoiceItemsTable.getRowCount();
+
+        if (rowCount < 1) {
+            JOptionPane.showMessageDialog(this, "No Items in the Invoice", "Warning", JOptionPane.WARNING_MESSAGE);
+        } else {
+            try {
+                //Generate Invoice Barcode
+                String newBarcode = IdGenerater.generateId("invoice", "invoice_id", "INV");
+
+                //Get Current Date Time
+                Date date = new Date();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String formattedCurrentDate = dateFormat.format(date);
+
+                //Add Invoice 
+                MySQL.execute("INSERT INTO invoice (invoice_id, datetime, total_amount, discount, return_voucher_id, return_payment_amount, paid_amount, item_count,payment_method_id) "
+                        + "VALUES ('" + newBarcode + "','" + formattedCurrentDate + "','" + invoiceTotal + "','" + invoiceDiscount + "'," + returnVoucherId + ",'" + returnPaymentAmount + "','" + paidAmount + "','" + rowCount + "','" + paymentMethodId + "')");
+
+                //Add Invoice Items
+                for (int i = 0; i < rowCount; i++) {
+                    String stockBarcode = String.valueOf(invoiceItemsTable.getValueAt(i, 1));
+                    String markedPrice = String.valueOf(invoiceItemsTable.getValueAt(i, 3)).replace(",", "");
+                    String sellingDiscount = String.valueOf(invoiceItemsTable.getValueAt(i, 4)).replace(",", "");
+                    String quantity = String.valueOf(invoiceItemsTable.getValueAt(i, 6));
+
+                    MySQL.execute("INSERT INTO `invoice_item` (`invoice_id`,`stock_barcode`,`marked_price`,`selling_discount`,`quantity`) "
+                            + "VALUES ('" + newBarcode + "','" + stockBarcode + "','" + markedPrice + "','" + sellingDiscount + "','" + quantity + "')");
+
+                    MySQL.execute("UPDATE stock SET current_quantity = current_quantity - '" + quantity + "' WHERE barcode = '" + stockBarcode + "' ");
+
+                }
+
+                //Update Return Voucher
+                if (returnVoucherId != null) {
+                    MySQL.execute("UPDATE return_voucher SET used_amount = used_amount +'" + usedReturnedVoucherAmount + "' WHERE id = '" + returnVoucherId + "' ");
+                }
+
+                invoiceManagement.loadInvoiceTable();
+                return newBarcode;
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    private void processToNormalPayment() {
+
+        int rowCount = invoiceItemsTable.getRowCount();
+
+        if (rowCount < 1) {
+            JOptionPane.showMessageDialog(this, "No Items in the Invoice", "Warning", JOptionPane.WARNING_MESSAGE);
+        } else {
+            InvoicePaymentData invoicePaymentData = new InvoicePaymentData(invoiceTotal, invoiceDiscount, invoiceNetTotal, null);
+            InvoicePayment invoicePayment = new InvoicePayment(this, true, invoicePaymentData, this);
+            invoicePayment.setVisible(true);
+        }
+
+    }
+
+    private void processToPayWithReturns() {
+        int rowCount = invoiceItemsTable.getRowCount();
+
+        if (rowCount < 1) {
+            JOptionPane.showMessageDialog(this, "No Items in the Invoice", "Warning", JOptionPane.WARNING_MESSAGE);
+        } else {
+            InvoicePaymentData invoicePaymentData = new InvoicePaymentData(invoiceTotal, invoiceDiscount, invoiceNetTotal, null);
+            ReturnIdInputToInvoicePayment returnIdInputToInvoicePayment = new ReturnIdInputToInvoicePayment(this, true, invoicePaymentData, this);
+            returnIdInputToInvoicePayment.setVisible(true);
+        }
+    }
+
+    public void resetInvoice() {
+
+        DefaultTableModel model = (DefaultTableModel) invoiceItemsTable.getModel();
+        model.setRowCount(0);
+
+        rowNumberMap = new HashMap<String, Integer>();
+
+        InvoiceItem selectedInoviceItem = null;
+
+        invoiceTotal = 0.00;
+        invoiceDiscount = 0.00;
+        invoiceNetTotal = 0.00;
+
+        removeDiscount();
+        calculateTotal();
     }
 
     /**
@@ -244,11 +456,12 @@ public class NewInvoice extends javax.swing.JFrame {
         clearRowButton = new javax.swing.JButton();
         jPanel5 = new javax.swing.JPanel();
         jPanel7 = new javax.swing.JPanel();
-        grnDiscountLabel = new javax.swing.JLabel();
-        grnSetDiscountButton = new javax.swing.JButton();
+        discountLabel = new javax.swing.JLabel();
+        setDiscountButton = new javax.swing.JButton();
         amountDiscountRadioButton = new javax.swing.JRadioButton();
         presentageDiscountRadioButton = new javax.swing.JRadioButton();
-        grnDiscountFromattedTextField = new javax.swing.JFormattedTextField();
+        invoiceDiscountFromattedTextField = new javax.swing.JFormattedTextField();
+        clearDiscountButton = new javax.swing.JButton();
         jPanel16 = new javax.swing.JPanel();
         totalValueLabel = new javax.swing.JLabel();
         discountValueLabel = new javax.swing.JLabel();
@@ -256,8 +469,8 @@ public class NewInvoice extends javax.swing.JFrame {
         netTotalTextLabel = new javax.swing.JLabel();
         discountTextLabel = new javax.swing.JLabel();
         totalTextLabel = new javax.swing.JLabel();
-        saveAndPrintButton = new javax.swing.JButton();
-        saveOnlyButton = new javax.swing.JButton();
+        payButton = new javax.swing.JButton();
+        payWithReturnsButton = new javax.swing.JButton();
         removeAllButton = new javax.swing.JButton();
         removeSelectedButton = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -292,7 +505,7 @@ public class NewInvoice extends javax.swing.JFrame {
         stockBarcodeLabel.setText("Stock Barcode");
 
         addStockButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/add.png"))); // NOI18N
-        addStockButton.setToolTipText("Select Product");
+        addStockButton.setToolTipText("Select Product (F1)");
         addStockButton.setBorder(null);
         addStockButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -300,11 +513,6 @@ public class NewInvoice extends javax.swing.JFrame {
             }
         });
 
-        stockBarcodeTextField.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                stockBarcodeTextFieldFocusLost(evt);
-            }
-        });
         stockBarcodeTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 stockBarcodeTextFieldActionPerformed(evt);
@@ -344,11 +552,6 @@ public class NewInvoice extends javax.swing.JFrame {
         productLabel.setText("Product");
 
         productNameTextField.setEditable(false);
-        productNameTextField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                productNameTextFieldActionPerformed(evt);
-            }
-        });
 
         javax.swing.GroupLayout jPanel13Layout = new javax.swing.GroupLayout(jPanel13);
         jPanel13.setLayout(jPanel13Layout);
@@ -548,15 +751,15 @@ public class NewInvoice extends javax.swing.JFrame {
 
         jPanel11.add(jPanel27);
 
-        grnDiscountLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        grnDiscountLabel.setText("Invoice Discount");
+        discountLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        discountLabel.setText("Invoice Discount");
 
-        grnSetDiscountButton.setText("Set");
-        grnSetDiscountButton.setToolTipText("Add New Product");
-        grnSetDiscountButton.setBorder(null);
-        grnSetDiscountButton.addActionListener(new java.awt.event.ActionListener() {
+        setDiscountButton.setText("Set");
+        setDiscountButton.setToolTipText("Add New Product");
+        setDiscountButton.setBorder(null);
+        setDiscountButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                grnSetDiscountButtonActionPerformed(evt);
+                setDiscountButtonActionPerformed(evt);
             }
         });
 
@@ -565,17 +768,22 @@ public class NewInvoice extends javax.swing.JFrame {
 
         buttonGroup1.add(presentageDiscountRadioButton);
         presentageDiscountRadioButton.setText("Presentage (%)");
-        presentageDiscountRadioButton.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                presentageDiscountRadioButtonItemStateChanged(evt);
+
+        invoiceDiscountFromattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("0.00"))));
+        invoiceDiscountFromattedTextField.setText("0.00");
+        invoiceDiscountFromattedTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                invoiceDiscountFromattedTextFieldActionPerformed(evt);
             }
         });
 
-        grnDiscountFromattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("0.00"))));
-        grnDiscountFromattedTextField.setText("0.00");
-        grnDiscountFromattedTextField.addActionListener(new java.awt.event.ActionListener() {
+        clearDiscountButton.setBackground(new java.awt.Color(102, 102, 102));
+        clearDiscountButton.setForeground(new java.awt.Color(255, 255, 255));
+        clearDiscountButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/clean.png"))); // NOI18N
+        clearDiscountButton.setBorder(null);
+        clearDiscountButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                grnDiscountFromattedTextFieldActionPerformed(evt);
+                clearDiscountButtonActionPerformed(evt);
             }
         });
 
@@ -587,28 +795,31 @@ public class NewInvoice extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel7Layout.createSequentialGroup()
-                        .addComponent(grnDiscountFromattedTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(invoiceDiscountFromattedTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(grnSetDiscountButton, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(setDiscountButton, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel7Layout.createSequentialGroup()
-                        .addComponent(grnDiscountLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(discountLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(jPanel7Layout.createSequentialGroup()
                         .addComponent(presentageDiscountRadioButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(amountDiscountRadioButton)
                         .addGap(12, 12, 12)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(clearDiscountButton, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         jPanel7Layout.setVerticalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel7Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(grnDiscountLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(discountLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(grnSetDiscountButton, javax.swing.GroupLayout.DEFAULT_SIZE, 35, Short.MAX_VALUE)
-                    .addComponent(grnDiscountFromattedTextField))
+                    .addComponent(setDiscountButton, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE)
+                    .addComponent(invoiceDiscountFromattedTextField)
+                    .addComponent(clearDiscountButton, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(presentageDiscountRadioButton)
@@ -638,18 +849,23 @@ public class NewInvoice extends javax.swing.JFrame {
 
         totalTextLabel.setFont(new java.awt.Font("Poppins", 1, 12)); // NOI18N
         totalTextLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        totalTextLabel.setText("Total (Rs.) :");
+        totalTextLabel.setText("Invoice Amount (Rs.) :");
 
-        saveAndPrintButton.setText("Save & Print");
-        saveAndPrintButton.setToolTipText("Add New Product");
-        saveAndPrintButton.setBorder(null);
-
-        saveOnlyButton.setText("Save");
-        saveOnlyButton.setToolTipText("Add New Product");
-        saveOnlyButton.setBorder(null);
-        saveOnlyButton.addActionListener(new java.awt.event.ActionListener() {
+        payButton.setText("Pay");
+        payButton.setToolTipText("Add New Product");
+        payButton.setBorder(null);
+        payButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                saveOnlyButtonActionPerformed(evt);
+                payButtonActionPerformed(evt);
+            }
+        });
+
+        payWithReturnsButton.setText("Pay With Returns");
+        payWithReturnsButton.setToolTipText("Add New Product");
+        payWithReturnsButton.setBorder(null);
+        payWithReturnsButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                payWithReturnsButtonActionPerformed(evt);
             }
         });
 
@@ -686,9 +902,9 @@ public class NewInvoice extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(removeAllButton, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(saveOnlyButton, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(payWithReturnsButton, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(saveAndPrintButton, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(payButton, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel16Layout.createSequentialGroup()
                         .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(discountTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -722,8 +938,8 @@ public class NewInvoice extends javax.swing.JFrame {
                         .addComponent(netTotalValueLabel)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(saveAndPrintButton, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE)
-                    .addComponent(saveOnlyButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(payButton, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE)
+                    .addComponent(payWithReturnsButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(removeAllButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(removeSelectedButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
@@ -787,16 +1003,6 @@ public class NewInvoice extends javax.swing.JFrame {
         DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
         rightRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
         invoiceItemsTable.getColumnModel().getColumn(8).setCellRenderer(rightRenderer);
-        invoiceItemsTable.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                invoiceItemsTableMouseClicked(evt);
-            }
-        });
-        invoiceItemsTable.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                invoiceItemsTableKeyReleased(evt);
-            }
-        });
         jScrollPane1.setViewportView(invoiceItemsTable);
         if (invoiceItemsTable.getColumnModel().getColumnCount() > 0) {
             invoiceItemsTable.getColumnModel().getColumn(0).setMinWidth(40);
@@ -808,7 +1014,7 @@ public class NewInvoice extends javax.swing.JFrame {
 
         jLabel1.setFont(new java.awt.Font("Poppins", 1, 14)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(0, 105, 75));
-        jLabel1.setText("New Customer Invoice");
+        jLabel1.setText("New Invoice");
         jLabel1.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 10, 1, 1));
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -942,274 +1148,57 @@ public class NewInvoice extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void addStockButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addStockButtonActionPerformed
-        invoiceItemsTable.clearSelection();
-        cleanRowInputs();
-        SelectStock selectStock = new SelectStock(this, true, null, this);
-        selectStock.setVisible(true);
+        openStockSelector();
     }//GEN-LAST:event_addStockButtonActionPerformed
 
     private void stockBarcodeTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stockBarcodeTextFieldActionPerformed
-        // Remove all whitespaces (spaces, tabs, newlines)
         String barcode = stockBarcodeTextField.getText().replaceAll("\\s+", "");
-        stockBarcodeTextField.setText(barcode);
-
-        if (!barcode.isBlank()) {
-
-            try {
-
-                ResultSet results = MySQL.execute("SELECT * FROM `stock` "
-                        + "WHERE `barcode`='" + barcode + "'");
-
-                if (results.next()) {
-                    setStock(barcode);
-                    stockBarcodeTextField.setEditable(false);
-                } else {
-                    JOptionPane.showMessageDialog(this, "Not Found This Barcode", "Warning", JOptionPane.WARNING_MESSAGE);
-                    stockBarcodeTextField.selectAll();
-                }
-
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        } else {
-            JOptionPane.showMessageDialog(this, "Enter Barcode or Select stock", "Warning", JOptionPane.WARNING_MESSAGE);
-        }
+        setInvoiceItem(barcode);
     }//GEN-LAST:event_stockBarcodeTextFieldActionPerformed
 
-    private void stockBarcodeTextFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_stockBarcodeTextFieldFocusLost
-        // TODO add your handling code here:
-    }//GEN-LAST:event_stockBarcodeTextFieldFocusLost
-
-    private void productNameTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productNameTextFieldActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_productNameTextFieldActionPerformed
-
     private void quantityTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_quantityTextFieldActionPerformed
-        String quantity = quantityTextField.getText();
-        if (quantity.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please Enter Quantity", "Warning", JOptionPane.WARNING_MESSAGE);
-        } else if (!Validation.isValidQuantity(quantity)) {
-            System.out.println(quantity);
-            JOptionPane.showMessageDialog(this, "<html>Quantity must be a whole number or decimal<br>(e.g., 10 or 10.5).</html>", "Warning", JOptionPane.WARNING_MESSAGE);
-        } else if (Double.parseDouble(quantity) == 0) {
-            JOptionPane.showMessageDialog(this, "Quantity Can't be \"0\"", "Warning", JOptionPane.WARNING_MESSAGE);
-        } else if (Double.parseDouble(quantity) < 0) {
-            JOptionPane.showMessageDialog(this, "Quantity Can't be Negetive", "Warning", JOptionPane.WARNING_MESSAGE);
-        } else {
-            addItemButton.doClick();
-        }
+        addInvoiceItem();
     }//GEN-LAST:event_quantityTextFieldActionPerformed
 
     private void removeAllButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeAllButtonActionPerformed
-
-        int rowCount = invoiceItemsTable.getRowCount();
-        if (rowCount < 1) {
-            JOptionPane.showMessageDialog(this, "No Items To Remove", "Warning", JOptionPane.WARNING_MESSAGE);
-        } else {
-            int result = JOptionPane.showConfirmDialog(
-                    this,
-                    "<html>Are you sure you want to remove all items<html>",
-                    "Clear Items",
-                    JOptionPane.YES_NO_OPTION
-            );
-
-            if (result == JOptionPane.YES_OPTION) {
-                DefaultTableModel model = (DefaultTableModel) invoiceItemsTable.getModel();
-                model.setRowCount(0);
-                rowNumberMap.clear();
-                JOptionPane.showMessageDialog(this, "Removed All Items Successfully", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));
-            }
-
-        }
-
-
+        removeAllInvoiceItems();
     }//GEN-LAST:event_removeAllButtonActionPerformed
 
-    private void grnDiscountFromattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_grnDiscountFromattedTextFieldActionPerformed
+    private void invoiceDiscountFromattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_invoiceDiscountFromattedTextFieldActionPerformed
         setInvoiceDiscount();
+    }//GEN-LAST:event_invoiceDiscountFromattedTextFieldActionPerformed
 
-    }//GEN-LAST:event_grnDiscountFromattedTextFieldActionPerformed
-
-    private void grnSetDiscountButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_grnSetDiscountButtonActionPerformed
+    private void setDiscountButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setDiscountButtonActionPerformed
         setInvoiceDiscount();
-        grnSetDiscountButton.grabFocus();
-    }//GEN-LAST:event_grnSetDiscountButtonActionPerformed
-
-    private void presentageDiscountRadioButtonItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_presentageDiscountRadioButtonItemStateChanged
-        if (presentageDiscountRadioButton.isSelected()) {
-            grnDiscountLabel.setText("GRN Discount (%)");
-        } else if (amountDiscountRadioButton.isSelected()) {
-            grnDiscountLabel.setText("GRN Discount (Rs.)");
-        } else {
-            grnDiscountLabel.setText("GRN Discount");
-        }
-    }//GEN-LAST:event_presentageDiscountRadioButtonItemStateChanged
-
-    private void invoiceItemsTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_invoiceItemsTableMouseClicked
-
-        if (evt.getClickCount() == 2) {
-            int selectedRow = invoiceItemsTable.getSelectedRow();
-
-            if (selectedRow != -1) {
-                setStock(String.valueOf(invoiceItemsTable.getValueAt(selectedRow, 1)));
-            }
-        }
-    }//GEN-LAST:event_invoiceItemsTableMouseClicked
+    }//GEN-LAST:event_setDiscountButtonActionPerformed
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-        addStockButton.doClick();
+        openStockSelector();
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
-    private void saveOnlyButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveOnlyButtonActionPerformed
-
-//        if (!isConfirmed) {
-//            JOptionPane.showMessageDialog(this, "Please enter GRN details and confirm it first.", "Warning", JOptionPane.WARNING_MESSAGE);
-//        } else {
-//            int rowCount = grnItemsTable.getRowCount();
-//
-//            if (rowCount < 1) {
-//                JOptionPane.showMessageDialog(this, "No Items in the GRN", "Warning", JOptionPane.WARNING_MESSAGE);
-//            } else {
-//                //Generate GRN Barcode
-//                try {
-//                    //Generate New Barcode
-//                    String lastbarcode = "50000000";
-//                    ResultSet resultset = MySQL.execute("SELECT `barcode` FROM `grn` ORDER BY `barcode` DESC LIMIT 1");
-//                    if (resultset.next()) {
-//                        lastbarcode = resultset.getString("barcode");
-//                    }
-//                    String newBarcode = Generate.GenerateNextGrnBarcode(lastbarcode);
-//
-//                    //Set Date and Time
-//                    String dateTime = "";
-//                    if (currentDateTimeCheckBox.isSelected()) {
-//                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//                        dateTime = format.format(new Date());
-//                    } else {
-//                        String date = dateChooseTextField.getText();
-//                        String time = timePickerTextField.getText() + ":00";
-//                        dateTime = date + " " + time;
-//                    }
-//
-//                    //Instet to GRN Table 
-//                    String supplierName = supplierNameTextField.getText();
-//                    String supplierMobile = supplierMobileTextField.getText();
-//                    String note = noteTextField.getText();
-//
-//                    MySQL.execute("INSERT INTO `grn` (`barcode`,`supplier_name`,`supplier_mobile`,`note`,`date_time`,`amount`,`discount`) "
-//                            + "VALUES ('" + newBarcode + "','" + supplierName + "','" + supplierMobile + "','" + note + "','" + dateTime + "','" + this.grnTotal + "','" + this.grnDiscount + "')");
-//
-//                    for (int i = 0; i < rowCount; i++) {
-//                        String stockBarcode = String.valueOf(grnItemsTable.getValueAt(i, 1));
-//                        String quantity = String.valueOf(grnItemsTable.getValueAt(i, 5));
-//                        String discount = String.valueOf(grnItemsTable.getValueAt(i, 7));
-//
-//                        MySQL.execute("INSERT INTO `grn_item` (`grn_barcode`,`stock_barcode`,`quantity`,`discount`) "
-//                                + "VALUES ('" + newBarcode + "','" + stockBarcode + "','" + quantity + "','" + discount + "')");
-//                    }
-//                    grnManagement.loadGRNTable();
-//                    JOptionPane.showMessageDialog(this, "GRN Added Successfully", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));
-//                    this.dispose();
-//                    //new NewGRN(grnManagement).setVisible(true);
-//                } catch (Exception e) {
-//                    JOptionPane.showMessageDialog(this, e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-    }//GEN-LAST:event_saveOnlyButtonActionPerformed
+    private void payWithReturnsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_payWithReturnsButtonActionPerformed
+        processToPayWithReturns();
+    }//GEN-LAST:event_payWithReturnsButtonActionPerformed
 
     private void removeSelectedButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeSelectedButtonActionPerformed
         deleteSelectedRow();
     }//GEN-LAST:event_removeSelectedButtonActionPerformed
 
-    private void invoiceItemsTableKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_invoiceItemsTableKeyReleased
-        // TODO add your handling code here:
-    }//GEN-LAST:event_invoiceItemsTableKeyReleased
-
     private void clearRowButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearRowButtonActionPerformed
-        cleanRowInputs();
+        cleanInvoiceItemInputs();
     }//GEN-LAST:event_clearRowButtonActionPerformed
 
     private void addItemButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addItemButtonActionPerformed
-        try {
-            String quantity = quantityTextField.getText();
-
-            if (selectedStockBarcode == null) {
-                JOptionPane.showMessageDialog(this, "Please Select the Stock", "Warning", JOptionPane.WARNING_MESSAGE);
-            } else if (quantity.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please Enter Quantity", "Warning", JOptionPane.WARNING_MESSAGE);
-                quantityTextField.grabFocus();
-            } else if (!Validation.isValidQuantity(quantity)) {
-                JOptionPane.showMessageDialog(this, "<html>Quantity must be a whole number or decimal<br>(e.g., 10 or 10.5).</html>", "Warning", JOptionPane.WARNING_MESSAGE);
-                quantityTextField.grabFocus();
-                quantityTextField.selectAll();
-            } else if (Double.parseDouble(quantity) == 0) {
-                JOptionPane.showMessageDialog(this, "Quantity Can't be \"0\"", "Warning", JOptionPane.WARNING_MESSAGE);
-                quantityTextField.grabFocus();
-                quantityTextField.selectAll();
-            } else if (Double.parseDouble(quantity) < 0) {
-                JOptionPane.showMessageDialog(this, "Quantity Can't be Negetive", "Warning", JOptionPane.WARNING_MESSAGE);
-                quantityTextField.grabFocus();
-                quantityTextField.selectAll();
-            } else {
-                if (rowNumberMap.containsKey(selectedStockBarcode)) {
-                    //Already Have a row from this stock
-                    int rowNumber = rowNumberMap.get(selectedStockBarcode);
-                    double currentQty = Double.parseDouble(String.valueOf(invoiceItemsTable.getValueAt(rowNumber, 6)));
-                    double newQuantity = Double.parseDouble(quantity);
-
-                    if (selectedAvalibleQuantity < (currentQty + newQuantity)) {
-                        JOptionPane.showMessageDialog(this, "<html>Only <b>" + Numbers.formatQuantity(selectedAvalibleQuantity) + selectedMeasUnit + "</b> are available in stock.<html>", "Available Quantity exceed", JOptionPane.WARNING_MESSAGE);
-                        quantityTextField.grabFocus();
-                        quantityTextField.selectAll();
-                    } else {
-                        invoiceItemsTable.setValueAt(Numbers.formatQuantity(currentQty + newQuantity), rowNumber, 6);
-                        invoiceItemsTable.setRowSelectionInterval(rowNumber, rowNumber);
-                        stockBarcodeTextField.grabFocus();
-                        calculateTotals();
-                        cleanRowInputs();
-                    }
-
-                } else {
-
-                    if (selectedAvalibleQuantity < Double.parseDouble(quantity)) {
-                        JOptionPane.showMessageDialog(this, "<html>Only <b>" + Numbers.formatQuantity(selectedAvalibleQuantity) + selectedMeasUnit + "</b> are available in stock.<html>", "Available Quantity exceed", JOptionPane.WARNING_MESSAGE);
-                        quantityTextField.grabFocus();
-                        quantityTextField.selectAll();
-                    } else {
-                        //New Row
-                        DefaultTableModel model = (DefaultTableModel) invoiceItemsTable.getModel();
-                        int rowCount = invoiceItemsTable.getRowCount();
-
-                        //Input To grn items Table
-                        Vector v = new Vector();
-                        v.add(rowCount + 1);
-                        v.add(selectedStockBarcode);
-                        v.add(selectedProductName);
-                        v.add(selectedMarkedPrice);
-                        v.add(selectedSellingDiscount);
-                        v.add(selectedSellingPrice);
-                        v.add(Numbers.formatQuantity(Double.parseDouble(quantity)));
-                        v.add(selectedMeasUnit);
-                        model.addRow(v);
-
-                        //Add To Row Numbers Hashmap
-                        rowNumberMap.put(selectedStockBarcode, rowCount);
-                        invoiceItemsTable.setRowSelectionInterval(rowCount, rowCount);
-                        stockBarcodeTextField.grabFocus();
-                        calculateTotals();
-                        cleanRowInputs();
-                    }
-
-                }
-
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Something Went Wrong Try Again", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
-        }
+        addInvoiceItem();
     }//GEN-LAST:event_addItemButtonActionPerformed
+
+    private void clearDiscountButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearDiscountButtonActionPerformed
+        removeDiscount();
+    }//GEN-LAST:event_clearDiscountButtonActionPerformed
+
+    private void payButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_payButtonActionPerformed
+        processToNormalPayment();
+    }//GEN-LAST:event_payButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -1229,13 +1218,13 @@ public class NewInvoice extends javax.swing.JFrame {
     private javax.swing.JRadioButton amountDiscountRadioButton;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JLabel buyingPriceLabel;
+    private javax.swing.JButton clearDiscountButton;
     private javax.swing.JButton clearRowButton;
     private com.raven.datechooser.DateChooser dateChooser;
+    private javax.swing.JLabel discountLabel;
     private javax.swing.JLabel discountTextLabel;
     private javax.swing.JLabel discountValueLabel;
-    private javax.swing.JFormattedTextField grnDiscountFromattedTextField;
-    private javax.swing.JLabel grnDiscountLabel;
-    private javax.swing.JButton grnSetDiscountButton;
+    private javax.swing.JFormattedTextField invoiceDiscountFromattedTextField;
     private javax.swing.JTable invoiceItemsTable;
     private javax.swing.JLabel itemDiscountLabel;
     private javax.swing.JLabel jLabel1;
@@ -1265,6 +1254,8 @@ public class NewInvoice extends javax.swing.JFrame {
     private javax.swing.JTextField markedPriceTextField;
     private javax.swing.JLabel netTotalTextLabel;
     private javax.swing.JLabel netTotalValueLabel;
+    private javax.swing.JButton payButton;
+    private javax.swing.JButton payWithReturnsButton;
     private javax.swing.JRadioButton presentageDiscountRadioButton;
     private javax.swing.JLabel productLabel;
     private javax.swing.JTextField productNameTextField;
@@ -1272,11 +1263,10 @@ public class NewInvoice extends javax.swing.JFrame {
     private javax.swing.JTextField quantityTextField;
     private javax.swing.JButton removeAllButton;
     private javax.swing.JButton removeSelectedButton;
-    private javax.swing.JButton saveAndPrintButton;
-    private javax.swing.JButton saveOnlyButton;
     private javax.swing.JTextField sellingDiscountTextField;
     private javax.swing.JLabel sellingPriceLabel;
     private javax.swing.JTextField sellingPriceTextField;
+    private javax.swing.JButton setDiscountButton;
     private javax.swing.JLabel stockBarcodeLabel;
     private javax.swing.JTextField stockBarcodeTextField;
     private javax.swing.JLabel supplierNameShowLabel;

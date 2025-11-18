@@ -292,21 +292,25 @@
             <Component class="javax.swing.JComboBox" name="sortByComboBox">
               <Properties>
                 <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                  <StringArray count="14">
+                  <StringArray count="18">
                     <StringItem index="0" value="Newest to Oldest"/>
                     <StringItem index="1" value="Oldest to Newest"/>
-                    <StringItem index="2" value="Number Of Items (High to Low)"/>
-                    <StringItem index="3" value="Number Of Items (Low to High)"/>
-                    <StringItem index="4" value="Total (High to Low)"/>
-                    <StringItem index="5" value="Total (Low to High)"/>
-                    <StringItem index="6" value="Discount (High to Low)"/>
-                    <StringItem index="7" value="Discount (Low to High)"/>
-                    <StringItem index="8" value="Net Total (High to Low)"/>
-                    <StringItem index="9" value="Net Total (Low to High)"/>
-                    <StringItem index="10" value="Paid Amount (High to Low)"/>
-                    <StringItem index="11" value="Paid Amount (Low to High)"/>
-                    <StringItem index="12" value="Balance (High to Low)"/>
-                    <StringItem index="13" value="Balance (Low to High)"/>
+                    <StringItem index="2" value="Total (High to Low)"/>
+                    <StringItem index="3" value="Total (Low to High)"/>
+                    <StringItem index="4" value="Discount (High to Low)"/>
+                    <StringItem index="5" value="Discount (Low to High)"/>
+                    <StringItem index="6" value="Net Total (High to Low)"/>
+                    <StringItem index="7" value="Net Total (Low to High)"/>
+                    <StringItem index="8" value="Return Payment (High to Low)"/>
+                    <StringItem index="9" value="Return Payment (Low to High)"/>
+                    <StringItem index="10" value="Payable Amount (High to Low)"/>
+                    <StringItem index="11" value="Payable Amount (Low to High)"/>
+                    <StringItem index="12" value="Paid Amount (High to Low)"/>
+                    <StringItem index="13" value="Paid Amount (Low to High)"/>
+                    <StringItem index="14" value="Balance (High to Low)"/>
+                    <StringItem index="15" value="Balance (Low to High)"/>
+                    <StringItem index="16" value="Item Count (High to Low)"/>
+                    <StringItem index="17" value="Item Count (Low to High)"/>
                   </StringArray>
                 </Property>
               </Properties>
@@ -460,16 +464,18 @@
             <Component class="javax.swing.JTable" name="invoiceTable">
               <Properties>
                 <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-                  <Table columnCount="9" rowCount="0">
+                  <Table columnCount="11" rowCount="0">
                     <Column editable="false" title="Invoice Id" type="java.lang.Object"/>
-                    <Column editable="false" title="Issued Date Time" type="java.lang.Object"/>
-                    <Column editable="false" title="Number of items" type="java.lang.Object"/>
                     <Column editable="false" title="Total" type="java.lang.Object"/>
                     <Column editable="false" title="Discount" type="java.lang.Object"/>
                     <Column editable="false" title="Net Total" type="java.lang.Object"/>
+                    <Column editable="false" title="Return Payment" type="java.lang.Object"/>
+                    <Column editable="false" title="Payable Amount" type="java.lang.Object"/>
                     <Column editable="false" title="Paid Amount" type="java.lang.Object"/>
                     <Column editable="false" title="Balance" type="java.lang.Object"/>
                     <Column editable="false" title="Payment Method" type="java.lang.Object"/>
+                    <Column editable="false" title="Item Count" type="java.lang.Object"/>
+                    <Column editable="false" title="Issued Date Time" type="java.lang.Object"/>
                   </Table>
                 </Property>
                 <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor">
@@ -479,42 +485,52 @@
                       <Editor/>
                       <Renderer/>
                     </Column>
+                    <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
+                      <Title/>
+                      <Editor/>
+                      <Renderer/>
+                    </Column>
+                    <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
+                      <Title/>
+                      <Editor/>
+                      <Renderer/>
+                    </Column>
+                    <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
+                      <Title/>
+                      <Editor/>
+                      <Renderer/>
+                    </Column>
+                    <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
+                      <Title/>
+                      <Editor/>
+                      <Renderer/>
+                    </Column>
+                    <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
+                      <Title/>
+                      <Editor/>
+                      <Renderer/>
+                    </Column>
+                    <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
+                      <Title/>
+                      <Editor/>
+                      <Renderer/>
+                    </Column>
+                    <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
+                      <Title/>
+                      <Editor/>
+                      <Renderer/>
+                    </Column>
+                    <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
+                      <Title/>
+                      <Editor/>
+                      <Renderer/>
+                    </Column>
+                    <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
+                      <Title/>
+                      <Editor/>
+                      <Renderer/>
+                    </Column>
                     <Column maxWidth="-1" minWidth="150" prefWidth="150" resizable="true">
-                      <Title/>
-                      <Editor/>
-                      <Renderer/>
-                    </Column>
-                    <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
-                      <Title/>
-                      <Editor/>
-                      <Renderer/>
-                    </Column>
-                    <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
-                      <Title/>
-                      <Editor/>
-                      <Renderer/>
-                    </Column>
-                    <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
-                      <Title/>
-                      <Editor/>
-                      <Renderer/>
-                    </Column>
-                    <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
-                      <Title/>
-                      <Editor/>
-                      <Renderer/>
-                    </Column>
-                    <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
-                      <Title/>
-                      <Editor/>
-                      <Renderer/>
-                    </Column>
-                    <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
-                      <Title/>
-                      <Editor/>
-                      <Renderer/>
-                    </Column>
-                    <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
                       <Title/>
                       <Editor/>
                       <Renderer/>

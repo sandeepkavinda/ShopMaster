@@ -367,6 +367,11 @@ public class GrnManagement extends javax.swing.JPanel {
                 sortByComboBoxItemStateChanged(evt);
             }
         });
+        sortByComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                sortByComboBoxActionPerformed(evt);
+            }
+        });
 
         jLabel5.setText("Sort By");
 
@@ -553,6 +558,10 @@ public class GrnManagement extends javax.swing.JPanel {
     private void newInvoiceButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newInvoiceButton1ActionPerformed
         searchByBarcode();
     }//GEN-LAST:event_newInvoiceButton1ActionPerformed
+
+    private void sortByComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sortByComboBoxActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_sortByComboBoxActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

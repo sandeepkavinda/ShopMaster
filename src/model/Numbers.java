@@ -32,7 +32,7 @@ public class Numbers {
         // Return the formatted price as a string
         return priceFormat.format(price);
     }
-    
+
     public static String formatPriceWithoutComma(double price) {
         DecimalFormat decimalFormat = new DecimalFormat("###0.00");
         return decimalFormat.format(price);

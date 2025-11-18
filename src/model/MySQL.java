@@ -7,22 +7,34 @@ import java.sql.Statement;
 
 public class MySQL {
 
-    private static Connection conncetion;
+    private static Connection connection;
 
     static {
         try {
+            
             Class.forName("com.mysql.cj.jdbc.Driver");
-            conncetion = DriverManager.getConnection("jdbc:mysql://localhost:3306/shopmaster", "root", "Sandeep/Root/1234");
+            connection = DriverManager.getConnection(
+                    "jdbc:mysql://localhost:3306/shopmaster", 
+                    "root", 
+                    "Sandeep/Root/1234"
+            );
+            connection.setAutoCommit(true);
+            
         } catch (Exception e) {
             e.printStackTrace();
         }
+        
+    }
+    
+    public static Connection getConnection() {
+        return connection;
     }
 
     public static ResultSet execute(String query) throws Exception {
 
-        Statement statement = conncetion.createStatement();
+        Statement statement = connection.createStatement();
 
-        if (query.startsWith("SELECT") | query.startsWith("select")) {
+        if (query.trim().toUpperCase().startsWith("SELECT")) {
             return statement.executeQuery(query);
         } else {
             statement.executeUpdate(query);

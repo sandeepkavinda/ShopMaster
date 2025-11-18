@@ -34,6 +34,8 @@ public class SelectStock extends javax.swing.JDialog {
         initComponents();
         loadProducts();
         loadStockTable();
+        stockTable.grabFocus();
+        stockTable.setRowSelectionInterval(0, 0);
     }
 
     private void loadProducts() {
@@ -80,8 +82,8 @@ public class SelectStock extends javax.swing.JDialog {
 
                 double currentQty = Double.parseDouble(results.getString("current_quantity"));
                 double buyingPrice = Double.parseDouble(results.getString("buying_price"));
-                double markedPrice = Double.parseDouble(results.getString("buying_price"));
-                double sellingDiscount = Double.parseDouble(results.getString("buying_price"));
+                double markedPrice = Double.parseDouble(results.getString("marked_price"));
+                double sellingDiscount = Double.parseDouble(results.getString("selling_discount"));
                 double sellingPrice = Double.parseDouble(results.getString("selling_price"));
 
                 Vector v = new Vector();
@@ -168,7 +170,7 @@ public class SelectStock extends javax.swing.JDialog {
             if (newGRN != null) {
                 newGRN.setStock(barcode);
             }else if (newInvoice != null) {
-                newInvoice.setStock(barcode);
+                newInvoice.setInvoiceItem(barcode);
             }else {
                 JOptionPane.showMessageDialog(this, "Something Went Wrong", "Unexpected Error", JOptionPane.WARNING_MESSAGE);
             }

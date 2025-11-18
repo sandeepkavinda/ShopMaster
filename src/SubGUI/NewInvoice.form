@@ -218,7 +218,7 @@
                         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                           <Image iconType="3" name="/resource/add.png"/>
                         </Property>
-                        <Property name="toolTipText" type="java.lang.String" value="Select Product"/>
+                        <Property name="toolTipText" type="java.lang.String" value="Select Product (F1)"/>
                         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                           <Border info="null"/>
                         </Property>
@@ -229,7 +229,6 @@
                     </Component>
                     <Component class="javax.swing.JTextField" name="stockBarcodeTextField">
                       <Events>
-                        <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="stockBarcodeTextFieldFocusLost"/>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="stockBarcodeTextFieldActionPerformed"/>
                       </Events>
                     </Component>
@@ -280,9 +279,6 @@
                       <Properties>
                         <Property name="editable" type="boolean" value="false"/>
                       </Properties>
-                      <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="productNameTextFieldActionPerformed"/>
-                      </Events>
                     </Component>
                   </SubComponents>
                 </Container>
@@ -586,12 +582,12 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" alignment="0" attributes="0">
-                                      <Component id="grnDiscountFromattedTextField" min="-2" pref="138" max="-2" attributes="0"/>
+                                      <Component id="invoiceDiscountFromattedTextField" min="-2" pref="138" max="-2" attributes="0"/>
                                       <EmptySpace max="32767" attributes="0"/>
-                                      <Component id="grnSetDiscountButton" min="-2" pref="81" max="-2" attributes="0"/>
+                                      <Component id="setDiscountButton" min="-2" pref="81" max="-2" attributes="0"/>
                                   </Group>
                                   <Group type="102" attributes="0">
-                                      <Component id="grnDiscountLabel" min="-2" pref="127" max="-2" attributes="0"/>
+                                      <Component id="discountLabel" min="-2" pref="127" max="-2" attributes="0"/>
                                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                                   </Group>
                                   <Group type="102" alignment="0" attributes="0">
@@ -602,6 +598,8 @@
                                   </Group>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
+                              <Component id="clearDiscountButton" min="-2" pref="37" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -609,11 +607,12 @@
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" alignment="0" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="grnDiscountLabel" max="32767" attributes="0"/>
+                              <Component id="discountLabel" max="32767" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                  <Component id="grnSetDiscountButton" pref="35" max="32767" attributes="0"/>
-                                  <Component id="grnDiscountFromattedTextField" max="32767" attributes="0"/>
+                                  <Component id="setDiscountButton" pref="37" max="32767" attributes="0"/>
+                                  <Component id="invoiceDiscountFromattedTextField" max="32767" attributes="0"/>
+                                  <Component id="clearDiscountButton" alignment="0" pref="37" max="32767" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
@@ -626,13 +625,13 @@
                     </DimensionLayout>
                   </Layout>
                   <SubComponents>
-                    <Component class="javax.swing.JLabel" name="grnDiscountLabel">
+                    <Component class="javax.swing.JLabel" name="discountLabel">
                       <Properties>
                         <Property name="horizontalAlignment" type="int" value="2"/>
                         <Property name="text" type="java.lang.String" value="Invoice Discount"/>
                       </Properties>
                     </Component>
-                    <Component class="javax.swing.JButton" name="grnSetDiscountButton">
+                    <Component class="javax.swing.JButton" name="setDiscountButton">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Set"/>
                         <Property name="toolTipText" type="java.lang.String" value="Add New Product"/>
@@ -641,7 +640,7 @@
                         </Property>
                       </Properties>
                       <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="grnSetDiscountButtonActionPerformed"/>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="setDiscountButtonActionPerformed"/>
                       </Events>
                     </Component>
                     <Component class="javax.swing.JRadioButton" name="amountDiscountRadioButton">
@@ -659,11 +658,8 @@
                         </Property>
                         <Property name="text" type="java.lang.String" value="Presentage (%)"/>
                       </Properties>
-                      <Events>
-                        <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="presentageDiscountRadioButtonItemStateChanged"/>
-                      </Events>
                     </Component>
-                    <Component class="javax.swing.JFormattedTextField" name="grnDiscountFromattedTextField">
+                    <Component class="javax.swing.JFormattedTextField" name="invoiceDiscountFromattedTextField">
                       <Properties>
                         <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
                           <Format format="0.00" subtype="-1" type="4"/>
@@ -671,7 +667,26 @@
                         <Property name="text" type="java.lang.String" value="0.00"/>
                       </Properties>
                       <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="grnDiscountFromattedTextFieldActionPerformed"/>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="invoiceDiscountFromattedTextFieldActionPerformed"/>
+                      </Events>
+                    </Component>
+                    <Component class="javax.swing.JButton" name="clearDiscountButton">
+                      <Properties>
+                        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                          <Color blue="66" green="66" red="66" type="rgb"/>
+                        </Property>
+                        <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                          <Color blue="ff" green="ff" red="ff" type="rgb"/>
+                        </Property>
+                        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                          <Image iconType="3" name="/resource/clean.png"/>
+                        </Property>
+                        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                          <Border info="null"/>
+                        </Property>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="clearDiscountButtonActionPerformed"/>
                       </Events>
                     </Component>
                   </SubComponents>
@@ -690,9 +705,9 @@
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Component id="removeAllButton" min="-2" pref="124" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="saveOnlyButton" min="-2" pref="141" max="-2" attributes="0"/>
+                                      <Component id="payWithReturnsButton" min="-2" pref="141" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="saveAndPrintButton" min="-2" pref="141" max="-2" attributes="0"/>
+                                      <Component id="payButton" min="-2" pref="141" max="-2" attributes="0"/>
                                   </Group>
                                   <Group type="102" attributes="0">
                                       <Group type="103" groupAlignment="0" attributes="0">
@@ -738,8 +753,8 @@
                               </Group>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                  <Component id="saveAndPrintButton" pref="37" max="32767" attributes="0"/>
-                                  <Component id="saveOnlyButton" alignment="0" max="32767" attributes="0"/>
+                                  <Component id="payButton" pref="37" max="32767" attributes="0"/>
+                                  <Component id="payWithReturnsButton" alignment="0" max="32767" attributes="0"/>
                                   <Component id="removeAllButton" alignment="0" max="32767" attributes="0"/>
                                   <Component id="removeSelectedButton" alignment="0" max="32767" attributes="0"/>
                               </Group>
@@ -800,28 +815,31 @@
                           <Font name="Poppins" size="12" style="1"/>
                         </Property>
                         <Property name="horizontalAlignment" type="int" value="4"/>
-                        <Property name="text" type="java.lang.String" value="Total (Rs.) :"/>
+                        <Property name="text" type="java.lang.String" value="Invoice Amount (Rs.) :"/>
                       </Properties>
                     </Component>
-                    <Component class="javax.swing.JButton" name="saveAndPrintButton">
+                    <Component class="javax.swing.JButton" name="payButton">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Save &amp; Print"/>
-                        <Property name="toolTipText" type="java.lang.String" value="Add New Product"/>
-                        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
-                          <Border info="null"/>
-                        </Property>
-                      </Properties>
-                    </Component>
-                    <Component class="javax.swing.JButton" name="saveOnlyButton">
-                      <Properties>
-                        <Property name="text" type="java.lang.String" value="Save"/>
+                        <Property name="text" type="java.lang.String" value="Pay"/>
                         <Property name="toolTipText" type="java.lang.String" value="Add New Product"/>
                         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                           <Border info="null"/>
                         </Property>
                       </Properties>
                       <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="saveOnlyButtonActionPerformed"/>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="payButtonActionPerformed"/>
+                      </Events>
+                    </Component>
+                    <Component class="javax.swing.JButton" name="payWithReturnsButton">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="Pay With Returns"/>
+                        <Property name="toolTipText" type="java.lang.String" value="Add New Product"/>
+                        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                          <Border info="null"/>
+                        </Property>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="payWithReturnsButtonActionPerformed"/>
                       </Events>
                     </Component>
                     <Component class="javax.swing.JButton" name="removeAllButton">
@@ -947,10 +965,6 @@
                       <TableHeader reorderingAllowed="true" resizingAllowed="true"/>
                     </Property>
                   </Properties>
-                  <Events>
-                    <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="invoiceItemsTableMouseClicked"/>
-                    <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="invoiceItemsTableKeyReleased"/>
-                  </Events>
                   <AuxValues>
                     <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="invoiceItemsTable.getTableHeader().setReorderingAllowed(false);&#xd;&#xa;&#xd;&#xa;// Center-align the first column (index 0)&#xd;&#xa;DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();&#xd;&#xa;centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);&#xd;&#xa;invoiceItemsTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);&#xd;&#xa;invoiceItemsTable.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);&#xd;&#xa;invoiceItemsTable.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);&#xd;&#xa;invoiceItemsTable.getColumnModel().getColumn(3).setCellRenderer(centerRenderer);&#xd;&#xa;invoiceItemsTable.getColumnModel().getColumn(4).setCellRenderer(centerRenderer);&#xd;&#xa;invoiceItemsTable.getColumnModel().getColumn(5).setCellRenderer(centerRenderer);&#xd;&#xa;invoiceItemsTable.getColumnModel().getColumn(6).setCellRenderer(centerRenderer);&#xd;&#xa;invoiceItemsTable.getColumnModel().getColumn(7).setCellRenderer(centerRenderer);&#xd;&#xa;&#xd;&#xa;// Right-align the second column (index 1)&#xd;&#xa;DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();&#xd;&#xa;rightRenderer.setHorizontalAlignment(SwingConstants.RIGHT);&#xd;&#xa;invoiceItemsTable.getColumnModel().getColumn(8).setCellRenderer(rightRenderer);"/>
                   </AuxValues>
@@ -972,7 +986,7 @@
                 <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                   <Color blue="4b" green="69" red="0" type="rgb"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="New Customer Invoice"/>
+                <Property name="text" type="java.lang.String" value="New Invoice"/>
                 <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                   <Border info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
                     <EmptyBorder bottom="1" left="10" right="1" top="1"/>

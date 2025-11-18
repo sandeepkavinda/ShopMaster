@@ -49,25 +49,41 @@ public class Generate {
     }
   
     
-    public static String GenerateNextGrnBarcode(String lastBarcode) throws Exception {
-        // Parse the string as an integer
-        int number = Integer.parseInt(lastBarcode);
-        
-        //If Number is 0 it convert to 50000000 to first barcode generate
-        if(number==0){
-            number = 50000000;
-        }
-
-        // Increment the number
-        number++;
-
-        if (number > 50000000 && number < 100000000) {
-            // Format the incremented number to the same length as the input
-            return String.format("%0" + lastBarcode.length() + "d", number);
-
-        } else {
-            throw new Exception("Barcods are out of the valid range");
-        }
-    }
+//    public static String generateNextGrnBarcode(String lastBarcode) throws Exception {
+//        // Parse the string as an integer
+//        int number = Integer.parseInt(lastBarcode);
+//        
+//        //If Number is 0 it convert to 50000000 to first barcode generate
+//        if(number==0){
+//            number = 50000000;
+//        }
+//
+//        // Increment the number
+//        number++;
+//
+//        if (number > 50000000 && number < 100000000) {
+//            // Format the incremented number to the same length as the input
+//            return String.format("%0" + lastBarcode.length() + "d", number);
+//
+//        } else {
+//            throw new Exception("Barcods are out of the valid range. Contact Developers");
+//        }
+//    }
+//    
+//     public static String generateNextInvoiceBarcode(String lastBarcode) throws Exception {
+//        // Parse the string as an integer
+//        int number = Integer.parseInt(lastBarcode);
+//    
+//        // Increment the number
+//        number++;
+//
+//        if (number > 0 && number < 50000000) {
+//            // Format the incremented number to the same length as the input
+//            return String.format("%08d", number);
+//        } else {
+//            throw new Exception("Barcods are out of the valid range. Contact Developers");
+//        }
+//    }
+//    
     
 }
