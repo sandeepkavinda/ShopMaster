@@ -4,7 +4,6 @@
  */
 package panels;
 
-import GUI.Home;
 import SubGUI.NewInvoice;
 import java.awt.event.ItemEvent;
 import model.MySQL;
@@ -88,7 +87,7 @@ public class InvoiceManagement extends javax.swing.JPanel {
             } else if (sortBy == 1) {
                 sortByColumn = "datetime";
                 sortByType = "ASC";
-            }  else if (sortBy == 2) {
+            } else if (sortBy == 2) {
                 sortByColumn = "total_amount";
                 sortByType = "DESC";
             } else if (sortBy == 3) {
@@ -130,14 +129,14 @@ public class InvoiceManagement extends javax.swing.JPanel {
             } else if (sortBy == 15) {
                 sortByColumn = "balance";
                 sortByType = "ASC";
-            }else if (sortBy == 16) {
+            } else if (sortBy == 16) {
                 sortByColumn = "item_count";
                 sortByType = "DESC";
             } else if (sortBy == 17) {
                 sortByColumn = "item_count";
                 sortByType = "ASC";
             }
-            
+
             String searchByPaymentMethodQueryPart = "";
 
             if (paymentMethodId != null) {
@@ -198,32 +197,24 @@ public class InvoiceManagement extends javax.swing.JPanel {
                 model.setRowCount(0);
 
                 ResultSet results = MySQL.execute(""
-                        + "SELECT "
-                        + "i.*, "
-                        + "pm.name, "
-                        + "COUNT(ii.id) AS item_count, "
-                        + "SUM(s.marked_price - s.selling_discount) AS total_amount, "
-                        + "(SUM(s.marked_price - s.selling_discount) - i.discount) AS net_total, "
-                        + "(i.paid_amount - (SUM(s.marked_price - s.selling_discount) - i.discount)) AS `balance` "
-                        + "FROM invoice_item ii  "
-                        + "INNER JOIN stock s ON ii.stock_barcode = s.barcode "
-                        + "INNER JOIN invoice i ON ii.invoice_id = i.invoice_id "
+                        + "SELECT * FROM invoice i "
                         + "INNER JOIN payment_method pm ON i.payment_method_id = pm.id  "
-                        + "WHERE (i.invoice_id = '" + invoiceId + "') "
-                        + "GROUP BY i.invoice_id ");
+                        + "WHERE i.invoice_id = '" + invoiceId + "' ");
 
                 if (results.next()) {
 
                     Vector v = new Vector();
                     v.add(results.getString("i.invoice_id"));
-                    v.add(results.getString("datetime"));
-                    v.add(results.getString("item_count"));
                     v.add(Numbers.formatPrice(Double.parseDouble(results.getString("total_amount"))));
                     v.add(Numbers.formatPrice(Double.parseDouble(results.getString("discount"))));
                     v.add(Numbers.formatPrice(Double.parseDouble(results.getString("net_total"))));
+                    v.add(Numbers.formatPrice(Double.parseDouble(results.getString("return_payment_amount"))));
+                    v.add(Numbers.formatPrice(Double.parseDouble(results.getString("payable_amount"))));
                     v.add(Numbers.formatPrice(Double.parseDouble(results.getString("paid_amount"))));
                     v.add(results.getString("balance"));
                     v.add(results.getString("pm.name"));
+                    v.add(results.getString("i.item_count"));
+                    v.add(results.getString("datetime"));
                     model.addRow(v);
 
                 } else {
