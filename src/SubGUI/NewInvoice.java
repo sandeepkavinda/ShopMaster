@@ -280,14 +280,8 @@ public class NewInvoice extends javax.swing.JFrame {
                 //Remove Row 
                 DefaultTableModel model = (DefaultTableModel) invoiceItemsTable.getModel();
                 model.removeRow(selectedRow);
-
-                //Update Row Number Map
-                int newRowcount = invoiceItemsTable.getRowCount();
-                rowNumberMap.clear();
-                for (int i = 0; i < newRowcount; i++) {
-                    String stockId = String.valueOf(invoiceItemsTable.getValueAt(i, 1));
-                    rowNumberMap.put(stockId, i);
-                }
+                
+                updateRowNumberMap();
                 calculateTotal();
             }
         } else {
@@ -300,6 +294,15 @@ public class NewInvoice extends javax.swing.JFrame {
         cleanInvoiceItemInputs();
         SelectStock selectStock = new SelectStock(this, true, null, this);
         selectStock.setVisible(true);
+    }
+
+    private void updateRowNumberMap() {
+        int newRowcount = invoiceItemsTable.getRowCount();
+        rowNumberMap.clear();
+        for (int i = 0; i < newRowcount; i++) {
+            String stockId = String.valueOf(invoiceItemsTable.getValueAt(i, 1));
+            rowNumberMap.put(stockId, i);
+        }
     }
 
     private void removeAllInvoiceItems() {
