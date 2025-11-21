@@ -43,6 +43,7 @@ public class InvoiceSummery extends javax.swing.JDialog {
                     balanceTextLabel.setText(Numbers.formatPriceWithCurrencyCode(resultSet.getDouble("balance")));
                 } else {
                     JOptionPane.showMessageDialog(null, "Invalid Invoice Id", "Error", JOptionPane.ERROR_MESSAGE);
+                    this.dispose();
 
                 }
 
@@ -105,7 +106,7 @@ public class InvoiceSummery extends javax.swing.JDialog {
         });
 
         jPanel9.setBorder(javax.swing.BorderFactory.createEmptyBorder(6, 0, 0, 0));
-        jPanel9.setLayout(new java.awt.GridLayout());
+        jPanel9.setLayout(new java.awt.GridLayout(1, 0));
 
         javax.swing.GroupLayout jPanel20Layout = new javax.swing.GroupLayout(jPanel20);
         jPanel20.setLayout(jPanel20Layout);
@@ -193,23 +194,23 @@ public class InvoiceSummery extends javax.swing.JDialog {
 
         invoiceIdTextLabel.setFont(new java.awt.Font("Poppins", 0, 14)); // NOI18N
         invoiceIdTextLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        invoiceIdTextLabel.setText("Rs. 50,000.00");
+        invoiceIdTextLabel.setText(" ");
 
         itemCountTextLabel.setFont(new java.awt.Font("Poppins", 0, 14)); // NOI18N
         itemCountTextLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        itemCountTextLabel.setText("Rs. 50,000.00");
+        itemCountTextLabel.setText(" ");
 
         paidAmountTextLabel.setFont(new java.awt.Font("Poppins", 0, 14)); // NOI18N
         paidAmountTextLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        paidAmountTextLabel.setText("Rs. 50,000.00");
+        paidAmountTextLabel.setText(" ");
 
         payableAmountTextLabel.setFont(new java.awt.Font("Poppins", 0, 14)); // NOI18N
         payableAmountTextLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        payableAmountTextLabel.setText("Rs. 50,000.00");
+        payableAmountTextLabel.setText(" ");
 
         balanceTextLabel.setFont(new java.awt.Font("Poppins", 1, 18)); // NOI18N
         balanceTextLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        balanceTextLabel.setText("Rs. 50,000.00");
+        balanceTextLabel.setText(" ");
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -232,11 +233,11 @@ public class InvoiceSummery extends javax.swing.JDialog {
                     .addComponent(payableTextLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(24, 24, 24)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(balanceTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(payableAmountTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(payableAmountTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 125, Short.MAX_VALUE)
                     .addComponent(paidAmountTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(itemCountTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(invoiceIdTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(invoiceIdTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(balanceTextLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(

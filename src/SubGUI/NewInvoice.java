@@ -344,8 +344,8 @@ public class NewInvoice extends javax.swing.JFrame {
                 String formattedCurrentDate = dateFormat.format(date);
 
                 //Add Invoice 
-                MySQL.execute("INSERT INTO invoice (invoice_id, datetime, total_amount, discount, return_voucher_id, return_payment_amount, paid_amount, item_count,payment_method_id) "
-                        + "VALUES ('" + newBarcode + "','" + formattedCurrentDate + "','" + invoiceTotal + "','" + invoiceDiscount + "'," + returnVoucherId + ",'" + returnPaymentAmount + "','" + paidAmount + "','" + rowCount + "','" + paymentMethodId + "')");
+                MySQL.execute("INSERT INTO invoice (invoice_id, datetime, total_amount, discount, return_voucher_id, return_payment_amount, paid_amount, item_count, payment_method_id) "
+                        + "VALUES ('" + newBarcode + "','" + formattedCurrentDate + "','" + invoiceTotal + "','" + invoiceDiscount + "','" + returnVoucherId + "','" + returnPaymentAmount + "','" + paidAmount + "','" + rowCount + "','" + paymentMethodId + "')");
 
                 //Add Invoice Items
                 for (int i = 0; i < rowCount; i++) {
