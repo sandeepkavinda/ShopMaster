@@ -4,6 +4,8 @@ import GUI.Home;
 import SubGUI.InvoiceIdInputToReturn;
 import java.sql.ResultSet;
 import java.util.Vector;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import model.MySQL;
 import model.Numbers;
@@ -15,14 +17,29 @@ import model.Numbers;
 public class ReturnManagement extends javax.swing.JPanel {
 
     private Home home;
+
     public ReturnManagement(Home home) {
         this.home = home;
         initComponents();
         loadReturnTable();
+
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+
+        DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
+        rightRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
+
+        returnTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
+        returnTable.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
+        returnTable.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
+        returnTable.getColumnModel().getColumn(3).setCellRenderer(rightRenderer);
+        returnTable.getColumnModel().getColumn(4).setCellRenderer(rightRenderer);
+        returnTable.getColumnModel().getColumn(5).setCellRenderer(rightRenderer);
+
     }
-    
-    public void loadReturnTable(){
-          try {
+
+    public void loadReturnTable() {
+        try {
             searchTextField.setText("");
 
             String search = searchTextField.getText();
@@ -32,35 +49,29 @@ public class ReturnManagement extends javax.swing.JPanel {
             String sortByType = "";
 
             if (sortBy == 0) {
-                sortByColumn = "sr.date_time";
+                sortByColumn = "datetime";
                 sortByType = "DESC";
             } else if (sortBy == 1) {
-                sortByColumn = "sr.date_time";
+                sortByColumn = "datetime";
                 sortByType = "ASC";
-            } 
+            }
 
             DefaultTableModel model = (DefaultTableModel) returnTable.getModel();
             model.setRowCount(0);
 
             ResultSet results = MySQL.execute(""
-                    + "SELECT *,((marked_price - selling_discount) * sr.quantity) AS returned_amount "
-                    + "FROM sales_return sr "
-                    + "INNER JOIN invoice_item ii ON sr.invoice_item_id = ii.id "
-                    + "INNER JOIN invoice i ON ii.invoice_id = i.invoice_id "
-                    + "INNER JOIN stock s ON s.barcode = ii.stock_barcode "
-                    + "INNER JOIN product p ON p.id = s.product_id "
-                    + "WHERE (s.barcode ='" + search + "' OR i.invoice_id ='" + search + "' OR p.name LIKE '%" + search + "%') "
+                    + "SELECT * FROM return_voucher rv "
+                    + "WHERE (rv.id LIKE '" + search + "%' OR reference_invoice_id LIKE '" + search + "%') "
                     + "ORDER BY " + sortByColumn + " " + sortByType + "");
 
             while (results.next()) {
                 Vector v = new Vector();
                 v.add(results.getString("id"));
-                v.add(results.getString("invoice_id"));
-                v.add(results.getString("barcode"));
-                v.add(results.getString("name"));
-                v.add(results.getString("sr.quantity"));
-                v.add(Numbers.formatPrice(Double.parseDouble(results.getString("returned_amount"))));
-                v.add(results.getString("date_time"));
+                v.add(results.getString("datetime"));
+                v.add(results.getString("reference_invoice_id"));
+                v.add(Numbers.formatPrice(results.getDouble("returned_amount")));
+                v.add(Numbers.formatPrice(results.getDouble("used_amount")));
+                v.add(Numbers.formatPrice(results.getDouble("available_amount")));
                 model.addRow(v);
             }
         } catch (Exception e) {
@@ -227,64 +238,64 @@ public class ReturnManagement extends javax.swing.JPanel {
 
         returnTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null}
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null}
             },
             new String [] {
-                "Return No", "Invoice Id", "Product Barcode", "Product Name", "Returned Quantity", "Returned Amount", "Returned Date Time"
+                "Return Id", "Returned Date Time", "Reference Invoice Id", "Returned Amount", "Used Amount", "Available Amount"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false
+                false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -336,12 +347,12 @@ public class ReturnManagement extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void clearSearchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearSearchButtonActionPerformed
-        
+
     }//GEN-LAST:event_clearSearchButtonActionPerformed
 
     private void newInvoiceButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newInvoiceButtonActionPerformed
-        InvoiceIdInputToReturn invoiceIdInputToReturn = new InvoiceIdInputToReturn(home,true, this);
-        invoiceIdInputToReturn.setVisible(true);       
+        InvoiceIdInputToReturn invoiceIdInputToReturn = new InvoiceIdInputToReturn(home, true, this);
+        invoiceIdInputToReturn.setVisible(true);
     }//GEN-LAST:event_newInvoiceButtonActionPerformed
 
 

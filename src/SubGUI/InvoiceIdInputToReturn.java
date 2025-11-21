@@ -30,6 +30,35 @@ public class InvoiceIdInputToReturn extends javax.swing.JDialog {
         initComponents();
     }
 
+    private void enterInvoiceId() {
+        String invoiceId = invoiceIdTextField.getText().replaceAll("\\s+", "");
+
+        if (invoiceId.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter the invoice ID", "Warning", JOptionPane.WARNING_MESSAGE);
+        } else {
+            try {
+                ResultSet results = MySQL.execute(""
+                        + "SELECT * FROM invoice i "
+                        + "INNER JOIN payment_method pm ON i.payment_method_id = pm.id  "
+                        + "WHERE i.invoice_id = '" + invoiceId + "' ");
+
+                if (results.next()) {
+                    this.dispose();
+                    ReturnSoldItems returnSales = new ReturnSoldItems(returnManagement, results);
+                    returnSales.setVisible(true);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Invalid Barcode/Id", "Warning", JOptionPane.WARNING_MESSAGE);
+
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(this, "An unexpected error has occurred. Please try again later or contact support if the issue persists.", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
+
+            }
+        }
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -43,7 +72,7 @@ public class InvoiceIdInputToReturn extends javax.swing.JDialog {
         jPanel3 = new javax.swing.JPanel();
         jPanel8 = new javax.swing.JPanel();
         invoiceIdTextField = new javax.swing.JTextField();
-        jButton1 = new javax.swing.JButton();
+        enterButton = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
 
@@ -53,17 +82,17 @@ public class InvoiceIdInputToReturn extends javax.swing.JDialog {
 
         jPanel8.setForeground(new java.awt.Color(255, 51, 51));
 
-        invoiceIdTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                invoiceIdTextFieldKeyReleased(evt);
+        invoiceIdTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                invoiceIdTextFieldActionPerformed(evt);
             }
         });
 
-        jButton1.setText("Enter");
-        jButton1.setBorder(null);
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        enterButton.setText("Enter");
+        enterButton.setBorder(null);
+        enterButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                enterButtonActionPerformed(evt);
             }
         });
 
@@ -74,7 +103,7 @@ public class InvoiceIdInputToReturn extends javax.swing.JDialog {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel8Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(enterButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(invoiceIdTextField, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 236, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -84,7 +113,7 @@ public class InvoiceIdInputToReturn extends javax.swing.JDialog {
                 .addContainerGap()
                 .addComponent(invoiceIdTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(enterButton, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -152,50 +181,13 @@ public class InvoiceIdInputToReturn extends javax.swing.JDialog {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void invoiceIdTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_invoiceIdTextFieldKeyReleased
-        // TODO add your handling code here:
-    }//GEN-LAST:event_invoiceIdTextFieldKeyReleased
+    private void enterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enterButtonActionPerformed
+        enterInvoiceId();
+    }//GEN-LAST:event_enterButtonActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        String invoiceId = invoiceIdTextField.getText();
-
-        if (invoiceId.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please enter the invoice ID", "Warning", JOptionPane.WARNING_MESSAGE);
-        } else {
-            try {
-                ResultSet results = MySQL.execute(""
-                        + "SELECT "
-                        + "i.*, "
-                        + "pm.name, "
-                        + "COUNT(ii.id) AS item_count, "
-                        + "SUM(s.marked_price - s.selling_discount) AS total_amount, "
-                        + "(SUM(s.marked_price - s.selling_discount) - i.discount) AS net_total, "
-                        + "(i.paid_amount - (SUM(s.marked_price - s.selling_discount) - i.discount)) AS `balance` "
-                        + "FROM invoice_item ii  "
-                        + "INNER JOIN stock s ON ii.stock_barcode = s.barcode "
-                        + "INNER JOIN invoice i ON ii.invoice_id = i.invoice_id "
-                        + "INNER JOIN payment_method pm ON i.payment_method_id = pm.id  "
-                        + "WHERE (i.invoice_id = '" + invoiceId + "') "
-                        + "GROUP BY i.invoice_id ");
-
-                if (results.next()) {
-                    this.dispose();
-                    ReturnSoldItems returnSales = new ReturnSoldItems(returnManagement, results);
-                    returnSales.setVisible(true);
-                } else {
-                    JOptionPane.showMessageDialog(this, "Invalid Barcode/Id", "Warning", JOptionPane.WARNING_MESSAGE);
-
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(this, "An unexpected error has occurred. Please try again later or contact support if the issue persists.", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
-
-            }
-        }
-
-
-    }//GEN-LAST:event_jButton1ActionPerformed
+    private void invoiceIdTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_invoiceIdTextFieldActionPerformed
+        enterInvoiceId();         
+    }//GEN-LAST:event_invoiceIdTextFieldActionPerformed
 
     /**
      * @param args the command line arguments
@@ -234,8 +226,8 @@ public class InvoiceIdInputToReturn extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton enterButton;
     private javax.swing.JTextField invoiceIdTextField;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel3;
