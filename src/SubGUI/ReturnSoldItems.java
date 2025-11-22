@@ -308,6 +308,8 @@ public class ReturnSoldItems extends javax.swing.JFrame {
 
                     JOptionPane.showMessageDialog(this, "Items Returned Successfully", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));
 
+                    returnManagement.loadReturnTable();
+                    
                 }
 
             } catch (Exception e) {

@@ -4,14 +4,8 @@
  */
 package SubGUI;
 
-import java.awt.event.ItemEvent;
 import java.sql.ResultSet;
-import java.util.HashMap;
-import java.util.Vector;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
-import javax.swing.table.DefaultTableModel;
 import model.MySQL;
 import panels.ReturnManagement;
 
@@ -22,7 +16,6 @@ import panels.ReturnManagement;
 public class InvoiceIdInputToReturn extends javax.swing.JDialog {
 
     private ReturnManagement returnManagement;
-    HashMap<String, String> categoryMap = new HashMap<>();
 
     public InvoiceIdInputToReturn(java.awt.Frame parent, boolean modal, ReturnManagement returnManagement) {
         super(parent, modal);
