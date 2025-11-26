@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Vector;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import model.IdGenerater;
 import model.Numbers;
@@ -24,50 +26,102 @@ public class ReturnSoldItems extends javax.swing.JFrame {
     private HashMap<String, Integer> returningItemRowNumberMap = new HashMap<String, Integer>();
     private HashMap<String, Integer> invoiceItemRowNumberMap = new HashMap<String, Integer>();
     private HashMap<String, String> invoiceItemIdMap = new HashMap<String, String>();
-    private String invoiceId;
     private double returningTotal;
     private ReturnManagement returnManagement;
-    private ResultSet results;
+    private String invoiceId;
+    private InvoiceIdInputToReturn idInputFrame;
 
-    public ReturnSoldItems(ReturnManagement returnManagement, ResultSet results) {
+    public ReturnSoldItems(String invoiceId, ReturnManagement returnManagement, InvoiceIdInputToReturn idInputFrame) {
+
         this.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resource/icon.png")));
         initComponents();
+        this.invoiceId = invoiceId;
         this.returnManagement = returnManagement;
-        this.results = results;
+        this.idInputFrame = idInputFrame;
 
-        try {
-            invoiceId = results.getString("invoice_id");
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "An unexpected error has occurred. Please try again later or contact support if the issue persists.", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
-
-        }
+        // Check Invoice Id And Load Data
         loadInvoiceDetails();
-        loadInvoiceItems();
-        itemBarcodeTextField.grabFocus();
+
+        //Table Data Alignment
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+
+        DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
+        rightRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
+
+        invoiceDataTable.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
+        invoiceDataTable.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
+        invoiceDataTable.getColumnModel().getColumn(3).setCellRenderer(centerRenderer);
+        invoiceDataTable.getColumnModel().getColumn(4).setCellRenderer(centerRenderer);
+        invoiceDataTable.getColumnModel().getColumn(5).setCellRenderer(centerRenderer);
+        invoiceDataTable.getColumnModel().getColumn(6).setCellRenderer(centerRenderer);
+        invoiceDataTable.getColumnModel().getColumn(7).setCellRenderer(centerRenderer);
+        invoiceDataTable.getColumnModel().getColumn(8).setCellRenderer(centerRenderer);
+        invoiceDataTable.getColumnModel().getColumn(9).setCellRenderer(centerRenderer);
+        invoiceDataTable.getColumnModel().getColumn(10).setCellRenderer(centerRenderer);
+
+        invoiceItemsTable.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
+        invoiceItemsTable.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
+        invoiceItemsTable.getColumnModel().getColumn(3).setCellRenderer(centerRenderer);
+        invoiceItemsTable.getColumnModel().getColumn(4).setCellRenderer(centerRenderer);
+        invoiceItemsTable.getColumnModel().getColumn(5).setCellRenderer(centerRenderer);
+        invoiceItemsTable.getColumnModel().getColumn(6).setCellRenderer(centerRenderer);
+        invoiceItemsTable.getColumnModel().getColumn(7).setCellRenderer(rightRenderer);
+
+        returningItemsTable.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
+        returningItemsTable.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
+        returningItemsTable.getColumnModel().getColumn(3).setCellRenderer(centerRenderer);
+        returningItemsTable.getColumnModel().getColumn(4).setCellRenderer(centerRenderer);
+        returningItemsTable.getColumnModel().getColumn(5).setCellRenderer(rightRenderer);
+
     }
 
     private void loadInvoiceDetails() {
         try {
-            DefaultTableModel model = (DefaultTableModel) invoiceDataTable.getModel();
-            model.setRowCount(0);
+            ResultSet results = MySQL.execute(""
+                    + "SELECT * FROM invoice i "
+                    + "INNER JOIN payment_method pm ON i.payment_method_id = pm.id  "
+                    + "WHERE i.invoice_id = '" + invoiceId + "' ");
 
-            Vector v = new Vector();
+            if (results.next()) {
+                DefaultTableModel model = (DefaultTableModel) invoiceDataTable.getModel();
+                model.setRowCount(0);
 
-            v.add(results.getString("invoice_id"));
-            v.add(results.getString("datetime"));
-            v.add(results.getString("item_count"));
-            v.add(Numbers.formatPrice(Double.parseDouble(results.getString("total_amount"))));
-            v.add(Numbers.formatPrice(Double.parseDouble(results.getString("discount"))));
-            v.add(Numbers.formatPrice(Double.parseDouble(results.getString("net_total"))));
-            v.add(Numbers.formatPrice(Double.parseDouble(results.getString("return_payment_amount"))));
-            v.add(Numbers.formatPrice(Double.parseDouble(results.getString("payable_amount"))));
-            v.add(Numbers.formatPrice(Double.parseDouble(results.getString("paid_amount"))));
-            v.add(results.getString("balance"));
-            v.add(results.getString("pm.name"));
-            model.addRow(v);
+                Vector v = new Vector();
+
+                v.add(results.getString("invoice_id"));
+                v.add(results.getString("datetime"));
+                v.add(results.getString("item_count"));
+                v.add(Numbers.formatPrice(Double.parseDouble(results.getString("total_amount"))));
+                v.add(Numbers.formatPrice(Double.parseDouble(results.getString("discount"))));
+                v.add(Numbers.formatPrice(Double.parseDouble(results.getString("net_total"))));
+                v.add(Numbers.formatPrice(Double.parseDouble(results.getString("return_payment_amount"))));
+                v.add(Numbers.formatPrice(Double.parseDouble(results.getString("payable_amount"))));
+                v.add(Numbers.formatPrice(Double.parseDouble(results.getString("paid_amount"))));
+                v.add(results.getString("balance"));
+                v.add(results.getString("pm.name"));
+                model.addRow(v);
+
+                loadInvoiceItems();
+                itemBarcodeTextField.grabFocus();
+
+                //Close Input Frame
+                if (idInputFrame != null) {
+                    idInputFrame.dispose();
+                    idInputFrame = null;
+                }
+
+                //Show This Frame
+                this.setVisible(true);
+
+            } else {
+                JOptionPane.showMessageDialog(null, "Invalid Invoice Id", "Warning", JOptionPane.WARNING_MESSAGE);
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "An unexpected error has occurred. Please try again later or contact support if the issue persists.", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
+
         }
 
     }
@@ -130,69 +184,73 @@ public class ReturnSoldItems extends javax.swing.JFrame {
 
     private void updateReturnData(String itemBarcode, double returningQuantity) {
 
-        try {
+        if (returningQuantity != 0) {
+            try {
 
-            ResultSet results = MySQL.execute(""
-                    + "SELECT * FROM invoice_item ii "
-                    + "INNER JOIN stock s ON ii.stock_barcode = s.barcode  "
-                    + "INNER JOIN product p ON s.product_id = p.id  "
-                    + "INNER JOIN measurement_unit mu ON p.measurement_unit_id = mu.id  "
-                    + "WHERE ii.invoice_id = '" + invoiceId + "' AND ii.stock_barcode = '" + itemBarcode + "' ");
+                ResultSet results = MySQL.execute(""
+                        + "SELECT * FROM invoice_item ii "
+                        + "INNER JOIN stock s ON ii.stock_barcode = s.barcode  "
+                        + "INNER JOIN product p ON s.product_id = p.id  "
+                        + "INNER JOIN measurement_unit mu ON p.measurement_unit_id = mu.id  "
+                        + "WHERE ii.invoice_id = '" + invoiceId + "' AND ii.stock_barcode = '" + itemBarcode + "' ");
 
-            if (results.next()) {
+                if (results.next()) {
 
-                if (returningItemRowNumberMap.containsKey(itemBarcode)) {
-                    // Already Added Row
-                    int rowNumber = returningItemRowNumberMap.get(itemBarcode);
-                    double currentQty = Double.parseDouble(String.valueOf(returningItemsTable.getValueAt(rowNumber, 3)));
-                    double newQuantity = currentQty + returningQuantity;
+                    if (returningItemRowNumberMap.containsKey(itemBarcode)) {
+                        // Already Added Row
+                        int rowNumber = returningItemRowNumberMap.get(itemBarcode);
+                        double currentQty = Double.parseDouble(String.valueOf(returningItemsTable.getValueAt(rowNumber, 3)));
+                        double newQuantity = currentQty + returningQuantity;
 
-                    if (results.getDouble("returnable_quantity") >= newQuantity) {
-                        //Valid for return
-                        returningItemsTable.setValueAt(Numbers.formatQuantity(newQuantity), rowNumber, 3);
-                        returningItemsTable.setRowSelectionInterval(rowNumber, rowNumber);
-                        itemBarcodeTextField.grabFocus();
-                        calculateTotal();
-                        clearInputs();
+                        if (results.getDouble("returnable_quantity") >= newQuantity) {
+                            //Valid for return
+                            returningItemsTable.setValueAt(Numbers.formatQuantity(newQuantity), rowNumber, 3);
+                            returningItemsTable.setRowSelectionInterval(rowNumber, rowNumber);
+                            itemBarcodeTextField.grabFocus();
+                            calculateTotal();
+                            clearInputs();
+                        } else {
+                            JOptionPane.showMessageDialog(this, "Entered quantity exceeds the available returnable quantity.", "Quantity exceeded", JOptionPane.WARNING_MESSAGE);
+                        }
+
                     } else {
-                        JOptionPane.showMessageDialog(this, "Entered quantity exceeds the available returnable quantity.", "Quantity exceeded", JOptionPane.WARNING_MESSAGE);
+                        // New Row
+                        if (results.getDouble("returnable_quantity") >= returningQuantity) {
+                            //Valid for return
+                            DefaultTableModel model = (DefaultTableModel) returningItemsTable.getModel();
+                            int rowCount = returningItemsTable.getRowCount();
+
+                            //Input To Invoice items Table
+                            Vector v = new Vector();
+                            v.add(results.getString("ii.stock_barcode"));
+                            v.add(results.getString("p.name"));
+                            v.add(Numbers.formatPrice(results.getDouble("ii.selling_price")));
+                            v.add(Numbers.formatQuantity(returningQuantity));
+                            v.add(results.getString("mu.name"));
+                            model.addRow(v);
+
+                            //Add To Row Numbers Hashmap
+                            updateRowNumberMap();
+                            returningItemsTable.setRowSelectionInterval(rowCount, rowCount);
+                            itemBarcodeTextField.grabFocus();
+                            calculateTotal();
+                            clearInputs();
+
+                        } else {
+                            JOptionPane.showMessageDialog(this, "Entered quantity exceeds the available returnable quantity.", "Quantity exceeded", JOptionPane.WARNING_MESSAGE);
+                        }
                     }
 
                 } else {
-                    // New Row
-                    if (results.getDouble("returnable_quantity") >= returningQuantity) {
-                        //Valid for return
-                        DefaultTableModel model = (DefaultTableModel) returningItemsTable.getModel();
-                        int rowCount = returningItemsTable.getRowCount();
-
-                        //Input To Invoice items Table
-                        Vector v = new Vector();
-                        v.add(results.getString("ii.stock_barcode"));
-                        v.add(results.getString("p.name"));
-                        v.add(Numbers.formatPrice(results.getDouble("ii.selling_price")));
-                        v.add(Numbers.formatQuantity(returningQuantity));
-                        v.add(results.getString("mu.name"));
-                        model.addRow(v);
-
-                        //Add To Row Numbers Hashmap
-                        updateRowNumberMap();
-                        returningItemsTable.setRowSelectionInterval(rowCount, rowCount);
-                        itemBarcodeTextField.grabFocus();
-                        calculateTotal();
-                        clearInputs();
-
-                    } else {
-                        JOptionPane.showMessageDialog(this, "Entered quantity exceeds the available returnable quantity.", "Quantity exceeded", JOptionPane.WARNING_MESSAGE);
-                    }
+                    JOptionPane.showMessageDialog(this, "Item not found in this invoice.", "Invalid Item", JOptionPane.WARNING_MESSAGE);
                 }
 
-            } else {
-                JOptionPane.showMessageDialog(this, "Item not found in this invoice.", "Invalid Item", JOptionPane.WARNING_MESSAGE);
+            } catch (Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(this, "An unexpected error has occurred. Please try again later or contact support if the issue persists.", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
             }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "An unexpected error has occurred. Please try again later or contact support if the issue persists.", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
+        }else{
+            JOptionPane.showMessageDialog(this, "Returning quantity cannot be zero.", "Invalid Quantity", JOptionPane.WARNING_MESSAGE);
         }
 
     }

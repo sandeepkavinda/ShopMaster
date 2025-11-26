@@ -29,26 +29,7 @@ public class InvoiceIdInputToReturn extends javax.swing.JDialog {
         if (invoiceId.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please enter the invoice ID", "Warning", JOptionPane.WARNING_MESSAGE);
         } else {
-            try {
-                ResultSet results = MySQL.execute(""
-                        + "SELECT * FROM invoice i "
-                        + "INNER JOIN payment_method pm ON i.payment_method_id = pm.id  "
-                        + "WHERE i.invoice_id = '" + invoiceId + "' ");
-
-                if (results.next()) {
-                    this.dispose();
-                    ReturnSoldItems returnSales = new ReturnSoldItems(returnManagement, results);
-                    returnSales.setVisible(true);
-                } else {
-                    JOptionPane.showMessageDialog(this, "Invalid Barcode/Id", "Warning", JOptionPane.WARNING_MESSAGE);
-
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(this, "An unexpected error has occurred. Please try again later or contact support if the issue persists.", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
-
-            }
+            new ReturnSoldItems(invoiceId, returnManagement, this);
         }
     }
 
@@ -179,7 +160,7 @@ public class InvoiceIdInputToReturn extends javax.swing.JDialog {
     }//GEN-LAST:event_enterButtonActionPerformed
 
     private void invoiceIdTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_invoiceIdTextFieldActionPerformed
-        enterInvoiceId();         
+        enterInvoiceId();
     }//GEN-LAST:event_invoiceIdTextFieldActionPerformed
 
     /**
