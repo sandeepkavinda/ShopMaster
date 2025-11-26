@@ -172,11 +172,11 @@ public class InvoiceDetails extends javax.swing.JFrame {
         discountValueLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         discountValueLabel.setText("0.00");
 
-        netTotalValueLabel.setFont(new java.awt.Font("Poppins", 1, 14)); // NOI18N
+        netTotalValueLabel.setFont(new java.awt.Font("Poppins", 1, 12)); // NOI18N
         netTotalValueLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         netTotalValueLabel.setText("0.00");
 
-        netTotalTextLabel4.setFont(new java.awt.Font("Poppins", 1, 14)); // NOI18N
+        netTotalTextLabel4.setFont(new java.awt.Font("Poppins", 1, 12)); // NOI18N
         netTotalTextLabel4.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         netTotalTextLabel4.setText("Net Total (Rs.) :");
 
@@ -196,11 +196,11 @@ public class InvoiceDetails extends javax.swing.JFrame {
         paidAmountValueLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         paidAmountValueLabel.setText("0.00");
 
-        netTotalTextLabel6.setFont(new java.awt.Font("Poppins", 1, 14)); // NOI18N
+        netTotalTextLabel6.setFont(new java.awt.Font("Poppins", 1, 12)); // NOI18N
         netTotalTextLabel6.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         netTotalTextLabel6.setText("Balance (Rs.) :");
 
-        balanceValueLabel.setFont(new java.awt.Font("Poppins", 1, 14)); // NOI18N
+        balanceValueLabel.setFont(new java.awt.Font("Poppins", 1, 12)); // NOI18N
         balanceValueLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         balanceValueLabel.setText("0.00");
 
@@ -212,11 +212,11 @@ public class InvoiceDetails extends javax.swing.JFrame {
         returnPaymentValueLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         returnPaymentValueLabel.setText("0.00");
 
-        netTotalTextLabel8.setFont(new java.awt.Font("Poppins", 1, 14)); // NOI18N
+        netTotalTextLabel8.setFont(new java.awt.Font("Poppins", 1, 12)); // NOI18N
         netTotalTextLabel8.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         netTotalTextLabel8.setText("Payable Amount (Rs.) :");
 
-        payableValueLabel.setFont(new java.awt.Font("Poppins", 1, 14)); // NOI18N
+        payableValueLabel.setFont(new java.awt.Font("Poppins", 1, 12)); // NOI18N
         payableValueLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         payableValueLabel.setText("0.00");
 
@@ -342,6 +342,8 @@ public class InvoiceDetails extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(invoiceItemsTable);
 
+        saveButton5.setBackground(new java.awt.Color(102, 102, 102));
+        saveButton5.setForeground(new java.awt.Color(255, 255, 255));
         saveButton5.setText("View Returned Items");
         saveButton5.setToolTipText("Add New Product");
         saveButton5.setBorder(null);
@@ -351,6 +353,8 @@ public class InvoiceDetails extends javax.swing.JFrame {
             }
         });
 
+        PayButton1.setBackground(new java.awt.Color(102, 102, 102));
+        PayButton1.setForeground(new java.awt.Color(255, 255, 255));
         PayButton1.setText("Return Items");
         PayButton1.setToolTipText("Add New Product");
         PayButton1.setBorder(null);
@@ -375,7 +379,7 @@ public class InvoiceDetails extends javax.swing.JFrame {
                 .addComponent(PayButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(saveAndPrintButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(239, Short.MAX_VALUE))
+                .addContainerGap(263, Short.MAX_VALUE))
         );
         jPanel23Layout.setVerticalGroup(
             jPanel23Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -421,7 +425,7 @@ public class InvoiceDetails extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 284, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 293, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel22, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
