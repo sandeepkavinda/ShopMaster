@@ -303,7 +303,7 @@ public class ReturnSoldItems extends javax.swing.JFrame {
                     //Update Invoice Items's Returned Quantity
                     MySQL.execute("UPDATE invoice_item SET returned_quantity = returned_quantity + '" + quantity + "' WHERE id = '" + invoiceItemId + "' ");
 
-                    //Update Stoc's Current Quantity
+                    //Update Stock's Current Quantity
                     MySQL.execute("UPDATE stock SET current_quantity = current_quantity + '" + quantity + "' WHERE barcode = '" + stockBarcode + "' ");
 
                     JOptionPane.showMessageDialog(this, "Items Returned Successfully", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));

@@ -4,7 +4,9 @@
  */
 package panels;
 
+import SubGUI.InvoiceDetails;
 import SubGUI.NewInvoice;
+import SubGUI.StockDetails;
 import java.awt.event.ItemEvent;
 import model.MySQL;
 import java.sql.ResultSet;
@@ -513,6 +515,11 @@ public class InvoiceManagement extends javax.swing.JPanel {
             }
         });
         invoiceTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        invoiceTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                invoiceTableMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(invoiceTable);
         if (invoiceTable.getColumnModel().getColumnCount() > 0) {
             invoiceTable.getColumnModel().getColumn(10).setMinWidth(150);
@@ -593,6 +600,19 @@ public class InvoiceManagement extends javax.swing.JPanel {
         NewInvoice newInvoice = new NewInvoice(this);
         newInvoice.setVisible(true);
     }//GEN-LAST:event_newInvoiceButtonActionPerformed
+
+    private void invoiceTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_invoiceTableMouseClicked
+       if (evt.getClickCount() == 2) {
+            int selectedRow = invoiceTable.getSelectedRow();
+
+            if (selectedRow != -1) {
+                String invoiceId = String.valueOf(invoiceTable.getValueAt(selectedRow, 0));
+                InvoiceDetails invoiceDetails = new InvoiceDetails(invoiceId);
+                invoiceDetails.setVisible(true);
+            }
+
+        }
+    }//GEN-LAST:event_invoiceTableMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

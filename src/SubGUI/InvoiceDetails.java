@@ -8,7 +8,7 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 import model.Numbers;
 import javax.swing.table.DefaultTableCellRenderer;
-import panels.ReturnManagement;
+import model.MySQL;
 
 /**
  *
@@ -17,34 +17,70 @@ import panels.ReturnManagement;
 public class InvoiceDetails extends javax.swing.JFrame {
 
     //Inisilize Varables
-    private ReturnManagement returnManagement;
-    private ResultSet results;
+    private String invoiceId;
 
-    public InvoiceDetails(ReturnManagement returnManagement, ResultSet results) {
+    public InvoiceDetails(String invoiceId) {
         this.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resource/icon.png")));
         initComponents();
-        this.returnManagement = returnManagement;
-        this.results = results;
-        loadInvoiceDetails();
+        this.invoiceId = invoiceId;
+        loadInvoiceData();
     }
 
-    private void loadInvoiceDetails() {
+    private void loadInvoiceData() {
         try {
 
-            DefaultTableModel model = (DefaultTableModel) invoiceItemsTable.getModel();
-            model.setRowCount(0);
+            ResultSet invoiceResultSet = MySQL.execute("SELECT * FROM invoice i "
+                    + "INNER JOIN payment_method pm ON i.payment_method_id = pm.id "
+                    + "WHERE i.invoice_id = '" + invoiceId + "' ");
 
-            Vector v = new Vector();
-            v.add(results.getString("i.invoice_id"));
-            v.add(results.getString("datetime"));
-            v.add(results.getString("item_count"));
-            v.add(Numbers.formatPrice(Double.parseDouble(results.getString("total_amount"))));
-            v.add(Numbers.formatPrice(Double.parseDouble(results.getString("discount"))));
-            v.add(Numbers.formatPrice(Double.parseDouble(results.getString("net_total"))));
-            v.add(Numbers.formatPrice(Double.parseDouble(results.getString("paid_amount"))));
-            v.add(results.getString("balance"));
-            v.add(results.getString("pm.name"));
-            model.addRow(v);
+            if (invoiceResultSet.next()) {
+                DefaultTableModel model = (DefaultTableModel) invoiceItemsTable.getModel();
+                model.setRowCount(0);
+
+                //Load Invoice Data
+                invoiceIdLabel.setText(invoiceResultSet.getString("invoice_id"));
+                invoiceDataLabel.setText(""
+                        + "Date Time : " + invoiceResultSet.getString("i.invoice_id") + "          "
+                        + "Item Count : " + invoiceResultSet.getString("i.item_count") + "          "
+                        + "Payment Method : " + invoiceResultSet.getString("pm.name") + "");
+
+                invoiceAmountLabel.setText(Numbers.formatPrice(invoiceResultSet.getDouble("i.total_amount")));
+                discountValueLabel.setText(Numbers.formatPrice(invoiceResultSet.getDouble("i.discount")));
+                netTotalValueLabel.setText(Numbers.formatPrice(invoiceResultSet.getDouble("i.net_total")));
+                returnPaymentValueLabel.setText(Numbers.formatPrice(invoiceResultSet.getDouble("i.return_payment_amount")));
+                payableValueLabel.setText(Numbers.formatPrice(invoiceResultSet.getDouble("i.payable_amount")));
+                paidAmountValueLabel.setText(Numbers.formatPrice(invoiceResultSet.getDouble("i.paid_amount")));
+                balanceValueLabel.setText(Numbers.formatPrice(invoiceResultSet.getDouble("i.balance")));
+
+                //Load Invoice Items
+                ResultSet itemsResultSet = MySQL.execute("SELECT * FROM invoice_item ii "
+                        + "INNER JOIN stock s ON ii.stock_barcode = s.barcode "
+                        + "INNER JOIN product p ON s.product_id = p.id "
+                        + "INNER JOIN measurement_unit mu ON p.measurement_unit_id = mu.id "
+                        + "WHERE ii.invoice_id = '" + invoiceId + "' ");
+
+                int rowCount = invoiceItemsTable.getRowCount();
+
+                while (itemsResultSet.next()) {
+                    Vector v = new Vector();
+                    v.add(rowCount + 1);
+                    v.add(itemsResultSet.getString("ii.stock_barcode"));
+                    v.add(itemsResultSet.getString("p.name"));
+                    v.add(Numbers.formatPrice(itemsResultSet.getDouble("ii.marked_price")));
+                    v.add(Numbers.formatPrice(itemsResultSet.getDouble("ii.selling_discount")));
+                    v.add(Numbers.formatPrice(itemsResultSet.getDouble("ii.selling_price")));
+                    v.add(Numbers.formatQuantity(itemsResultSet.getDouble("ii.quantity")));
+                    v.add(itemsResultSet.getString("mu.name"));
+                    v.add(Numbers.formatPrice(itemsResultSet.getDouble("ii.item_amount")));
+                    rowCount++;
+                    model.addRow(v);
+                }
+
+            } else {
+                JOptionPane.showMessageDialog(this, "Invalid invoice ID", "Warning", JOptionPane.WARNING_MESSAGE);
+
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "An unexpected error has occurred. Please try again later or contact support if the issue persists.", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
@@ -67,27 +103,30 @@ public class InvoiceDetails extends javax.swing.JFrame {
         jMenu1 = new javax.swing.JMenu();
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
+        invoiceIdLabel = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
+        invoiceDataLabel = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
         jPanel22 = new javax.swing.JPanel();
-        totalValueLabel4 = new javax.swing.JLabel();
-        discountValueLabel4 = new javax.swing.JLabel();
-        netTotalValueLabel4 = new javax.swing.JLabel();
+        invoiceAmountLabel = new javax.swing.JLabel();
+        discountValueLabel = new javax.swing.JLabel();
+        netTotalValueLabel = new javax.swing.JLabel();
         netTotalTextLabel4 = new javax.swing.JLabel();
         discountTextLabel4 = new javax.swing.JLabel();
         totalTextLabel4 = new javax.swing.JLabel();
         netTotalTextLabel5 = new javax.swing.JLabel();
-        netTotalValueLabel5 = new javax.swing.JLabel();
+        paidAmountValueLabel = new javax.swing.JLabel();
         netTotalTextLabel6 = new javax.swing.JLabel();
-        netTotalValueLabel6 = new javax.swing.JLabel();
+        balanceValueLabel = new javax.swing.JLabel();
+        netTotalTextLabel7 = new javax.swing.JLabel();
+        returnPaymentValueLabel = new javax.swing.JLabel();
+        netTotalTextLabel8 = new javax.swing.JLabel();
+        payableValueLabel = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         invoiceItemsTable = new javax.swing.JTable();
         jPanel23 = new javax.swing.JPanel();
         saveButton5 = new javax.swing.JButton();
         PayButton1 = new javax.swing.JButton();
-        PayButton = new javax.swing.JButton();
         saveAndPrintButton4 = new javax.swing.JButton();
         jPanel9 = new javax.swing.JPanel();
         jPanel20 = new javax.swing.JPanel();
@@ -110,34 +149,34 @@ public class InvoiceDetails extends javax.swing.JFrame {
         setTitle("INVOICE");
         setMinimumSize(new java.awt.Dimension(1090, 696));
 
-        jLabel1.setFont(new java.awt.Font("Poppins", 1, 18)); // NOI18N
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel1.setText("INV0000017");
-        jLabel1.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 10, 1, 30));
+        invoiceIdLabel.setFont(new java.awt.Font("Poppins", 1, 18)); // NOI18N
+        invoiceIdLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        invoiceIdLabel.setText("INV0000017");
+        invoiceIdLabel.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 10, 1, 30));
 
         jLabel3.setFont(new java.awt.Font("Poppins", 1, 18)); // NOI18N
         jLabel3.setText("INVOICE");
         jLabel3.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 30, 1, 1));
 
-        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel4.setText("Date Time : 2024-10-12 10:24:00          Item Count : 12 Items          Returned Item Count : 2          Payment Status : Not Paid          Payment Status : Not Paid");
-        jLabel4.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 30, 1, 30));
+        invoiceDataLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        invoiceDataLabel.setText("Date Time : 2024-10-12 10:24:00          Item Count : 12 Items          Payment Method : Not Paid");
+        invoiceDataLabel.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 30, 1, 30));
 
         jSeparator1.setForeground(new java.awt.Color(204, 204, 204));
 
-        totalValueLabel4.setFont(new java.awt.Font("Poppins", 1, 12)); // NOI18N
-        totalValueLabel4.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        totalValueLabel4.setText("0.00");
+        invoiceAmountLabel.setFont(new java.awt.Font("Poppins", 1, 12)); // NOI18N
+        invoiceAmountLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        invoiceAmountLabel.setText("0.00");
 
-        discountValueLabel4.setFont(new java.awt.Font("Poppins", 1, 12)); // NOI18N
-        discountValueLabel4.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        discountValueLabel4.setText("0.00");
+        discountValueLabel.setFont(new java.awt.Font("Poppins", 1, 12)); // NOI18N
+        discountValueLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        discountValueLabel.setText("0.00");
 
-        netTotalValueLabel4.setFont(new java.awt.Font("Poppins", 1, 12)); // NOI18N
-        netTotalValueLabel4.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        netTotalValueLabel4.setText("0.00");
+        netTotalValueLabel.setFont(new java.awt.Font("Poppins", 1, 14)); // NOI18N
+        netTotalValueLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        netTotalValueLabel.setText("0.00");
 
-        netTotalTextLabel4.setFont(new java.awt.Font("Poppins", 1, 12)); // NOI18N
+        netTotalTextLabel4.setFont(new java.awt.Font("Poppins", 1, 14)); // NOI18N
         netTotalTextLabel4.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         netTotalTextLabel4.setText("Net Total (Rs.) :");
 
@@ -153,17 +192,33 @@ public class InvoiceDetails extends javax.swing.JFrame {
         netTotalTextLabel5.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         netTotalTextLabel5.setText("Paid Amont (Rs.) :");
 
-        netTotalValueLabel5.setFont(new java.awt.Font("Poppins", 1, 12)); // NOI18N
-        netTotalValueLabel5.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        netTotalValueLabel5.setText("0.00");
+        paidAmountValueLabel.setFont(new java.awt.Font("Poppins", 1, 12)); // NOI18N
+        paidAmountValueLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        paidAmountValueLabel.setText("0.00");
 
-        netTotalTextLabel6.setFont(new java.awt.Font("Poppins", 1, 12)); // NOI18N
+        netTotalTextLabel6.setFont(new java.awt.Font("Poppins", 1, 14)); // NOI18N
         netTotalTextLabel6.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         netTotalTextLabel6.setText("Balance (Rs.) :");
 
-        netTotalValueLabel6.setFont(new java.awt.Font("Poppins", 1, 12)); // NOI18N
-        netTotalValueLabel6.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        netTotalValueLabel6.setText("0.00");
+        balanceValueLabel.setFont(new java.awt.Font("Poppins", 1, 14)); // NOI18N
+        balanceValueLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        balanceValueLabel.setText("0.00");
+
+        netTotalTextLabel7.setFont(new java.awt.Font("Poppins", 1, 12)); // NOI18N
+        netTotalTextLabel7.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        netTotalTextLabel7.setText("Return Payment (Rs.) :");
+
+        returnPaymentValueLabel.setFont(new java.awt.Font("Poppins", 1, 12)); // NOI18N
+        returnPaymentValueLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        returnPaymentValueLabel.setText("0.00");
+
+        netTotalTextLabel8.setFont(new java.awt.Font("Poppins", 1, 14)); // NOI18N
+        netTotalTextLabel8.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        netTotalTextLabel8.setText("Payable Amount (Rs.) :");
+
+        payableValueLabel.setFont(new java.awt.Font("Poppins", 1, 14)); // NOI18N
+        payableValueLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        payableValueLabel.setText("0.00");
 
         javax.swing.GroupLayout jPanel22Layout = new javax.swing.GroupLayout(jPanel22);
         jPanel22.setLayout(jPanel22Layout);
@@ -178,20 +233,28 @@ public class InvoiceDetails extends javax.swing.JFrame {
                             .addComponent(netTotalTextLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel22Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(discountValueLabel4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(netTotalValueLabel4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(discountValueLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(netTotalValueLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel22Layout.createSequentialGroup()
-                        .addComponent(totalTextLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 149, Short.MAX_VALUE)
+                        .addComponent(totalTextLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(totalValueLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(invoiceAmountLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel22Layout.createSequentialGroup()
                         .addComponent(netTotalTextLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(netTotalValueLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(paidAmountValueLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel22Layout.createSequentialGroup()
                         .addComponent(netTotalTextLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(netTotalValueLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(balanceValueLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel22Layout.createSequentialGroup()
+                        .addComponent(netTotalTextLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(returnPaymentValueLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel22Layout.createSequentialGroup()
+                        .addComponent(netTotalTextLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(payableValueLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         jPanel22Layout.setVerticalGroup(
@@ -200,7 +263,7 @@ public class InvoiceDetails extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel22Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(totalTextLabel4)
-                    .addComponent(totalValueLabel4))
+                    .addComponent(invoiceAmountLabel))
                 .addGap(0, 0, 0)
                 .addGroup(jPanel22Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel22Layout.createSequentialGroup()
@@ -208,17 +271,25 @@ public class InvoiceDetails extends javax.swing.JFrame {
                         .addGap(0, 0, 0)
                         .addComponent(netTotalTextLabel4))
                     .addGroup(jPanel22Layout.createSequentialGroup()
-                        .addComponent(discountValueLabel4)
+                        .addComponent(discountValueLabel)
                         .addGap(0, 0, 0)
-                        .addComponent(netTotalValueLabel4)))
+                        .addComponent(netTotalValueLabel)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel22Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(netTotalTextLabel7, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(returnPaymentValueLabel))
+                .addGap(0, 0, 0)
+                .addGroup(jPanel22Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(netTotalTextLabel8, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(payableValueLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel22Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(netTotalTextLabel5, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(netTotalValueLabel5))
+                    .addComponent(paidAmountValueLabel))
                 .addGap(0, 0, 0)
                 .addGroup(jPanel22Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(netTotalTextLabel6, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(netTotalValueLabel6))
+                    .addComponent(balanceValueLabel))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -289,15 +360,6 @@ public class InvoiceDetails extends javax.swing.JFrame {
             }
         });
 
-        PayButton.setText("Pay");
-        PayButton.setToolTipText("Add New Product");
-        PayButton.setBorder(null);
-        PayButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                PayButtonActionPerformed(evt);
-            }
-        });
-
         saveAndPrintButton4.setText("Print Invoice");
         saveAndPrintButton4.setToolTipText("Add New Product");
         saveAndPrintButton4.setBorder(null);
@@ -312,19 +374,15 @@ public class InvoiceDetails extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(PayButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(PayButton, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(saveAndPrintButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(239, Short.MAX_VALUE))
         );
         jPanel23Layout.setVerticalGroup(
             jPanel23Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel23Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel23Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(jPanel23Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(saveAndPrintButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(PayButton, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(saveAndPrintButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel23Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                         .addComponent(PayButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(saveButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -338,11 +396,11 @@ public class InvoiceDetails extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(invoiceDataLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 475, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(invoiceIdLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(jSeparator1)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                         .addComponent(jPanel23, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -356,14 +414,14 @@ public class InvoiceDetails extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(12, 12, 12)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1)
+                    .addComponent(invoiceIdLabel)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(24, 24, 24)
-                .addComponent(jLabel4)
+                .addComponent(invoiceDataLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 290, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 284, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel22, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -474,11 +532,6 @@ public class InvoiceDetails extends javax.swing.JFrame {
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
-    private void PayButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PayButtonActionPerformed
-
-      
-    }//GEN-LAST:event_PayButtonActionPerformed
-
     private void invoiceItemsTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_invoiceItemsTableMouseClicked
 
         if (evt.getClickCount() == 2) {
@@ -515,85 +568,44 @@ public class InvoiceDetails extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton PayButton;
     private javax.swing.JButton PayButton1;
+    private javax.swing.JLabel balanceValueLabel;
     private javax.swing.ButtonGroup buttonGroup1;
     private com.raven.datechooser.DateChooser dateChooser;
-    private javax.swing.JLabel discountTextLabel;
-    private javax.swing.JLabel discountTextLabel1;
-    private javax.swing.JLabel discountTextLabel2;
-    private javax.swing.JLabel discountTextLabel3;
     private javax.swing.JLabel discountTextLabel4;
     private javax.swing.JLabel discountValueLabel;
-    private javax.swing.JLabel discountValueLabel1;
-    private javax.swing.JLabel discountValueLabel2;
-    private javax.swing.JLabel discountValueLabel3;
-    private javax.swing.JLabel discountValueLabel4;
+    private javax.swing.JLabel invoiceAmountLabel;
+    private javax.swing.JLabel invoiceDataLabel;
+    private javax.swing.JLabel invoiceIdLabel;
     private javax.swing.JTable invoiceItemsTable;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel16;
-    private javax.swing.JPanel jPanel17;
     private javax.swing.JPanel jPanel18;
-    private javax.swing.JPanel jPanel19;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel20;
-    private javax.swing.JPanel jPanel21;
     private javax.swing.JPanel jPanel22;
     private javax.swing.JPanel jPanel23;
     private javax.swing.JPanel jPanel9;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JLabel netTotalTextLabel;
-    private javax.swing.JLabel netTotalTextLabel1;
-    private javax.swing.JLabel netTotalTextLabel2;
-    private javax.swing.JLabel netTotalTextLabel3;
     private javax.swing.JLabel netTotalTextLabel4;
     private javax.swing.JLabel netTotalTextLabel5;
     private javax.swing.JLabel netTotalTextLabel6;
+    private javax.swing.JLabel netTotalTextLabel7;
+    private javax.swing.JLabel netTotalTextLabel8;
     private javax.swing.JLabel netTotalValueLabel;
-    private javax.swing.JLabel netTotalValueLabel1;
-    private javax.swing.JLabel netTotalValueLabel2;
-    private javax.swing.JLabel netTotalValueLabel3;
-    private javax.swing.JLabel netTotalValueLabel4;
-    private javax.swing.JLabel netTotalValueLabel5;
-    private javax.swing.JLabel netTotalValueLabel6;
-    private javax.swing.JButton removeAllButton;
-    private javax.swing.JButton removeAllButton1;
-    private javax.swing.JButton removeAllButton2;
-    private javax.swing.JButton removeAllButton3;
-    private javax.swing.JButton removeSelectedButton;
-    private javax.swing.JButton removeSelectedButton1;
-    private javax.swing.JButton removeSelectedButton2;
-    private javax.swing.JButton removeSelectedButton3;
-    private javax.swing.JButton saveAndPrintButton;
-    private javax.swing.JButton saveAndPrintButton1;
-    private javax.swing.JButton saveAndPrintButton2;
-    private javax.swing.JButton saveAndPrintButton3;
+    private javax.swing.JLabel paidAmountValueLabel;
+    private javax.swing.JLabel payableValueLabel;
+    private javax.swing.JLabel returnPaymentValueLabel;
     private javax.swing.JButton saveAndPrintButton4;
-    private javax.swing.JButton saveButton;
-    private javax.swing.JButton saveButton1;
-    private javax.swing.JButton saveButton2;
-    private javax.swing.JButton saveButton3;
     private javax.swing.JButton saveButton5;
     private javax.swing.JLabel supplierNameShowLabel;
     private com.raven.swing.TimePicker timePicker;
-    private javax.swing.JLabel totalTextLabel;
-    private javax.swing.JLabel totalTextLabel1;
-    private javax.swing.JLabel totalTextLabel2;
-    private javax.swing.JLabel totalTextLabel3;
     private javax.swing.JLabel totalTextLabel4;
-    private javax.swing.JLabel totalValueLabel;
-    private javax.swing.JLabel totalValueLabel1;
-    private javax.swing.JLabel totalValueLabel2;
-    private javax.swing.JLabel totalValueLabel3;
-    private javax.swing.JLabel totalValueLabel4;
     // End of variables declaration//GEN-END:variables
 }
