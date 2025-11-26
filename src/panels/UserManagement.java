@@ -14,6 +14,7 @@ import java.util.Vector;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.table.DefaultTableModel;
 import model.MySQL;
+import utils.ToastUtils;
 
 /**
  *
@@ -548,7 +549,7 @@ public class UserManagement extends javax.swing.JPanel {
             int selectedRow = userTable.getSelectedRow();
             if (selectedRow != -1) {
                 String userId = String.valueOf(userTable.getValueAt(selectedRow, 0));
-                UserDetails userDetails = new UserDetails(home, true, userId,this);
+                UserDetails userDetails = new UserDetails(home, true, userId, this);
                 userDetails.setVisible(true);
             }
 
@@ -565,6 +566,7 @@ public class UserManagement extends javax.swing.JPanel {
     private void addNewProductButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addNewProductButton1ActionPerformed
         // TODO add your handling code here:
         clearSearch();
+        ToastUtils.showBottomToast(home, "Search Cleared", 2000);
     }//GEN-LAST:event_addNewProductButton1ActionPerformed
 
     private void userStatusComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_userStatusComboBoxItemStateChanged

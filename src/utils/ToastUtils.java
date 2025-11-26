@@ -19,7 +19,29 @@ import javax.swing.Timer;
  */
 public class ToastUtils {
 
-    public static void showToast(JFrame frame, String message, int duration) {
+    public static void showCenterToast(JFrame frame, String message, int duration) {
+        JWindow toastWindow = new JWindow(frame);
+        toastWindow.setLayout(new BorderLayout());
+
+        JLabel label = new JLabel(message);
+        label.setOpaque(true);
+        label.setBackground(new Color(0, 0, 0, 170)); // Semi-transparent black
+        label.setForeground(Color.WHITE);
+        label.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        toastWindow.add(label, BorderLayout.CENTER);
+
+        toastWindow.pack();
+        toastWindow.setLocationRelativeTo(frame);
+        toastWindow.setLocation(frame.getX() + frame.getWidth()/2 - toastWindow.getWidth()/2,
+                                frame.getY() + frame.getHeight()/2 - toastWindow.getHeight()/2);
+
+        toastWindow.setVisible(true);
+
+        // Close after duration
+        new Timer(duration, e -> toastWindow.dispose()).start();
+    }
+    
+    public static void showBottomToast(JFrame frame, String message, int duration) {
         // Create borderless window
         JWindow toast = new JWindow(frame);
         toast.setLayout(new BorderLayout());
@@ -44,4 +66,6 @@ public class ToastUtils {
         new Timer(duration, e -> toast.dispose()).start();
     }
 
+ 
+    
 }

@@ -4,6 +4,7 @@
  */
 package panels;
 
+import GUI.Home;
 import SubGUI.NewGRN;
 import java.awt.event.ItemEvent;
 import java.sql.ResultSet;
@@ -15,6 +16,7 @@ import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import model.MySQL;
 import model.Numbers;
+import utils.ToastUtils;
 
 /**
  *
@@ -22,11 +24,14 @@ import model.Numbers;
  */
 public class GrnManagement extends javax.swing.JPanel {
 
+    private Home home;
+    
     /**
      * Creates new form ProductManagement
      */
-    public GrnManagement() {
+    public GrnManagement(Home home) {
         initComponents();
+        this.home = home;
         loadYears();
         loadGRNTable();
     }
@@ -545,6 +550,8 @@ public class GrnManagement extends javax.swing.JPanel {
     private void clearSearchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearSearchButtonActionPerformed
         // TODO add your handling code here:
         clearSearch();
+        ToastUtils.showBottomToast(home, "Search Cleared", 2000);
+
     }//GEN-LAST:event_clearSearchButtonActionPerformed
 
     private void barcodeTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_barcodeTextFieldActionPerformed

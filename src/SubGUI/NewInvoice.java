@@ -20,6 +20,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import model.Generate;
 import model.IdGenerater;
 import panels.InvoiceManagement;
+import utils.ToastUtils;
 
 /**
  *
@@ -164,6 +165,7 @@ public class NewInvoice extends javax.swing.JFrame {
                         stockBarcodeTextField.grabFocus();
                         calculateTotal();
                         cleanInvoiceItemInputs();
+
                     }
 
                 }
@@ -239,6 +241,8 @@ public class NewInvoice extends javax.swing.JFrame {
                 } else {
                     discountTextLabel.setText(Numbers.formatPresentage(discountPresentage) + "% Disount (Rs.) :");
                     invoiceDiscount = invoiceTotal * (discountPresentage / 100);
+                    ToastUtils.showBottomToast(this, "Discount Added", 2000);
+
                 }
             }
 
@@ -253,6 +257,8 @@ public class NewInvoice extends javax.swing.JFrame {
                 } else {
                     invoiceDiscount = discountAmount;
                     discountTextLabel.setText("Disount (Rs.) :");
+                    ToastUtils.showBottomToast(this, "Discount Added", 2000);
+
                 }
             }
         }

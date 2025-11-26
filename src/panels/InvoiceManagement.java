@@ -204,7 +204,7 @@ public class InvoiceManagement extends javax.swing.JPanel {
         if (selectedRow != -1) {
             String invoiceId = String.valueOf(invoiceTable.getValueAt(selectedRow, 0));
             ClipboardUtils.copyToClipboard(invoiceId);
-            ToastUtils.showToast(home, "Invoice Id Copied",2000);
+            ToastUtils.showBottomToast(home, "Invoice Id Copied",2000);
         }
     }
 
@@ -533,6 +533,7 @@ public class InvoiceManagement extends javax.swing.JPanel {
 
     private void clearSearchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearSearchButtonActionPerformed
         clearSearch();
+        ToastUtils.showBottomToast(home, "Search Cleared", 2000);
     }//GEN-LAST:event_clearSearchButtonActionPerformed
 
     private void searchTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_searchTextFieldKeyReleased

@@ -18,6 +18,7 @@ import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import model.MySQL;
 import model.Numbers;
+import utils.ToastUtils;
 
 /**
  *
@@ -602,6 +603,8 @@ public class StockManagement extends javax.swing.JPanel {
     private void addNewProductButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addNewProductButton1ActionPerformed
         // TODO add your handling code here:
         clearSearch();
+        ToastUtils.showBottomToast(home, "Search Cleared", 2000);
+
     }//GEN-LAST:event_addNewProductButton1ActionPerformed
 
     private void barcodeTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_barcodeTextFieldActionPerformed

@@ -2,6 +2,7 @@ package panels;
 
 import GUI.Home;
 import SubGUI.InvoiceIdInputToReturn;
+import java.awt.event.ItemEvent;
 import java.sql.ResultSet;
 import java.util.Vector;
 import javax.swing.SwingConstants;
@@ -9,6 +10,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import model.MySQL;
 import model.Numbers;
+import utils.ToastUtils;
 
 /**
  *
@@ -79,6 +81,11 @@ public class ReturnManagement extends javax.swing.JPanel {
         }
     }
 
+    private void clearSearch() {
+        searchTextField.setText("");
+        sortByComboBox.setSelectedIndex(0);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -118,6 +125,17 @@ public class ReturnManagement extends javax.swing.JPanel {
 
         jLabel6.setText("Search");
 
+        searchTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                searchTextFieldActionPerformed(evt);
+            }
+        });
+        searchTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                searchTextFieldKeyReleased(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
         jPanel7Layout.setHorizontalGroup(
@@ -146,6 +164,11 @@ public class ReturnManagement extends javax.swing.JPanel {
         jPanel4.setForeground(new java.awt.Color(255, 51, 51));
 
         sortByComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Newest to Oldest", "Oldest to Newest" }));
+        sortByComboBox.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                sortByComboBoxItemStateChanged(evt);
+            }
+        });
 
         jLabel5.setText("Sort By");
 
@@ -347,13 +370,28 @@ public class ReturnManagement extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void clearSearchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearSearchButtonActionPerformed
-
+        clearSearch();
+        ToastUtils.showBottomToast(home, "Search Cleared", 2000);
     }//GEN-LAST:event_clearSearchButtonActionPerformed
 
     private void newInvoiceButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newInvoiceButtonActionPerformed
         InvoiceIdInputToReturn invoiceIdInputToReturn = new InvoiceIdInputToReturn(home, true, this);
         invoiceIdInputToReturn.setVisible(true);
     }//GEN-LAST:event_newInvoiceButtonActionPerformed
+
+    private void sortByComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_sortByComboBoxItemStateChanged
+        if (evt.getStateChange() == ItemEvent.SELECTED) {
+            loadReturnTable();
+        }
+    }//GEN-LAST:event_sortByComboBoxItemStateChanged
+
+    private void searchTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_searchTextFieldKeyReleased
+        loadReturnTable();
+    }//GEN-LAST:event_searchTextFieldKeyReleased
+
+    private void searchTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchTextFieldActionPerformed
+         loadReturnTable();
+    }//GEN-LAST:event_searchTextFieldActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

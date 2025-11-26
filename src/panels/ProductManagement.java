@@ -17,6 +17,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import model.MySQL;
+import utils.ToastUtils;
 
 /**
  *
@@ -149,7 +150,6 @@ public class ProductManagement extends javax.swing.JPanel {
     private void deleteSelectedProduct() {
 
         int selectedRow = productTable.getSelectedRow();
-        
 
         if (selectedRow != -1) {
             String productName = String.valueOf(productTable.getValueAt(selectedRow, 1));
@@ -168,12 +168,12 @@ public class ProductManagement extends javax.swing.JPanel {
                     loadProductTable();
                 } catch (SQLException e) {
                     // Check if the exception message indicates a foreign key constraint violation
-                     if (e.getErrorCode()== 1451) {
+                    if (e.getErrorCode() == 1451) {
                         JOptionPane.showMessageDialog(this, "Product linked to other records in the database.", "Cannot Delete", JOptionPane.WARNING_MESSAGE);
                     } else {
                         JOptionPane.showMessageDialog(this, "An unexpected error occurred: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                     }
-                }  catch (Exception e) {
+                } catch (Exception e) {
                     JOptionPane.showMessageDialog(this, "An unexpected error occurred: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
@@ -644,6 +644,7 @@ public class ProductManagement extends javax.swing.JPanel {
     private void addNewProductButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addNewProductButton1ActionPerformed
         // TODO add your handling code here:
         clearSearch();
+        ToastUtils.showBottomToast(home, "Search Cleared", 2000);
     }//GEN-LAST:event_addNewProductButton1ActionPerformed
 
 
