@@ -4,9 +4,10 @@
  */
 package panels;
 
+import GUI.Home;
 import SubGUI.InvoiceDetails;
+import SubGUI.InvoiceSummery;
 import SubGUI.NewInvoice;
-import SubGUI.StockDetails;
 import java.awt.event.ItemEvent;
 import model.MySQL;
 import java.sql.ResultSet;
@@ -15,9 +16,12 @@ import java.util.Vector;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import model.Numbers;
+import utils.ClipboardUtils;
+import utils.ToastUtils;
 
 /**
  *
@@ -26,12 +30,15 @@ import model.Numbers;
 public class InvoiceManagement extends javax.swing.JPanel {
 
     private HashMap<String, String> paymentMethodMap = new HashMap<>();
+    private Home home;
 
     /**
      * Creates new form ProductManagement
      */
-    public InvoiceManagement() {
+    public InvoiceManagement(Home home) {
         initComponents();
+        this.home = home;
+
         loadPaymentMethods();
         loadInvoiceTable();
 
@@ -74,7 +81,6 @@ public class InvoiceManagement extends javax.swing.JPanel {
 
     public void loadInvoiceTable() {
         try {
-            invoiceIdTextField.setText("");
 
             String search = searchTextField.getText();
             String paymentMethodId = paymentMethodMap.get(String.valueOf(paymentMethodComboBox.getSelectedItem()));
@@ -176,65 +182,40 @@ public class InvoiceManagement extends javax.swing.JPanel {
     }
 
     private void clearSearch() {
-        invoiceIdTextField.setText("");
         searchTextField.setText("");
         paymentMethodComboBox.setSelectedIndex(0);
         sortByComboBox.setSelectedIndex(0);
         loadInvoiceTable();
     }
 
-    private void searchByBarcode() {
+    private void openSelectedInvoice() {
+        int selectedRow = invoiceTable.getSelectedRow();
 
-        // Remove all whitespaces (spaces, tabs, newlines)
-        String invoiceId = invoiceIdTextField.getText().replaceAll("\\s+", "");
-
-        if (!invoiceId.isBlank()) {
-
-            try {
-                //Reset Other Feilds
-                clearSearch();
-                invoiceIdTextField.setText(invoiceId);
-
-                DefaultTableModel model = (DefaultTableModel) invoiceTable.getModel();
-                model.setRowCount(0);
-
-                ResultSet results = MySQL.execute(""
-                        + "SELECT * FROM invoice i "
-                        + "INNER JOIN payment_method pm ON i.payment_method_id = pm.id  "
-                        + "WHERE i.invoice_id = '" + invoiceId + "' ");
-
-                if (results.next()) {
-
-                    Vector v = new Vector();
-                    v.add(results.getString("i.invoice_id"));
-                    v.add(Numbers.formatPrice(Double.parseDouble(results.getString("total_amount"))));
-                    v.add(Numbers.formatPrice(Double.parseDouble(results.getString("discount"))));
-                    v.add(Numbers.formatPrice(Double.parseDouble(results.getString("net_total"))));
-                    v.add(Numbers.formatPrice(Double.parseDouble(results.getString("return_payment_amount"))));
-                    v.add(Numbers.formatPrice(Double.parseDouble(results.getString("payable_amount"))));
-                    v.add(Numbers.formatPrice(Double.parseDouble(results.getString("paid_amount"))));
-                    v.add(results.getString("balance"));
-                    v.add(results.getString("pm.name"));
-                    v.add(results.getString("i.item_count"));
-                    v.add(results.getString("datetime"));
-                    model.addRow(v);
-
-                } else {
-                    JOptionPane.showMessageDialog(this, "Invalid Barcode/Id", "Warning", JOptionPane.WARNING_MESSAGE);
-                    clearSearch();
-                    loadInvoiceTable();
-                }
-
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "An unexpected error has occurred. Please try again later or contact support if the issue persists.", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
-
-            }
-        } else {
-            JOptionPane.showMessageDialog(this, "Please Enter Barcode First", "Warning", JOptionPane.WARNING_MESSAGE);
-            loadInvoiceTable();
+        if (selectedRow != -1) {
+            String invoiceId = String.valueOf(invoiceTable.getValueAt(selectedRow, 0));
+            InvoiceDetails invoiceDetails = new InvoiceDetails(invoiceId);
+            invoiceDetails.setVisible(true);
         }
+    }
 
+    private void copySelectedInvoiceId() {
+        int selectedRow = invoiceTable.getSelectedRow();
+
+        if (selectedRow != -1) {
+            String invoiceId = String.valueOf(invoiceTable.getValueAt(selectedRow, 0));
+            ClipboardUtils.copyToClipboard(invoiceId);
+            ToastUtils.showToast(home, "Invoice Id Copied",2000);
+        }
+    }
+
+    private void openSelectedInvoiceSummery() {
+        int selectedRow = invoiceTable.getSelectedRow();
+
+        if (selectedRow != -1) {
+            String invoiceId = String.valueOf(invoiceTable.getValueAt(selectedRow, 0));
+            InvoiceSummery invoiceSummery = new InvoiceSummery(home, true, invoiceId, null);
+            invoiceSummery.setVisible(true);
+        }
     }
 
     /**
@@ -246,12 +227,13 @@ public class InvoiceManagement extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        rightClickPopupMenu = new javax.swing.JPopupMenu();
+        jMenuItem1 = new javax.swing.JMenuItem();
+        jMenuItem2 = new javax.swing.JMenuItem();
+        jMenuItem3 = new javax.swing.JMenuItem();
+        jMenuItem4 = new javax.swing.JMenuItem();
         jLabel1 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
-        jPanel7 = new javax.swing.JPanel();
-        jLabel6 = new javax.swing.JLabel();
-        invoiceIdTextField = new javax.swing.JTextField();
-        newInvoiceButton1 = new javax.swing.JButton();
         jPanel5 = new javax.swing.JPanel();
         jLabel7 = new javax.swing.JLabel();
         searchTextField = new javax.swing.JTextField();
@@ -269,6 +251,33 @@ public class InvoiceManagement extends javax.swing.JPanel {
         jScrollPane1 = new javax.swing.JScrollPane();
         invoiceTable = new javax.swing.JTable();
 
+        jMenuItem1.setText("Open Invoice");
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
+        rightClickPopupMenu.add(jMenuItem1);
+
+        jMenuItem2.setText("Print Invoice");
+        rightClickPopupMenu.add(jMenuItem2);
+
+        jMenuItem3.setText("Copy Invoice Id");
+        jMenuItem3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem3ActionPerformed(evt);
+            }
+        });
+        rightClickPopupMenu.add(jMenuItem3);
+
+        jMenuItem4.setText("Open Payment Summery");
+        jMenuItem4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem4ActionPerformed(evt);
+            }
+        });
+        rightClickPopupMenu.add(jMenuItem4);
+
         setMinimumSize(new java.awt.Dimension(852, 617));
         setPreferredSize(new java.awt.Dimension(852, 617));
 
@@ -278,55 +287,6 @@ public class InvoiceManagement extends javax.swing.JPanel {
         jLabel1.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 10, 1, 1));
 
         jPanel2.setLayout(new java.awt.GridLayout(1, 0));
-
-        jPanel7.setForeground(new java.awt.Color(255, 51, 51));
-
-        jLabel6.setText("Invoice Barcode/ Id");
-
-        invoiceIdTextField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                invoiceIdTextFieldActionPerformed(evt);
-            }
-        });
-
-        newInvoiceButton1.setBackground(new java.awt.Color(102, 102, 102));
-        newInvoiceButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/search.png"))); // NOI18N
-        newInvoiceButton1.setBorder(null);
-        newInvoiceButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                newInvoiceButton1ActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
-        jPanel7.setLayout(jPanel7Layout);
-        jPanel7Layout.setHorizontalGroup(
-            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel7Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel7Layout.createSequentialGroup()
-                        .addComponent(jLabel6)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(jPanel7Layout.createSequentialGroup()
-                        .addComponent(invoiceIdTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 85, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(newInvoiceButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap())
-        );
-        jPanel7Layout.setVerticalGroup(
-            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel6)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(newInvoiceButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(invoiceIdTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE))
-                .addContainerGap())
-        );
-
-        jPanel2.add(jPanel7);
 
         jPanel5.setForeground(new java.awt.Color(255, 51, 51));
 
@@ -349,7 +309,7 @@ public class InvoiceManagement extends javax.swing.JPanel {
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addComponent(jLabel7)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(searchTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 128, Short.MAX_VALUE))
+                    .addComponent(searchTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 156, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel5Layout.setVerticalGroup(
@@ -385,7 +345,7 @@ public class InvoiceManagement extends javax.swing.JPanel {
                     .addComponent(paymentMethodComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel4)
-                        .addGap(0, 36, Short.MAX_VALUE)))
+                        .addGap(0, 64, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -418,7 +378,7 @@ public class InvoiceManagement extends javax.swing.JPanel {
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sortByComboBox, 0, 128, Short.MAX_VALUE)
+                    .addComponent(sortByComboBox, 0, 156, Short.MAX_VALUE)
                     .addGroup(jPanel4Layout.createSequentialGroup()
                         .addComponent(jLabel5)
                         .addGap(0, 0, Short.MAX_VALUE)))
@@ -454,7 +414,7 @@ public class InvoiceManagement extends javax.swing.JPanel {
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel8Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(clearSearchButton, javax.swing.GroupLayout.DEFAULT_SIZE, 128, Short.MAX_VALUE)
+                .addComponent(clearSearchButton, javax.swing.GroupLayout.DEFAULT_SIZE, 156, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel8Layout.setVerticalGroup(
@@ -519,6 +479,9 @@ public class InvoiceManagement extends javax.swing.JPanel {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 invoiceTableMouseClicked(evt);
             }
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                invoiceTableMouseReleased(evt);
+            }
         });
         jScrollPane1.setViewportView(invoiceTable);
         if (invoiceTable.getColumnModel().getColumnCount() > 0) {
@@ -572,14 +535,6 @@ public class InvoiceManagement extends javax.swing.JPanel {
         clearSearch();
     }//GEN-LAST:event_clearSearchButtonActionPerformed
 
-    private void invoiceIdTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_invoiceIdTextFieldActionPerformed
-        searchByBarcode();
-    }//GEN-LAST:event_invoiceIdTextFieldActionPerformed
-
-    private void newInvoiceButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newInvoiceButton1ActionPerformed
-        searchByBarcode();
-    }//GEN-LAST:event_newInvoiceButton1ActionPerformed
-
     private void searchTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_searchTextFieldKeyReleased
         loadInvoiceTable();
     }//GEN-LAST:event_searchTextFieldKeyReleased
@@ -602,40 +557,57 @@ public class InvoiceManagement extends javax.swing.JPanel {
     }//GEN-LAST:event_newInvoiceButtonActionPerformed
 
     private void invoiceTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_invoiceTableMouseClicked
-       if (evt.getClickCount() == 2) {
-            int selectedRow = invoiceTable.getSelectedRow();
-
-            if (selectedRow != -1) {
-                String invoiceId = String.valueOf(invoiceTable.getValueAt(selectedRow, 0));
-                InvoiceDetails invoiceDetails = new InvoiceDetails(invoiceId);
-                invoiceDetails.setVisible(true);
-            }
-
+        if (evt.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(evt)) {
+            openSelectedInvoice();
         }
     }//GEN-LAST:event_invoiceTableMouseClicked
+
+    private void invoiceTableMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_invoiceTableMouseReleased
+        int row = invoiceTable.rowAtPoint(evt.getPoint());
+        if (row >= 0) {
+            invoiceTable.setRowSelectionInterval(row, row); // Select the row
+            if (evt.isPopupTrigger()) { // Right-click
+                rightClickPopupMenu.show(evt.getComponent(), evt.getX(), evt.getY());
+            }
+        }
+
+    }//GEN-LAST:event_invoiceTableMouseReleased
+
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+        openSelectedInvoice();
+    }//GEN-LAST:event_jMenuItem1ActionPerformed
+
+    private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
+        copySelectedInvoiceId();
+    }//GEN-LAST:event_jMenuItem3ActionPerformed
+
+    private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem4ActionPerformed
+        openSelectedInvoiceSummery();
+    }//GEN-LAST:event_jMenuItem4ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton clearSearchButton;
-    private javax.swing.JTextField invoiceIdTextField;
     private javax.swing.JTable invoiceTable;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItem2;
+    private javax.swing.JMenuItem jMenuItem3;
+    private javax.swing.JMenuItem jMenuItem4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
-    private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton newInvoiceButton;
-    private javax.swing.JButton newInvoiceButton1;
     private javax.swing.JComboBox<String> paymentMethodComboBox;
+    private javax.swing.JPopupMenu rightClickPopupMenu;
     private javax.swing.JTextField searchTextField;
     private javax.swing.JComboBox<String> sortByComboBox;
     // End of variables declaration//GEN-END:variables

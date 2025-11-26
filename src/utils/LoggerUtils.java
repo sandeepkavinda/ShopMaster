@@ -1,15 +1,14 @@
-package util;
+package utils;
 
 import java.io.IOException;
 import java.util.logging.*;
 
-public class LoggerUtil {
+public class LoggerUtils {
     private static Logger logger;
 
     static {
         try {
-            LogManager.getLogManager().readConfiguration(
-                LoggerUtil.class.getResourceAsStream("/logging.properties")
+            LogManager.getLogManager().readConfiguration(LoggerUtils.class.getResourceAsStream("/logging.properties")
             );
         } catch (IOException e) {
             e.printStackTrace();

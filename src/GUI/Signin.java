@@ -2,7 +2,7 @@ package GUI;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import javax.swing.UIManager;
-import util.LoggerUtil;
+import utils.LoggerUtils;
 import java.util.logging.*;
 
 /**
@@ -11,7 +11,7 @@ import java.util.logging.*;
  */
 public class Signin extends javax.swing.JFrame {
 
-    private static final Logger logger = LoggerUtil.getLogger();
+    private static final Logger logger = LoggerUtils.getLogger();
    
     public Signin() {
         initComponents();

@@ -4,7 +4,6 @@
  */
 package SubGUI;
 
-import DTO.InvoicePaymentData;
 import java.sql.ResultSet;
 import javax.swing.JOptionPane;
 import model.MySQL;
@@ -58,7 +57,9 @@ public class InvoiceSummery extends javax.swing.JDialog {
 
     private void resetInvoice() {
         this.dispose();
-        newInvoice.resetInvoice();
+        if (newInvoice != null) {
+            newInvoice.resetInvoice();
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -98,7 +99,7 @@ public class InvoiceSummery extends javax.swing.JDialog {
         jFormattedTextField1.setText("jFormattedTextField1");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Invoice Payment");
+        setTitle("Invoice Payment Summery");
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosed(java.awt.event.WindowEvent evt) {
                 formWindowClosed(evt);
@@ -154,7 +155,7 @@ public class InvoiceSummery extends javax.swing.JDialog {
         jLabel1.setFont(new java.awt.Font("Poppins", 1, 14)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(0, 105, 75));
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("Invoice Summery");
+        jLabel1.setText("Invoice Payment Summery");
         jLabel1.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 10, 1, 1));
 
         payableTextLabel3.setFont(new java.awt.Font("Poppins", 0, 14)); // NOI18N
@@ -403,6 +404,8 @@ public class InvoiceSummery extends javax.swing.JDialog {
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(InvoiceSummery.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+        //</editor-fold>
         //</editor-fold>
         //</editor-fold>
 

@@ -37,7 +37,7 @@ public class Home extends javax.swing.JFrame {
         initComponents();
         showMenu();
 //        loadPanel(new Dashboard(), dashboardButton, dashboardActiveBar);
-          loadPanel(new InvoiceManagement(), invoiceManagementButton, invoiceManagementActiveBar);
+          loadPanel(new InvoiceManagement(this), invoiceManagementButton, invoiceManagementActiveBar);
     }
 
     private void loadPanel(JPanel panel, JButton selectedButton, JPanel selectActiveBar) {
@@ -828,7 +828,7 @@ public class Home extends javax.swing.JFrame {
     }//GEN-LAST:event_grnManagementButtonActionPerformed
 
     private void invoiceManagementButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_invoiceManagementButtonActionPerformed
-        loadPanel(new InvoiceManagement(), invoiceManagementButton, invoiceManagementActiveBar);
+        loadPanel(new InvoiceManagement(this), invoiceManagementButton, invoiceManagementActiveBar);
     }//GEN-LAST:event_invoiceManagementButtonActionPerformed
 
     private void returnManagementButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_returnManagementButtonActionPerformed
