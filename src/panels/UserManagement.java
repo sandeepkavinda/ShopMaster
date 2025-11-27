@@ -12,6 +12,8 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Vector;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import model.MySQL;
 import utils.ToastUtils;
@@ -35,6 +37,20 @@ public class UserManagement extends javax.swing.JPanel {
         loadUserTypes();
         loadUserStatus();
         loadUserTable();
+
+        //Table Data Alignment
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+
+        DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
+        rightRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
+
+        userTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
+        userTable.getColumnModel().getColumn(4).setCellRenderer(centerRenderer);
+        userTable.getColumnModel().getColumn(5).setCellRenderer(centerRenderer);
+        userTable.getColumnModel().getColumn(6).setCellRenderer(centerRenderer);
+        userTable.getColumnModel().getColumn(7).setCellRenderer(centerRenderer);
+
     }
 
     private void loadUserTypes() {
@@ -60,8 +76,8 @@ public class UserManagement extends javax.swing.JPanel {
             Vector v = new Vector();
             v.add("All Users");
             while (result.next()) {
-                v.add(result.getString("name"));
-                userStatusMap.put(result.getString("name"), result.getString("id"));
+                v.add(result.getString("status"));
+                userStatusMap.put(result.getString("status"), result.getString("id"));
             }
             DefaultComboBoxModel model = new DefaultComboBoxModel(v);
             userStatusComboBox.setModel(model);
@@ -76,72 +92,84 @@ public class UserManagement extends javax.swing.JPanel {
             String search = searchTextField.getText();
             String userTypeId = userTypeMap.get(String.valueOf(userTypesComboBox.getSelectedItem()));
             String userStatusId = userStatusMap.get(String.valueOf(userStatusComboBox.getSelectedItem()));
+            String verificationStatusId = String.valueOf(verificationStatusComboBox.getSelectedItem());
             int sortBy = sortByComboBox.getSelectedIndex();
 
             String sortByColumn = "";
             String sortByType = "";
 
             if (sortBy == 0) {
-                sortByColumn = "id";
+                sortByColumn = "u.registered_date_time";
                 sortByType = "DESC";
             } else if (sortBy == 1) {
-                sortByColumn = "id";
+                sortByColumn = "u.registered_date_time";
                 sortByType = "ASC";
             } else if (sortBy == 2) {
-                sortByColumn = "username";
+                sortByColumn = "u.username";
                 sortByType = "ASC";
             } else if (sortBy == 3) {
-                sortByColumn = "username";
+                sortByColumn = "u.username";
                 sortByType = "DESC";
             } else if (sortBy == 4) {
-                sortByColumn = "first_name";
+                sortByColumn = "u.email";
                 sortByType = "ASC";
             } else if (sortBy == 5) {
-                sortByColumn = "first_name";
+                sortByColumn = "u.email";
                 sortByType = "DESC";
             } else if (sortBy == 6) {
-                sortByColumn = "last_name";
+                sortByColumn = "u.full_name";
                 sortByType = "ASC";
             } else if (sortBy == 7) {
-                sortByColumn = "last_name";
+                sortByColumn = "u.full_name";
                 sortByType = "DESC";
             }
 
             String searchByUserTypeQueryPart = "";
             String searchByUserStatusQueryPart = "";
+            String searchByVerificationStatusQueryPart = "";
 
             if (userTypeId != null) {
-                searchByUserTypeQueryPart = "AND `user`.`user_type_id`='" + userTypeId + "' ";
+                searchByUserTypeQueryPart = "AND u.user_type_id='" + userTypeId + "' ";
             }
 
             if (userStatusId != null) {
-                searchByUserStatusQueryPart = "AND `user`.`user_status_id`='" + userStatusId + "' ";
+                searchByUserStatusQueryPart = "AND u.user_status_id='" + userStatusId + "' ";
+            }
+
+            if (verificationStatusId == "Verified") {
+                searchByVerificationStatusQueryPart = "AND u.is_verified = 1 ";
+            }
+
+            if (verificationStatusId == "Not Verified") {
+                searchByVerificationStatusQueryPart = "AND u.is_verified = 0 ";
             }
 
             DefaultTableModel model = (DefaultTableModel) userTable.getModel();
             model.setRowCount(0);
 
-            ResultSet results = MySQL.execute(""
-                    + "SELECT * FROM `user` "
-                    + "INNER JOIN `user_type` ON `user`.`user_type_id`=`user_type`.`id` "
-                    + "INNER JOIN `user_status` ON `user`.`user_status_id`=`user_status`.`id` "
-                    + "WHERE (`user`.`username` LIKE '%" + search + "%' OR `user`.`id` LIKE '%" + search + "%' OR `user`.`registered_date_time` LIKE '%" + search + "%')"
+            ResultSet results = MySQL.execute("SELECT * FROM user u "
+                    + "INNER JOIN user_type ut ON u.user_type_id = ut.id "
+                    + "INNER JOIN user_status us ON u.user_status_id = us.id "
+                    + "WHERE (u.full_name LIKE '%" + search + "%' OR u.username LIKE '%" + search + "%' OR u.email LIKE '%" + search + "%' OR u.registered_date_time LIKE '%" + search + "%') "
                     + searchByUserTypeQueryPart
                     + searchByUserStatusQueryPart
-                    + "ORDER BY `user`.`" + sortByColumn + "` " + sortByType + "");
+                    + searchByVerificationStatusQueryPart
+                    + "ORDER BY " + sortByColumn + " " + sortByType + " ");
 
             while (results.next()) {
-                Vector v = new Vector();
-                v.add(results.getString("id"));
-                v.add(results.getString("username"));
-                v.add(results.getString("first_name"));
-                v.add(results.getString("last_name"));
-                v.add(results.getString("registered_date_time"));
-                v.add(results.getString("user_type.name"));
-                v.add(results.getString("user_status.name"));
 
+                Vector v = new Vector();
+                v.add(results.getString("u.id"));
+                v.add(results.getString("u.username"));
+                v.add(results.getString("u.email"));
+                v.add(results.getString("u.full_name"));
+                v.add(results.getString("ut.name"));
+                v.add(results.getString("us.status"));
+                v.add(results.getBoolean("u.is_verified") ? "Verified" : "Not Verified");
+                v.add(results.getString("u.registered_date_time"));
                 model.addRow(v);
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -175,6 +203,9 @@ public class UserManagement extends javax.swing.JPanel {
         jPanel5 = new javax.swing.JPanel();
         userStatusComboBox = new javax.swing.JComboBox<>();
         jLabel7 = new javax.swing.JLabel();
+        jPanel6 = new javax.swing.JPanel();
+        verificationStatusComboBox = new javax.swing.JComboBox<>();
+        jLabel8 = new javax.swing.JLabel();
         jPanel4 = new javax.swing.JPanel();
         sortByComboBox = new javax.swing.JComboBox<>();
         jLabel5 = new javax.swing.JLabel();
@@ -216,7 +247,7 @@ public class UserManagement extends javax.swing.JPanel {
                     .addGroup(jPanel7Layout.createSequentialGroup()
                         .addComponent(jLabel6)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(searchTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 128, Short.MAX_VALUE))
+                    .addComponent(searchTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 108, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel7Layout.setVerticalGroup(
@@ -251,7 +282,7 @@ public class UserManagement extends javax.swing.JPanel {
                     .addComponent(userTypesComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel4)
-                        .addGap(0, 77, Short.MAX_VALUE)))
+                        .addGap(0, 57, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -286,7 +317,7 @@ public class UserManagement extends javax.swing.JPanel {
                     .addComponent(userStatusComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addComponent(jLabel7)
-                        .addGap(0, 70, Short.MAX_VALUE)))
+                        .addGap(0, 50, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel5Layout.setVerticalGroup(
@@ -301,9 +332,45 @@ public class UserManagement extends javax.swing.JPanel {
 
         jPanel2.add(jPanel5);
 
+        jPanel6.setForeground(new java.awt.Color(255, 51, 51));
+
+        verificationStatusComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All", "Verified", "Not Verified" }));
+        verificationStatusComboBox.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                verificationStatusComboBoxItemStateChanged(evt);
+            }
+        });
+
+        jLabel8.setText("Verification Status");
+
+        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
+        jPanel6.setLayout(jPanel6Layout);
+        jPanel6Layout.setHorizontalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(verificationStatusComboBox, 0, 108, Short.MAX_VALUE)
+                    .addGroup(jPanel6Layout.createSequentialGroup()
+                        .addComponent(jLabel8)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        jPanel6Layout.setVerticalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel8)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(verificationStatusComboBox, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        jPanel2.add(jPanel6);
+
         jPanel4.setForeground(new java.awt.Color(255, 51, 51));
 
-        sortByComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Added (Newest First)", "Added (Oldest First)", "Username (A-Z)", "Username (Z-A)", "First Name (A-Z)", "First Name (Z-A)", "Last Name (A-Z)", "Last Name (Z-A)" }));
+        sortByComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Newest to Oldest", "Oldest to Newest", "Username (A-Z)", "Username (Z-A)", "Email (A-Z)", "Email (Z-A)", "Full Name (A-Z)", "Full Name (Z-A)" }));
         sortByComboBox.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 sortByComboBoxItemStateChanged(evt);
@@ -319,7 +386,7 @@ public class UserManagement extends javax.swing.JPanel {
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sortByComboBox, 0, 128, Short.MAX_VALUE)
+                    .addComponent(sortByComboBox, 0, 108, Short.MAX_VALUE)
                     .addGroup(jPanel4Layout.createSequentialGroup()
                         .addComponent(jLabel5)
                         .addGap(0, 0, Short.MAX_VALUE)))
@@ -355,7 +422,7 @@ public class UserManagement extends javax.swing.JPanel {
             jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel10Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(addNewProductButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 122, Short.MAX_VALUE)
+                .addComponent(addNewProductButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE)
                 .addGap(12, 12, 12))
         );
         jPanel10Layout.setVerticalGroup(
@@ -386,7 +453,7 @@ public class UserManagement extends javax.swing.JPanel {
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel8Layout.createSequentialGroup()
                 .addGap(12, 12, 12)
-                .addComponent(addNewProductButton, javax.swing.GroupLayout.DEFAULT_SIZE, 121, Short.MAX_VALUE)
+                .addComponent(addNewProductButton, javax.swing.GroupLayout.DEFAULT_SIZE, 101, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel8Layout.setVerticalGroup(
@@ -403,64 +470,64 @@ public class UserManagement extends javax.swing.JPanel {
 
         userTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null}
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "Id", "Username", "First Name", "Last Name", "Registered Date", "User Type", "Active Status"
+                "Id", "Username", "Email", "Full Name", "User Type", "Active Status", "Verification Status", "Registered Date"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -581,6 +648,10 @@ public class UserManagement extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_sortByComboBoxItemStateChanged
 
+    private void verificationStatusComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_verificationStatusComboBoxItemStateChanged
+        loadUserTable();
+    }//GEN-LAST:event_verificationStatusComboBoxItemStateChanged
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addNewProductButton;
@@ -590,12 +661,14 @@ public class UserManagement extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel9;
@@ -605,5 +678,6 @@ public class UserManagement extends javax.swing.JPanel {
     private javax.swing.JComboBox<String> userStatusComboBox;
     private javax.swing.JTable userTable;
     private javax.swing.JComboBox<String> userTypesComboBox;
+    private javax.swing.JComboBox<String> verificationStatusComboBox;
     // End of variables declaration//GEN-END:variables
 }
