@@ -150,6 +150,10 @@ public class AddNewUser extends javax.swing.JDialog {
                     JOptionPane.showMessageDialog(this, "User Added Successfully", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));
                     loadUserTable();
                     resetFields();
+                    
+                    UserOtpDetails userOtpDetails = new UserOtpDetails(null, true, userName);
+                    userOtpDetails.setVisible(true);
+                    
                 }
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "An error occurred: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
