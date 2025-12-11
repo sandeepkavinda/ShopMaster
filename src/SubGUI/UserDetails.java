@@ -4,8 +4,15 @@
  */
 package SubGUI;
 
+import DTO.UserEditableData;
 import java.awt.Color;
+import java.security.SecureRandom;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Vector;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import model.MySQL;
@@ -17,49 +24,75 @@ import panels.UserManagement;
  */
 public class UserDetails extends javax.swing.JDialog {
 
-    UserManagement userManagement;
-    String userId;
-    String userStatusId;
-    String ACTIVE_STATUS_ID = "1";
-    String DEACTIVE_STATUS_ID = "2";
+    private UserManagement userManagement;
+    private String username;
 
-    public UserDetails(java.awt.Frame parent, boolean modal, String userId,UserManagement userManagement) {
+    private UserEditableData userEditableData = new UserEditableData();
+
+    private String userStatusId;
+
+    HashMap<String, String> userTypeMap = new HashMap<>();
+
+    // Database Status Ids
+    private String ACTIVE_STATUS_ID = "1";
+    private String DEACTIVE_STATUS_ID = "2";
+
+    public UserDetails(java.awt.Frame parent, boolean modal, String username, UserManagement userManagement) {
         super(parent, modal);
-        this.userId = userId;
+        this.username = username;
         this.userManagement = userManagement;
         initComponents();
+        loadUserTypes();
         loadData();
+    }
+
+    private void loadUserTypes() {
+        try {
+            ResultSet result = MySQL.execute("SELECT * FROM user_type ");
+            Vector v = new Vector();
+            while (result.next()) {
+                v.add(result.getString("name"));
+                userTypeMap.put(result.getString("name"), result.getString("id"));
+            }
+            DefaultComboBoxModel model = new DefaultComboBoxModel(v);
+            usertypeComboBox.setModel(model);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void loadData() {
         try {
-            ResultSet result = MySQL.execute("SELECT * FROM `user` "
-                    + "INNER JOIN `user_type` ON `user`.`user_type_id`=`user_type`.`id`"
-                    + "INNER JOIN `user_status` ON `user`.`user_status_id`= `user_status`.`id` "
-                    + "WHERE `user`.`id`='" + userId + "'");
+
+            ResultSet result = MySQL.execute("SELECT * FROM user u "
+                    + "INNER JOIN user_type ut ON u.user_type_id = ut.id "
+                    + "INNER JOIN user_status us ON u.user_status_id = us.id "
+                    + "WHERE u.username = '" + username + "'");
 
             if (result.next()) {
-                titleLable.setText(result.getString("username"));
-                activeStatusLabel.setText(result.getString("user_status.name") + " User");
-                usernameTextField.setText(result.getString("username"));
-                userTypeTextField.setText(result.getString("user_type.name"));
-                firstnameTextField.setText(result.getString("first_name"));
-                lastnameTextField.setText(result.getString("last_name"));
-                passwordField.setText(result.getString("password"));
-                userStatusTextField.setText(result.getString("user_status.name") + " User");
-                registeredDatejLabel.setText("Registered on " + result.getString("registered_date_time"));
+                titleLable.setText(result.getString("u.username"));
+                userTypeLabel.setText(result.getString("ut.name"));
 
-                String userStatusId = result.getString("user_status.id");
+                fullNameTextField.setText(result.getString("u.full_name"));
+                emailTextField.setText(result.getString("u.email"));
+                usernameTextField.setText(result.getString("u.username"));
+                usertypeComboBox.setSelectedItem(result.getString("ut.name"));
+                userStatusTextField.setText(result.getString("us.status"));
+                verificationStatusTextField.setText(result.getBoolean("u.is_verified") ? "Verified" : "Not Verified");
+                regDateTimeTextField.setText(result.getString("u.registered_date_time"));
+
+                String userStatusId = result.getString("us.id");
                 this.userStatusId = userStatusId;
 
+                userEditableData.setFullName(result.getString("u.full_name"));
+                userEditableData.setEmail(result.getString("u.email"));
+                userEditableData.setUserTypeId(result.getString("ut.id"));
+
                 if (userStatusId.equals(ACTIVE_STATUS_ID)) {
-                    changeStatusButton.setText("Deactivate");
-                    activeStatusLabel.setForeground(Color.decode("#00694b"));
+                    changeUserStatusButton.setText("Deactivate User");
                 } else if (userStatusId.equals(DEACTIVE_STATUS_ID)) {
-                    changeStatusButton.setText("Activate");
-                    activeStatusLabel.setForeground(Color.decode("#690028"));
-                } else {
-                    JOptionPane.showMessageDialog(this, "An unexpected error has occurred. Please try again later or contact support if the issue persists.", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
+                    changeUserStatusButton.setText("Activate User");
                 }
 
             } else {
@@ -72,6 +105,86 @@ public class UserDetails extends javax.swing.JDialog {
         }
     }
 
+    private void enableEdits() {
+        fullNameTextField.setEditable(true);
+        emailTextField.setEditable(true);
+        usertypeComboBox.setEnabled(true);
+        updateChangesButton.setEnabled(true);
+        enableEditsButton.setEnabled(false);
+    }
+
+    private void resetData() {
+        loadData();
+        fullNameTextField.setEditable(false);
+        emailTextField.setEditable(false);
+        usertypeComboBox.setEnabled(false);
+        updateChangesButton.setEnabled(false);
+        enableEditsButton.setEnabled(true);
+
+    }
+
+    private void updateDetails() {
+
+        String fullName = fullNameTextField.getText();
+        String email = emailTextField.getText();
+        String userTypeId = userTypeMap.get(usertypeComboBox.getSelectedItem().toString());
+
+        if (fullName.equals(userEditableData.getFullName()) && email.equals(userEditableData.getEmail()) && userTypeId.equals(userEditableData.getUserTypeId())) {
+            JOptionPane.showMessageDialog(this,
+                    "No changes detected to update.",
+                    "Same Details",
+                    JOptionPane.WARNING_MESSAGE);
+        } else {
+
+            try {
+                if (fullName.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "User's Full Name is Empty", "Warning", JOptionPane.WARNING_MESSAGE);
+                    fullNameTextField.grabFocus();
+                } else if (fullName.length() > 100) {
+                    JOptionPane.showMessageDialog(this, "The Fullname must contain fewer than 100 characters.", "Warning", JOptionPane.WARNING_MESSAGE);
+                    fullNameTextField.grabFocus();
+                    fullNameTextField.selectAll();
+                } else if (email.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Please Enter the User's Email", "Warning", JOptionPane.WARNING_MESSAGE);
+                    emailTextField.grabFocus();
+                } else if (email.length() > 100) {
+                    JOptionPane.showMessageDialog(this, "The email must contain fewer than 100 characters.", "Warning", JOptionPane.WARNING_MESSAGE);
+                    emailTextField.grabFocus();
+                    emailTextField.selectAll();
+                } else {
+
+                    ResultSet emailResultSet = MySQL.execute("SELECT * FROM user WHERE email='" + email + "' AND username != '" + username + "' ");
+
+                    if (emailResultSet.next()) {
+                        JOptionPane.showMessageDialog(this, "Email is already in use", "Warning", JOptionPane.WARNING_MESSAGE);
+                        emailTextField.grabFocus();
+                        emailTextField.selectAll();
+                    } else {
+
+                        MySQL.execute("UPDATE user SET full_name='" + fullName + "', email = '" + email + "', user_type_id='" + userTypeId + "' "
+                                + "WHERE username = '" + username + "'");
+
+                        JOptionPane.showMessageDialog(this, "User Updated Successfully", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));
+
+                        resetData();
+
+                        if (userManagement != null) {
+                            userManagement.loadUserTable();
+                        }
+
+                    }
+
+                }
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, e.getMessage(), "Unexpected Error", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+
+            }
+        }
+
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -82,152 +195,204 @@ public class UserDetails extends javax.swing.JDialog {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        jPanel2 = new javax.swing.JPanel();
-        jPanel4 = new javax.swing.JPanel();
-        jPanel6 = new javax.swing.JPanel();
-        jLabel6 = new javax.swing.JLabel();
-        usernameTextField = new javax.swing.JTextField();
-        jLabel7 = new javax.swing.JLabel();
-        firstnameTextField = new javax.swing.JTextField();
-        jLabel9 = new javax.swing.JLabel();
-        showPasswordCheckBox = new javax.swing.JCheckBox();
-        passwordField = new javax.swing.JPasswordField();
-        jPanel5 = new javax.swing.JPanel();
-        jLabel8 = new javax.swing.JLabel();
-        userTypeTextField = new javax.swing.JTextField();
-        jLabel10 = new javax.swing.JLabel();
-        lastnameTextField = new javax.swing.JTextField();
-        jLabel11 = new javax.swing.JLabel();
-        userStatusTextField = new javax.swing.JTextField();
-        registeredDatejLabel = new javax.swing.JLabel();
-        changeStatusButton = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         titleLable = new javax.swing.JLabel();
-        activeStatusLabel = new javax.swing.JLabel();
+        userTypeLabel = new javax.swing.JLabel();
+        jSeparator1 = new javax.swing.JSeparator();
+        jPanel2 = new javax.swing.JPanel();
+        jPanel4 = new javax.swing.JPanel();
+        fullNameTextField = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        usertypeComboBox = new javax.swing.JComboBox<>();
+        updateChangesButton = new javax.swing.JButton();
+        resetButton = new javax.swing.JButton();
+        jLabel10 = new javax.swing.JLabel();
+        emailTextField = new javax.swing.JTextField();
+        jLabel11 = new javax.swing.JLabel();
+        usernameTextField = new javax.swing.JTextField();
+        jPanel5 = new javax.swing.JPanel();
+        userStatusTextField = new javax.swing.JTextField();
+        jLabel7 = new javax.swing.JLabel();
+        enableEditsButton = new javax.swing.JButton();
+        forgotPasswordButton = new javax.swing.JButton();
+        jLabel12 = new javax.swing.JLabel();
+        verificationStatusTextField = new javax.swing.JTextField();
+        jLabel13 = new javax.swing.JLabel();
+        regDateTimeTextField = new javax.swing.JTextField();
+        changeUserStatusButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("User Details");
         setResizable(false);
 
-        jPanel4.setLayout(new java.awt.GridLayout());
+        titleLable.setFont(new java.awt.Font("Poppins", 1, 14)); // NOI18N
+        titleLable.setForeground(new java.awt.Color(0, 105, 75));
+        titleLable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/user.png"))); // NOI18N
+        titleLable.setText("User");
 
-        jLabel6.setText("Username");
+        userTypeLabel.setFont(new java.awt.Font("Poppins", 1, 14)); // NOI18N
+        userTypeLabel.setForeground(new java.awt.Color(0, 105, 75));
+        userTypeLabel.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        userTypeLabel.setText("Admin");
 
-        usernameTextField.setEditable(false);
-        usernameTextField.setPreferredSize(new java.awt.Dimension(64, 35));
-        usernameTextField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                usernameTextFieldActionPerformed(evt);
-            }
-        });
-
-        jLabel7.setText("First Name");
-
-        firstnameTextField.setEditable(false);
-        firstnameTextField.setPreferredSize(new java.awt.Dimension(64, 35));
-        firstnameTextField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                firstnameTextFieldActionPerformed(evt);
-            }
-        });
-
-        jLabel9.setText("Password");
-
-        showPasswordCheckBox.setText("Show Password");
-        showPasswordCheckBox.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                showPasswordCheckBoxItemStateChanged(evt);
-            }
-        });
-
-        passwordField.setEditable(false);
-        passwordField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                passwordFieldActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
-        jPanel6.setLayout(jPanel6Layout);
-        jPanel6Layout.setHorizontalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel6Layout.createSequentialGroup()
-                .addGap(9, 9, 9)
-                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(usernameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(firstnameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel6Layout.createSequentialGroup()
-                        .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel6)
-                            .addComponent(jLabel7)
-                            .addComponent(jLabel9)
-                            .addComponent(showPasswordCheckBox))
-                        .addGap(0, 100, Short.MAX_VALUE))
-                    .addComponent(passwordField))
-                .addContainerGap())
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGap(30, 30, 30)
+                .addComponent(titleLable, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(userTypeLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 272, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-        jPanel6Layout.setVerticalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel6Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel6)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(usernameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel7)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(firstnameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel9)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(passwordField, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(showPasswordCheckBox)
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGap(21, 21, 21)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(titleLable)
+                    .addComponent(userTypeLabel))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jPanel4.add(jPanel6);
+        jSeparator1.setForeground(new java.awt.Color(204, 204, 204));
+
+        fullNameTextField.setEditable(false);
+        fullNameTextField.setPreferredSize(new java.awt.Dimension(64, 35));
+
+        jLabel6.setText("Full Name");
 
         jLabel8.setText("User Type");
 
-        userTypeTextField.setEditable(false);
-        userTypeTextField.setPreferredSize(new java.awt.Dimension(64, 35));
-        userTypeTextField.addActionListener(new java.awt.event.ActionListener() {
+        usertypeComboBox.setEnabled(false);
+        usertypeComboBox.setPreferredSize(new java.awt.Dimension(72, 35));
+
+        updateChangesButton.setText("Update Changes");
+        updateChangesButton.setBorder(null);
+        updateChangesButton.setEnabled(false);
+        updateChangesButton.setPreferredSize(new java.awt.Dimension(99, 35));
+        updateChangesButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                userTypeTextFieldActionPerformed(evt);
+                updateChangesButtonActionPerformed(evt);
             }
         });
 
-        jLabel10.setText("Last Name");
-
-        lastnameTextField.setEditable(false);
-        lastnameTextField.setPreferredSize(new java.awt.Dimension(64, 35));
-        lastnameTextField.addActionListener(new java.awt.event.ActionListener() {
+        resetButton.setBackground(new java.awt.Color(102, 102, 102));
+        resetButton.setForeground(new java.awt.Color(255, 255, 255));
+        resetButton.setText("Reset");
+        resetButton.setBorder(null);
+        resetButton.setPreferredSize(new java.awt.Dimension(99, 35));
+        resetButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                lastnameTextFieldActionPerformed(evt);
+                resetButtonActionPerformed(evt);
             }
         });
 
-        jLabel11.setText("Status");
+        jLabel10.setText("Email");
+
+        emailTextField.setEditable(false);
+        emailTextField.setPreferredSize(new java.awt.Dimension(64, 35));
+
+        jLabel11.setText("Username");
+
+        usernameTextField.setEditable(false);
+        usernameTextField.setPreferredSize(new java.awt.Dimension(64, 35));
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(fullNameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(emailTextField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(usernameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(updateChangesButton, javax.swing.GroupLayout.DEFAULT_SIZE, 253, Short.MAX_VALUE)
+                    .addComponent(resetButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(usertypeComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel6)
+                            .addComponent(jLabel10)
+                            .addComponent(jLabel11)
+                            .addComponent(jLabel8))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel6)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(fullNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel10)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(emailTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel11)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(usernameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel8)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(usertypeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(updateChangesButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(resetButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(9, Short.MAX_VALUE))
+        );
 
         userStatusTextField.setEditable(false);
         userStatusTextField.setPreferredSize(new java.awt.Dimension(64, 35));
-        userStatusTextField.addActionListener(new java.awt.event.ActionListener() {
+
+        jLabel7.setText("User Status");
+
+        enableEditsButton.setBackground(new java.awt.Color(102, 102, 102));
+        enableEditsButton.setForeground(new java.awt.Color(255, 255, 255));
+        enableEditsButton.setText("Enable Edits");
+        enableEditsButton.setBorder(null);
+        enableEditsButton.setPreferredSize(new java.awt.Dimension(99, 35));
+        enableEditsButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                userStatusTextFieldActionPerformed(evt);
+                enableEditsButtonActionPerformed(evt);
             }
         });
 
-        registeredDatejLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        registeredDatejLabel.setText("Registered at 2025-07-04 10:50:50");
-        registeredDatejLabel.setToolTipText("Registerd Date Time");
-
-        changeStatusButton.setFont(new java.awt.Font("Poppins", 0, 12)); // NOI18N
-        changeStatusButton.setText("Deactivate");
-        changeStatusButton.setBorder(null);
-        changeStatusButton.addActionListener(new java.awt.event.ActionListener() {
+        forgotPasswordButton.setBackground(new java.awt.Color(102, 102, 102));
+        forgotPasswordButton.setForeground(new java.awt.Color(255, 255, 255));
+        forgotPasswordButton.setText("Forgot Password");
+        forgotPasswordButton.setBorder(null);
+        forgotPasswordButton.setPreferredSize(new java.awt.Dimension(99, 35));
+        forgotPasswordButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                changeStatusButtonActionPerformed(evt);
+                forgotPasswordButtonActionPerformed(evt);
+            }
+        });
+
+        jLabel12.setText("Verification Status");
+
+        verificationStatusTextField.setEditable(false);
+        verificationStatusTextField.setPreferredSize(new java.awt.Dimension(64, 35));
+
+        jLabel13.setText("Registered Date Time");
+
+        regDateTimeTextField.setEditable(false);
+        regDateTimeTextField.setPreferredSize(new java.awt.Dimension(64, 35));
+
+        changeUserStatusButton.setBackground(new java.awt.Color(102, 102, 102));
+        changeUserStatusButton.setForeground(new java.awt.Color(255, 255, 255));
+        changeUserStatusButton.setText(" ");
+        changeUserStatusButton.setBorder(null);
+        changeUserStatusButton.setPreferredSize(new java.awt.Dimension(99, 35));
+        changeUserStatusButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                changeUserStatusButtonActionPerformed(evt);
             }
         });
 
@@ -238,44 +403,43 @@ public class UserDetails extends javax.swing.JDialog {
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(userTypeTextField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lastnameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(registeredDatejLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(userStatusTextField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(verificationStatusTextField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(regDateTimeTextField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(enableEditsButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(forgotPasswordButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel8)
-                            .addComponent(jLabel10)
-                            .addComponent(jLabel11))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(jPanel5Layout.createSequentialGroup()
-                        .addComponent(userStatusTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(changeStatusButton, javax.swing.GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE)))
-                .addGap(9, 9, 9))
+                            .addComponent(jLabel7)
+                            .addComponent(jLabel12)
+                            .addComponent(jLabel13))
+                        .addGap(0, 130, Short.MAX_VALUE))
+                    .addComponent(changeUserStatusButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel8)
+                .addComponent(jLabel7)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(userTypeTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel10)
+                .addComponent(userStatusTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lastnameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel11)
+                .addComponent(jLabel12)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(userStatusTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(changeStatusButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(verificationStatusTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(registeredDatejLabel)
-                .addContainerGap(10, Short.MAX_VALUE))
+                .addComponent(jLabel13)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(regDateTimeTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(35, 35, 35)
+                .addComponent(enableEditsButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(forgotPasswordButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(changeUserStatusButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-
-        jPanel4.add(jPanel5);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -283,134 +447,85 @@ public class UserDetails extends javax.swing.JDialog {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(26, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-
-        titleLable.setFont(new java.awt.Font("Poppins", 1, 14)); // NOI18N
-        titleLable.setForeground(new java.awt.Color(0, 105, 75));
-        titleLable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/user.png"))); // NOI18N
-        titleLable.setText("Sandeep Kavinda");
-
-        activeStatusLabel.setFont(new java.awt.Font("Poppins", 1, 14)); // NOI18N
-        activeStatusLabel.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        activeStatusLabel.setText("Active User");
-
-        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addGap(30, 30, 30)
-                .addComponent(titleLable, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(activeStatusLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addGap(9, 9, 9)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(titleLable)
-                    .addComponent(activeStatusLabel))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(13, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(21, 21, 21)
-                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(21, 21, 21))
-            .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jSeparator1))
+                .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 3, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(21, 21, 21)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(9, 9, 9))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(12, 12, 12)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void usernameTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_usernameTextFieldActionPerformed
-    }//GEN-LAST:event_usernameTextFieldActionPerformed
+    private void updateChangesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateChangesButtonActionPerformed
+        updateDetails();
+    }//GEN-LAST:event_updateChangesButtonActionPerformed
 
-    private void firstnameTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_firstnameTextFieldActionPerformed
+    private void resetButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetButtonActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_firstnameTextFieldActionPerformed
+        resetData();
+    }//GEN-LAST:event_resetButtonActionPerformed
 
-    private void userTypeTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_userTypeTextFieldActionPerformed
+    private void forgotPasswordButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_forgotPasswordButtonActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_userTypeTextFieldActionPerformed
+    }//GEN-LAST:event_forgotPasswordButtonActionPerformed
 
-    private void lastnameTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lastnameTextFieldActionPerformed
+    private void enableEditsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enableEditsButtonActionPerformed
+        enableEdits();
+    }//GEN-LAST:event_enableEditsButtonActionPerformed
+
+    private void changeUserStatusButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changeUserStatusButtonActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_lastnameTextFieldActionPerformed
-
-    private void userStatusTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_userStatusTextFieldActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_userStatusTextFieldActionPerformed
-
-    private void passwordFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_passwordFieldActionPerformed
-    }//GEN-LAST:event_passwordFieldActionPerformed
-
-    private void showPasswordCheckBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_showPasswordCheckBoxItemStateChanged
-        if (showPasswordCheckBox.isSelected()) {
-            passwordField.setEchoChar((char) 0);
-        } else {
-            passwordField.setEchoChar('•');
-        }
-    }//GEN-LAST:event_showPasswordCheckBoxItemStateChanged
-
-    private void changeStatusButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changeStatusButtonActionPerformed
-        String shouldToDoAction = (userStatusId.equals(ACTIVE_STATUS_ID)) ? "deactivate" : "activate";
-        int option = JOptionPane.showConfirmDialog(this, "<html>Are you sure you want to <b>" + shouldToDoAction + "</b> this user?</html>", "Confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.YES_NO_OPTION, new ImageIcon(getClass().getResource("/resource/question.png")));
-
-        if (option == 0) {
-            try {
-                if (userStatusId.equals(ACTIVE_STATUS_ID)) {
-                    MySQL.execute("UPDATE `user` SET `user_status_id`='" + DEACTIVE_STATUS_ID + "' WHERE `id`='" + userId + "'");
-                    JOptionPane.showMessageDialog(this, "User Deactivated Successfully", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));
-
-                } else if (userStatusId.equals(DEACTIVE_STATUS_ID)) {
-                    MySQL.execute("UPDATE `user` SET `user_status_id`='" + ACTIVE_STATUS_ID + "' WHERE `id`='" + userId + "'");
-                    JOptionPane.showMessageDialog(this, "User Activated Successfully", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));
-                }
-                loadData();
-                userManagement.loadUserTable();
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "An unexpected error has occurred. Please try again later or contact support if the issue persists.", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
-                e.printStackTrace();
-            }
-        }
-
-    }//GEN-LAST:event_changeStatusButtonActionPerformed
+    }//GEN-LAST:event_changeUserStatusButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -449,28 +564,32 @@ public class UserDetails extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel activeStatusLabel;
-    private javax.swing.JButton changeStatusButton;
-    private javax.swing.JTextField firstnameTextField;
+    private javax.swing.JButton changeUserStatusButton;
+    private javax.swing.JTextField emailTextField;
+    private javax.swing.JButton enableEditsButton;
+    private javax.swing.JButton forgotPasswordButton;
+    private javax.swing.JTextField fullNameTextField;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
-    private javax.swing.JPanel jPanel6;
-    private javax.swing.JTextField lastnameTextField;
-    private javax.swing.JPasswordField passwordField;
-    private javax.swing.JLabel registeredDatejLabel;
-    private javax.swing.JCheckBox showPasswordCheckBox;
+    private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JTextField regDateTimeTextField;
+    private javax.swing.JButton resetButton;
     private javax.swing.JLabel titleLable;
+    private javax.swing.JButton updateChangesButton;
     private javax.swing.JTextField userStatusTextField;
-    private javax.swing.JTextField userTypeTextField;
+    private javax.swing.JLabel userTypeLabel;
     private javax.swing.JTextField usernameTextField;
+    private javax.swing.JComboBox<String> usertypeComboBox;
+    private javax.swing.JTextField verificationStatusTextField;
     // End of variables declaration//GEN-END:variables
 }
