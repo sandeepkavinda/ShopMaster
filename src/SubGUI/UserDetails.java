@@ -71,7 +71,7 @@ public class UserDetails extends javax.swing.JDialog {
                     + "WHERE u.username = '" + username + "'");
 
             if (result.next()) {
-                titleLable.setText(result.getString("u.username"));
+                titleLable.setText(result.getString("u.full_name"));
                 userTypeLabel.setText(result.getString("ut.name"));
 
                 fullNameTextField.setText(result.getString("u.full_name"));
