@@ -242,9 +242,9 @@ public class UserDetails extends javax.swing.JDialog {
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addGap(30, 30, 30)
-                .addComponent(titleLable, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(userTypeLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 272, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(titleLable, javax.swing.GroupLayout.PREFERRED_SIZE, 439, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(userTypeLabel)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
@@ -353,8 +353,6 @@ public class UserDetails extends javax.swing.JDialog {
 
         jLabel7.setText("User Status");
 
-        enableEditsButton.setBackground(new java.awt.Color(102, 102, 102));
-        enableEditsButton.setForeground(new java.awt.Color(255, 255, 255));
         enableEditsButton.setText("Enable Edits");
         enableEditsButton.setBorder(null);
         enableEditsButton.setPreferredSize(new java.awt.Dimension(99, 35));
