@@ -1,15 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JDialog.java to edit this template
- */
 package SubGUI;
 
 import DTO.UserEditableData;
 import java.awt.Color;
-import java.security.SecureRandom;
 import java.sql.ResultSet;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Vector;
 import javax.swing.DefaultComboBoxModel;
@@ -17,6 +10,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import model.MySQL;
 import panels.UserManagement;
+import utils.PasswordUtils;
 
 /**
  *
@@ -90,11 +84,25 @@ public class UserDetails extends javax.swing.JDialog {
                 userEditableData.setUserTypeId(result.getString("ut.id"));
 
                 if (userStatusId.equals(ACTIVE_STATUS_ID)) {
+
                     bottomJPanel.setBackground(Color.decode("#00694b"));
+                    enableEditsButton.setBackground(Color.decode("#00694b"));
+                    updateChangesButton.setBackground(Color.decode("#00694b"));
+                    titleLable.setForeground(Color.decode("#00694b"));
+                    userTypeLabel.setForeground(Color.decode("#00694b"));
+                    titleLable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/user.png")));
                     changeUserStatusButton.setText("Deactivate User");
+
                 } else if (userStatusId.equals(DEACTIVE_STATUS_ID)) {
-                    bottomJPanel.setBackground(Color.decode("#690028"));
+
+                    bottomJPanel.setBackground(Color.decode("#7D2324"));
+                    enableEditsButton.setBackground(Color.decode("#7D2324"));
+                    updateChangesButton.setBackground(Color.decode("#7D2324"));
+                    titleLable.setForeground(Color.decode("#7D2324"));
+                    userTypeLabel.setForeground(Color.decode("#7D2324"));
+                    titleLable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/user_red.png")));
                     changeUserStatusButton.setText("Activate User");
+
                 }
 
             } else {
@@ -114,7 +122,7 @@ public class UserDetails extends javax.swing.JDialog {
         updateChangesButton.setEnabled(true);
         enableEditsButton.setEnabled(false);
         fullNameTextField.grabFocus();
-        
+
     }
 
     private void resetData() {
@@ -190,9 +198,7 @@ public class UserDetails extends javax.swing.JDialog {
     }
 
     private void deactivateUser() {
-
         try {
-
             MySQL.execute("UPDATE user SET user_status_id='" + DEACTIVE_STATUS_ID + "' WHERE username = '" + username + "'");
             JOptionPane.showMessageDialog(this, "User Deactivated", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));
             resetData();
@@ -200,7 +206,6 @@ public class UserDetails extends javax.swing.JDialog {
             if (userManagement != null) {
                 userManagement.loadUserTable();
             }
-
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "Unexpected Error", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
@@ -212,7 +217,6 @@ public class UserDetails extends javax.swing.JDialog {
     private void activateUser() {
 
         try {
-
             MySQL.execute("UPDATE user SET user_status_id='" + ACTIVE_STATUS_ID + "' WHERE username = '" + username + "'");
             JOptionPane.showMessageDialog(this, "User Activated", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));
             resetData();
@@ -224,9 +228,29 @@ public class UserDetails extends javax.swing.JDialog {
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "Unexpected Error", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
+        }
+    }
+
+    private void resetPassword() {
+        int result = JOptionPane.showConfirmDialog(
+                this,
+                "Are you sure you want to reset this user's password?",
+                "Confirm Password Reset",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE
+        );
+
+        if (result == JOptionPane.YES_OPTION) {
+            try {
+                PasswordUtils.resetPassword(username);
+                UserOtpDetails userOtpDetails = new UserOtpDetails(null, true, username);
+                userOtpDetails.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(this, "An unexpected error has occurred. Please try again later or contact support if the issue persists.", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
+            }
 
         }
-
     }
 
     /**
@@ -575,7 +599,7 @@ public class UserDetails extends javax.swing.JDialog {
     }//GEN-LAST:event_resetButtonActionPerformed
 
     private void forgotPasswordButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_forgotPasswordButtonActionPerformed
-        // TODO add your handling code here:
+        resetPassword();
     }//GEN-LAST:event_forgotPasswordButtonActionPerformed
 
     private void enableEditsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enableEditsButtonActionPerformed

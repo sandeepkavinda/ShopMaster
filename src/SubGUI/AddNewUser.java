@@ -4,6 +4,7 @@
  */
 package SubGUI;
 
+import DTO.VerificationCodeData;
 import java.awt.Toolkit;
 import java.security.SecureRandom;
 import java.sql.ResultSet;
@@ -17,6 +18,7 @@ import javax.swing.table.DefaultTableModel;
 import model.MySQL;
 import panels.UserManagement;
 import java.sql.Timestamp;
+import utils.PasswordUtils;
 
 
 /**
@@ -139,14 +141,10 @@ public class AddNewUser extends javax.swing.JDialog {
                     usernameTextField.selectAll();
                 } else {
 
-                    LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(10);
-                    Timestamp expiryTimestamp = Timestamp.valueOf(expiresAt);
-
-                    SecureRandom random = new SecureRandom();
-                    int verificationCode = 100000 + random.nextInt(900000);
+                    VerificationCodeData verificationCodeData = PasswordUtils.generateVerificationCode();
 
                     MySQL.execute("INSERT INTO user (full_name, username, email, password, user_type_id, user_status_id, is_verified, verification_code, verification_code_expiry) "
-                            + "VALUES ('" + fullName + "', '" + userName + "', '" + email + "', " + null + ", '" + userTypeId + "', '1', '0', '" + verificationCode + "', '" + expiryTimestamp + "')");
+                            + "VALUES ('" + fullName + "', '" + userName + "', '" + email + "', " + null + ", '" + userTypeId + "', '1', '0', '" + verificationCodeData.getVerificationCode() + "', '" + verificationCodeData.getExpiryTimestamp()+ "')");
                     JOptionPane.showMessageDialog(this, "User Added Successfully", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));
                     loadUserTable();
                     resetFields();

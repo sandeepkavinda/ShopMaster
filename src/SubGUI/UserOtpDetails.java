@@ -6,7 +6,10 @@ package SubGUI;
 
 import java.sql.ResultSet;
 import javax.swing.JOptionPane;
+import javax.swing.Timer;
 import model.MySQL;
+import java.sql.Timestamp;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -15,12 +18,15 @@ import model.MySQL;
 public class UserOtpDetails extends javax.swing.JDialog {
 
     private String username;
+    private Timer timer;
+    private Timestamp expiryTimestamp;
 
     public UserOtpDetails(java.awt.Frame parent, boolean modal, String username) {
         super(parent, modal);
         initComponents();
         this.username = username;
         loadUserDetails();
+        startCountdown();
     }
 
     private void loadUserDetails() {
@@ -38,6 +44,8 @@ public class UserOtpDetails extends javax.swing.JDialog {
                     userNameTextLabel.setText(resultSet.getString("u.username"));
                     userTypeTextLabel.setText(resultSet.getString("ut.name"));
                     otpTextLabel.setText(resultSet.getString("u.verification_code"));
+                    
+                    expiryTimestamp = resultSet.getTimestamp("u.verification_code_expiry");
                 } else {
                     JOptionPane.showMessageDialog(null, "Invalid Username", "Error", JOptionPane.ERROR_MESSAGE);
                     this.dispose();
@@ -51,6 +59,24 @@ public class UserOtpDetails extends javax.swing.JDialog {
         } else {
             JOptionPane.showMessageDialog(null, "Username is Null", "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+    
+     public void startCountdown() {
+
+        timer = new Timer(1000, e -> {
+            long diffMillis = expiryTimestamp.getTime() - System.currentTimeMillis();
+
+            if (diffMillis <= 0) {
+                otpTextLabel1.setText("Expired");
+                timer.stop();
+            } else {
+                long minutes = TimeUnit.MILLISECONDS.toMinutes(diffMillis);
+                long seconds = TimeUnit.MILLISECONDS.toSeconds(diffMillis) % 60;
+                otpTextLabel1.setText(String.format("Expire in %02d:%02d", minutes, seconds));
+            }
+        });
+
+        timer.start();
     }
 
 
@@ -87,6 +113,7 @@ public class UserOtpDetails extends javax.swing.JDialog {
         payableTextLabel7 = new javax.swing.JLabel();
         otpTextLabel = new javax.swing.JLabel();
         payableTextLabel12 = new javax.swing.JLabel();
+        otpTextLabel1 = new javax.swing.JLabel();
 
         jFormattedTextField1.setText("jFormattedTextField1");
 
@@ -244,10 +271,13 @@ public class UserOtpDetails extends javax.swing.JDialog {
 
         otpTextLabel.setFont(new java.awt.Font("Poppins", 1, 18)); // NOI18N
         otpTextLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        otpTextLabel.setText("125265");
+        otpTextLabel.setText(" ");
 
         payableTextLabel12.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         payableTextLabel12.setText("Provide this code to the user for password reset.");
+
+        otpTextLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        otpTextLabel1.setText("Expire In");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -267,7 +297,10 @@ public class UserOtpDetails extends javax.swing.JDialog {
                         .addGap(0, 134, Short.MAX_VALUE))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(payableTextLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(payableTextLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(otpTextLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -279,9 +312,11 @@ public class UserOtpDetails extends javax.swing.JDialog {
                 .addComponent(payableTextLabel7)
                 .addGap(0, 0, 0)
                 .addComponent(otpTextLabel)
-                .addGap(24, 24, 24)
+                .addGap(0, 0, 0)
+                .addComponent(otpTextLabel1)
+                .addGap(21, 21, 21)
                 .addComponent(payableTextLabel12)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(doneButton, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -418,6 +453,7 @@ public class UserOtpDetails extends javax.swing.JDialog {
     private javax.swing.JPanel jPanel9;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel otpTextLabel;
+    private javax.swing.JLabel otpTextLabel1;
     private javax.swing.JLabel payableTextLabel10;
     private javax.swing.JLabel payableTextLabel11;
     private javax.swing.JLabel payableTextLabel12;
