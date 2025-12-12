@@ -7,6 +7,7 @@ package panels;
 import GUI.Home;
 import SubGUI.AddNewUser;
 import SubGUI.UserDetails;
+import SubGUI.UserDetails;
 import java.awt.event.ItemEvent;
 import java.sql.ResultSet;
 import java.util.HashMap;
@@ -184,7 +185,7 @@ public class UserManagement extends javax.swing.JPanel {
         int selectedRow = userTable.getSelectedRow();
         if (selectedRow != -1) {
             String username = userTable.getValueAt(selectedRow, 0).toString();
-            UserDetails userDetails = new UserDetails(home, true, username, this);
+            UserDetails userDetails = new UserDetails(home, true,username, this);
             userDetails.setVisible(true);
         }
     }

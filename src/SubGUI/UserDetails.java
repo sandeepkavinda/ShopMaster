@@ -90,8 +90,10 @@ public class UserDetails extends javax.swing.JDialog {
                 userEditableData.setUserTypeId(result.getString("ut.id"));
 
                 if (userStatusId.equals(ACTIVE_STATUS_ID)) {
+                    bottomJPanel.setBackground(Color.decode("#00694b"));
                     changeUserStatusButton.setText("Deactivate User");
                 } else if (userStatusId.equals(DEACTIVE_STATUS_ID)) {
+                    bottomJPanel.setBackground(Color.decode("#690028"));
                     changeUserStatusButton.setText("Activate User");
                 }
 
@@ -111,6 +113,8 @@ public class UserDetails extends javax.swing.JDialog {
         usertypeComboBox.setEnabled(true);
         updateChangesButton.setEnabled(true);
         enableEditsButton.setEnabled(false);
+        fullNameTextField.grabFocus();
+        
     }
 
     private void resetData() {
@@ -185,6 +189,46 @@ public class UserDetails extends javax.swing.JDialog {
 
     }
 
+    private void deactivateUser() {
+
+        try {
+
+            MySQL.execute("UPDATE user SET user_status_id='" + DEACTIVE_STATUS_ID + "' WHERE username = '" + username + "'");
+            JOptionPane.showMessageDialog(this, "User Deactivated", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));
+            resetData();
+
+            if (userManagement != null) {
+                userManagement.loadUserTable();
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Unexpected Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+
+        }
+
+    }
+
+    private void activateUser() {
+
+        try {
+
+            MySQL.execute("UPDATE user SET user_status_id='" + ACTIVE_STATUS_ID + "' WHERE username = '" + username + "'");
+            JOptionPane.showMessageDialog(this, "User Activated", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));
+            resetData();
+
+            if (userManagement != null) {
+                userManagement.loadUserTable();
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Unexpected Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+
+        }
+
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -221,6 +265,7 @@ public class UserDetails extends javax.swing.JDialog {
         jLabel13 = new javax.swing.JLabel();
         regDateTimeTextField = new javax.swing.JTextField();
         changeUserStatusButton = new javax.swing.JButton();
+        bottomJPanel = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("User Details");
@@ -448,7 +493,7 @@ public class UserDetails extends javax.swing.JDialog {
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(26, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -457,7 +502,7 @@ public class UserDetails extends javax.swing.JDialog {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(13, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -483,21 +528,37 @@ public class UserDetails extends javax.swing.JDialog {
                 .addContainerGap())
         );
 
+        bottomJPanel.setBackground(new java.awt.Color(153, 0, 0));
+
+        javax.swing.GroupLayout bottomJPanelLayout = new javax.swing.GroupLayout(bottomJPanel);
+        bottomJPanel.setLayout(bottomJPanelLayout);
+        bottomJPanelLayout.setHorizontalGroup(
+            bottomJPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        bottomJPanelLayout.setVerticalGroup(
+            bottomJPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 8, Short.MAX_VALUE)
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(21, 21, 21)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(12, 12, 12)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGap(9, 9, 9))
+            .addComponent(bottomJPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(12, 12, 12)
+                .addGap(11, 11, 11)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(bottomJPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, 0))
         );
 
         pack();
@@ -522,7 +583,11 @@ public class UserDetails extends javax.swing.JDialog {
     }//GEN-LAST:event_enableEditsButtonActionPerformed
 
     private void changeUserStatusButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changeUserStatusButtonActionPerformed
-        // TODO add your handling code here:
+        if (userStatusId.equals(ACTIVE_STATUS_ID)) {
+            deactivateUser();
+        } else if (userStatusId.equals(DEACTIVE_STATUS_ID)) {
+            activateUser();
+        }
     }//GEN-LAST:event_changeUserStatusButtonActionPerformed
 
     /**
@@ -552,6 +617,12 @@ public class UserDetails extends javax.swing.JDialog {
         }
         //</editor-fold>
         //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
 
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -562,6 +633,7 @@ public class UserDetails extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel bottomJPanel;
     private javax.swing.JButton changeUserStatusButton;
     private javax.swing.JTextField emailTextField;
     private javax.swing.JButton enableEditsButton;
