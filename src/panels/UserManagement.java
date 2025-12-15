@@ -8,15 +8,19 @@ import GUI.Home;
 import SubGUI.AddNewUser;
 import SubGUI.UserDetails;
 import SubGUI.UserDetails;
+import SubGUI.UserOtpDetails;
 import java.awt.event.ItemEvent;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Vector;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import model.MySQL;
+import user.PasswordService;
+import utils.ClipboardUtils;
 import utils.ToastUtils;
 
 /**
@@ -185,8 +189,36 @@ public class UserManagement extends javax.swing.JPanel {
         int selectedRow = userTable.getSelectedRow();
         if (selectedRow != -1) {
             String username = userTable.getValueAt(selectedRow, 0).toString();
-            UserDetails userDetails = new UserDetails(home, true,username, this);
+            UserDetails userDetails = new UserDetails(home, true, username, this);
             userDetails.setVisible(true);
+        }
+    }
+
+    private void openSelectedUserOtp() {
+        int selectedRow = userTable.getSelectedRow();
+        if (selectedRow != -1) {
+            String username = userTable.getValueAt(selectedRow, 0).toString();
+            new UserOtpDetails(home, true, username);
+        }
+    }
+
+    private void copySelectedUsername() {
+        int selectedRow = userTable.getSelectedRow();
+
+        if (selectedRow != -1) {
+            String username = String.valueOf(userTable.getValueAt(selectedRow, 0));
+            ClipboardUtils.copyToClipboard(username);
+            ToastUtils.showBottomToast(home, "Username Copied To Clipboard", 1500);
+        }
+    }
+    
+       private void copySelectedEmail() {
+        int selectedRow = userTable.getSelectedRow();
+
+        if (selectedRow != -1) {
+            String email = String.valueOf(userTable.getValueAt(selectedRow, 1));
+            ClipboardUtils.copyToClipboard(email);
+            ToastUtils.showBottomToast(home, "Email Copied To Clipboard", 1500);
         }
     }
 
@@ -203,6 +235,8 @@ public class UserManagement extends javax.swing.JPanel {
         jMenuItem1 = new javax.swing.JMenuItem();
         jMenuItem2 = new javax.swing.JMenuItem();
         jMenuItem3 = new javax.swing.JMenuItem();
+        jMenu1 = new javax.swing.JMenu();
+        jMenuItem5 = new javax.swing.JMenuItem();
         jMenuItem4 = new javax.swing.JMenuItem();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
@@ -239,6 +273,11 @@ public class UserManagement extends javax.swing.JPanel {
         rightClickPopupMenu.add(jMenuItem1);
 
         jMenuItem2.setText("View OTP");
+        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem2ActionPerformed(evt);
+            }
+        });
         rightClickPopupMenu.add(jMenuItem2);
 
         jMenuItem3.setText("Forgot Password");
@@ -249,13 +288,25 @@ public class UserManagement extends javax.swing.JPanel {
         });
         rightClickPopupMenu.add(jMenuItem3);
 
-        jMenuItem4.setText("Deactivate User");
+        jMenu1.setText("Copy");
+
+        jMenuItem5.setText("Copy Username");
+        jMenuItem5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem5ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem5);
+
+        jMenuItem4.setText("Copy Email");
         jMenuItem4.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItem4ActionPerformed(evt);
             }
         });
-        rightClickPopupMenu.add(jMenuItem4);
+        jMenu1.add(jMenuItem4);
+
+        rightClickPopupMenu.add(jMenu1);
 
         setMinimumSize(new java.awt.Dimension(852, 617));
         setPreferredSize(new java.awt.Dimension(852, 617));
@@ -684,14 +735,22 @@ public class UserManagement extends javax.swing.JPanel {
     }//GEN-LAST:event_verificationStatusComboBoxItemStateChanged
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-       openSelectedUserDetails();
+        openSelectedUserDetails();
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
     private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
-    }//GEN-LAST:event_jMenuItem3ActionPerformed
 
-    private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem4ActionPerformed
-    }//GEN-LAST:event_jMenuItem4ActionPerformed
+        try {
+            int selectedRow = userTable.getSelectedRow();
+            if (selectedRow != -1) {
+                String username = userTable.getValueAt(selectedRow, 0).toString();
+                PasswordService.resetUserPassword(username, this);
+
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "An unexpected error has occurred. Please try again later or contact support if the issue persists.", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_jMenuItem3ActionPerformed
 
     private void userTableMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_userTableMouseReleased
         int row = userTable.rowAtPoint(evt.getPoint());
@@ -703,6 +762,18 @@ public class UserManagement extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_userTableMouseReleased
 
+    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
+        openSelectedUserOtp();
+    }//GEN-LAST:event_jMenuItem2ActionPerformed
+
+    private void jMenuItem5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem5ActionPerformed
+        copySelectedUsername();
+    }//GEN-LAST:event_jMenuItem5ActionPerformed
+
+    private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem4ActionPerformed
+        copySelectedEmail();
+    }//GEN-LAST:event_jMenuItem4ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addNewProductButton;
@@ -713,10 +784,12 @@ public class UserManagement extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JMenuItem jMenuItem4;
+    private javax.swing.JMenuItem jMenuItem5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel2;

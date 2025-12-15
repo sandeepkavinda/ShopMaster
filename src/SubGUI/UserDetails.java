@@ -1,6 +1,7 @@
 package SubGUI;
 
 import DTO.UserEditableData;
+import constants.UserStatusConstants;
 import java.awt.Color;
 import java.sql.ResultSet;
 import java.util.HashMap;
@@ -10,7 +11,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import model.MySQL;
 import panels.UserManagement;
-import utils.PasswordUtils;
+import user.PasswordService;
+import user.StatusService;
 
 /**
  *
@@ -23,13 +25,9 @@ public class UserDetails extends javax.swing.JDialog {
 
     private UserEditableData userEditableData = new UserEditableData();
 
-    private String userStatusId;
+    private int userStatusId;
 
     HashMap<String, String> userTypeMap = new HashMap<>();
-
-    // Database Status Ids
-    private String ACTIVE_STATUS_ID = "1";
-    private String DEACTIVE_STATUS_ID = "2";
 
     public UserDetails(java.awt.Frame parent, boolean modal, String username, UserManagement userManagement) {
         super(parent, modal);
@@ -76,14 +74,13 @@ public class UserDetails extends javax.swing.JDialog {
                 verificationStatusTextField.setText(result.getBoolean("u.is_verified") ? "Verified" : "Not Verified");
                 regDateTimeTextField.setText(result.getString("u.registered_date_time"));
 
-                String userStatusId = result.getString("us.id");
-                this.userStatusId = userStatusId;
+                this.userStatusId = result.getInt("us.id");
 
                 userEditableData.setFullName(result.getString("u.full_name"));
                 userEditableData.setEmail(result.getString("u.email"));
                 userEditableData.setUserTypeId(result.getString("ut.id"));
 
-                if (userStatusId.equals(ACTIVE_STATUS_ID)) {
+                if (userStatusId == UserStatusConstants.ACTIVE) {
 
                     bottomJPanel.setBackground(Color.decode("#00694b"));
                     enableEditsButton.setBackground(Color.decode("#00694b"));
@@ -93,7 +90,7 @@ public class UserDetails extends javax.swing.JDialog {
                     titleLable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/user.png")));
                     changeUserStatusButton.setText("Deactivate User");
 
-                } else if (userStatusId.equals(DEACTIVE_STATUS_ID)) {
+                } else if (userStatusId == UserStatusConstants.DEACTIVE) {
 
                     bottomJPanel.setBackground(Color.decode("#7D2324"));
                     enableEditsButton.setBackground(Color.decode("#7D2324"));
@@ -197,62 +194,39 @@ public class UserDetails extends javax.swing.JDialog {
 
     }
 
-    private void deactivateUser() {
-        try {
-            MySQL.execute("UPDATE user SET user_status_id='" + DEACTIVE_STATUS_ID + "' WHERE username = '" + username + "'");
-            JOptionPane.showMessageDialog(this, "User Deactivated", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));
-            resetData();
-
-            if (userManagement != null) {
-                userManagement.loadUserTable();
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Unexpected Error", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
-
-        }
-
-    }
-
-    private void activateUser() {
-
-        try {
-            MySQL.execute("UPDATE user SET user_status_id='" + ACTIVE_STATUS_ID + "' WHERE username = '" + username + "'");
-            JOptionPane.showMessageDialog(this, "User Activated", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));
-            resetData();
-
-            if (userManagement != null) {
-                userManagement.loadUserTable();
-            }
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Unexpected Error", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
-        }
-    }
-
-    private void resetPassword() {
-        int result = JOptionPane.showConfirmDialog(
-                this,
-                "Are you sure you want to reset this user's password?",
-                "Confirm Password Reset",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.WARNING_MESSAGE
-        );
-
-        if (result == JOptionPane.YES_OPTION) {
-            try {
-                PasswordUtils.resetPassword(username);
-                UserOtpDetails userOtpDetails = new UserOtpDetails(null, true, username);
-                userOtpDetails.setVisible(true);
-            } catch (Exception e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(this, "An unexpected error has occurred. Please try again later or contact support if the issue persists.", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
-            }
-
-        }
-    }
-
+//    private void deactivateUser() {
+//        try {
+//            MySQL.execute("UPDATE user SET user_status_id='" + UserStatusConstants.DEACTIVE + "' WHERE username = '" + username + "'");
+//            JOptionPane.showMessageDialog(this, "User Deactivated", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));
+//            resetData();
+//
+//            if (userManagement != null) {
+//                userManagement.loadUserTable();
+//            }
+//        } catch (Exception e) {
+//            JOptionPane.showMessageDialog(this, e.getMessage(), "Unexpected Error", JOptionPane.ERROR_MESSAGE);
+//            e.printStackTrace();
+//
+//        }
+//
+//    }
+//
+//    private void activateUser() {
+//
+//        try {
+//            MySQL.execute("UPDATE user SET user_status_id='" + UserStatusConstants.ACTIVE + "' WHERE username = '" + username + "'");
+//            JOptionPane.showMessageDialog(this, "User Activated", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));
+//            resetData();
+//
+//            if (userManagement != null) {
+//                userManagement.loadUserTable();
+//            }
+//
+//        } catch (Exception e) {
+//            JOptionPane.showMessageDialog(this, e.getMessage(), "Unexpected Error", JOptionPane.ERROR_MESSAGE);
+//            e.printStackTrace();
+//        }
+//    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -599,7 +573,11 @@ public class UserDetails extends javax.swing.JDialog {
     }//GEN-LAST:event_resetButtonActionPerformed
 
     private void forgotPasswordButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_forgotPasswordButtonActionPerformed
-        resetPassword();
+        try {
+            PasswordService.resetUserPassword(username, userManagement);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "An unexpected error has occurred. Please try again later or contact support if the issue persists.", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_forgotPasswordButtonActionPerformed
 
     private void enableEditsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enableEditsButtonActionPerformed
@@ -607,11 +585,22 @@ public class UserDetails extends javax.swing.JDialog {
     }//GEN-LAST:event_enableEditsButtonActionPerformed
 
     private void changeUserStatusButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changeUserStatusButtonActionPerformed
-        if (userStatusId.equals(ACTIVE_STATUS_ID)) {
-            deactivateUser();
-        } else if (userStatusId.equals(DEACTIVE_STATUS_ID)) {
-            activateUser();
+
+        try {
+            if (userStatusId == UserStatusConstants.ACTIVE) {
+                StatusService.deactivateUser(username, userManagement);
+                JOptionPane.showMessageDialog(this, "User Deactivated", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));
+            } else if (userStatusId == UserStatusConstants.DEACTIVE) {
+                StatusService.activateUser(username, userManagement);
+                JOptionPane.showMessageDialog(this, "User Activated", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));
+            }
+            resetData();
+            
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Unexpected Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
         }
+
     }//GEN-LAST:event_changeUserStatusButtonActionPerformed
 
     /**

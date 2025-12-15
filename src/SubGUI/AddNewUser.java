@@ -6,9 +6,7 @@ package SubGUI;
 
 import DTO.VerificationCodeData;
 import java.awt.Toolkit;
-import java.security.SecureRandom;
 import java.sql.ResultSet;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Vector;
 import javax.swing.DefaultComboBoxModel;
@@ -17,8 +15,9 @@ import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import model.MySQL;
 import panels.UserManagement;
-import java.sql.Timestamp;
-import utils.PasswordUtils;
+
+import user.PasswordService;
+
 
 
 /**
@@ -141,7 +140,7 @@ public class AddNewUser extends javax.swing.JDialog {
                     usernameTextField.selectAll();
                 } else {
 
-                    VerificationCodeData verificationCodeData = PasswordUtils.generateVerificationCode();
+                    VerificationCodeData verificationCodeData = PasswordService.generateVerificationCode();
 
                     MySQL.execute("INSERT INTO user (full_name, username, email, password, user_type_id, user_status_id, is_verified, verification_code, verification_code_expiry) "
                             + "VALUES ('" + fullName + "', '" + userName + "', '" + email + "', " + null + ", '" + userTypeId + "', '1', '0', '" + verificationCodeData.getVerificationCode() + "', '" + verificationCodeData.getExpiryTimestamp()+ "')");
@@ -149,8 +148,7 @@ public class AddNewUser extends javax.swing.JDialog {
                     loadUserTable();
                     resetFields();
                     
-                    UserOtpDetails userOtpDetails = new UserOtpDetails(null, true, userName);
-                    userOtpDetails.setVisible(true);
+                    new UserOtpDetails(null, true, userName);
                     
                 }
             } catch (Exception e) {

@@ -9,6 +9,7 @@ import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import model.MySQL;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -26,7 +27,7 @@ public class UserOtpDetails extends javax.swing.JDialog {
         initComponents();
         this.username = username;
         loadUserDetails();
-        startCountdown();
+
     }
 
     private void loadUserDetails() {
@@ -39,13 +40,28 @@ public class UserOtpDetails extends javax.swing.JDialog {
                         + "WHERE u.username = '" + username + "'");
 
                 if (resultSet.next()) {
-                    fullNameTextLabel.setText(resultSet.getString("u.full_name"));
-                    emailTextLabel.setText(resultSet.getString("u.email"));
-                    userNameTextLabel.setText(resultSet.getString("u.username"));
-                    userTypeTextLabel.setText(resultSet.getString("ut.name"));
-                    otpTextLabel.setText(resultSet.getString("u.verification_code"));
-                    
+
                     expiryTimestamp = resultSet.getTimestamp("u.verification_code_expiry");
+
+                    boolean isVerified = resultSet.getBoolean("u.is_verified");
+                    boolean isExpired = expiryTimestamp.toInstant().isBefore(Instant.now());
+
+                    if (isVerified) {
+                        JOptionPane.showMessageDialog(null, "OTP is not required for verified users.", "Warning", JOptionPane.WARNING_MESSAGE);
+                        this.dispose();
+                    } else if (isExpired) {
+                        JOptionPane.showMessageDialog(null, "The OTP has expired.", "Warning", JOptionPane.WARNING_MESSAGE);
+                        this.dispose();
+                    } else {
+                        fullNameTextLabel.setText(resultSet.getString("u.full_name"));
+                        emailTextLabel.setText(resultSet.getString("u.email"));
+                        userNameTextLabel.setText(resultSet.getString("u.username"));
+                        userTypeTextLabel.setText(resultSet.getString("ut.name"));
+                        otpTextLabel.setText(resultSet.getString("u.verification_code"));
+                        startCountdown();
+                        this.setVisible(true);
+                    }
+
                 } else {
                     JOptionPane.showMessageDialog(null, "Invalid Username", "Error", JOptionPane.ERROR_MESSAGE);
                     this.dispose();
@@ -60,8 +76,9 @@ public class UserOtpDetails extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(null, "Username is Null", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-    
-     public void startCountdown() {
+
+    public void startCountdown() {
+
 
         timer = new Timer(1000, e -> {
             long diffMillis = expiryTimestamp.getTime() - System.currentTimeMillis();
@@ -75,10 +92,9 @@ public class UserOtpDetails extends javax.swing.JDialog {
                 otpTextLabel1.setText(String.format("Expire in %02d:%02d", minutes, seconds));
             }
         });
-
+        timer.setInitialDelay(0);
         timer.start();
     }
-
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -110,10 +126,11 @@ public class UserOtpDetails extends javax.swing.JDialog {
         userNameTextLabel = new javax.swing.JLabel();
         userTypeTextLabel = new javax.swing.JLabel();
         doneButton = new javax.swing.JButton();
-        payableTextLabel7 = new javax.swing.JLabel();
-        otpTextLabel = new javax.swing.JLabel();
         payableTextLabel12 = new javax.swing.JLabel();
+        jPanel5 = new javax.swing.JPanel();
+        otpTextLabel = new javax.swing.JLabel();
         otpTextLabel1 = new javax.swing.JLabel();
+        otpTextLabel2 = new javax.swing.JLabel();
 
         jFormattedTextField1.setText("jFormattedTextField1");
 
@@ -265,19 +282,44 @@ public class UserOtpDetails extends javax.swing.JDialog {
             }
         });
 
-        payableTextLabel7.setFont(new java.awt.Font("Poppins", 1, 18)); // NOI18N
-        payableTextLabel7.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        payableTextLabel7.setText("OTP");
-
-        otpTextLabel.setFont(new java.awt.Font("Poppins", 1, 18)); // NOI18N
-        otpTextLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        otpTextLabel.setText(" ");
-
         payableTextLabel12.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         payableTextLabel12.setText("Provide this code to the user for password reset.");
 
+        otpTextLabel.setFont(new java.awt.Font("Poppins", 1, 18)); // NOI18N
+        otpTextLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        otpTextLabel.setText("000000");
+
+        otpTextLabel1.setFont(new java.awt.Font("Poppins", 0, 12)); // NOI18N
         otpTextLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        otpTextLabel1.setText("Expire In");
+        otpTextLabel1.setText(" ");
+
+        otpTextLabel2.setFont(new java.awt.Font("Poppins", 1, 14)); // NOI18N
+        otpTextLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        otpTextLabel2.setText("OTP");
+
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(otpTextLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(otpTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(otpTextLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 171, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        jPanel5Layout.setVerticalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addGap(9, 9, 9)
+                .addComponent(otpTextLabel2)
+                .addGap(0, 0, 0)
+                .addComponent(otpTextLabel)
+                .addGap(0, 0, 0)
+                .addComponent(otpTextLabel1)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -287,20 +329,18 @@ public class UserOtpDetails extends javax.swing.JDialog {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addContainerGap()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(payableTextLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(otpTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGap(136, 136, 136)
                         .addComponent(doneButton, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 134, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(payableTextLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(otpTextLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                        .addContainerGap(110, Short.MAX_VALUE)
+                        .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(110, 110, 110)))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -308,17 +348,13 @@ public class UserOtpDetails extends javax.swing.JDialog {
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(24, 24, 24)
-                .addComponent(payableTextLabel7)
-                .addGap(0, 0, 0)
-                .addComponent(otpTextLabel)
-                .addGap(0, 0, 0)
-                .addComponent(otpTextLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(21, 21, 21)
                 .addComponent(payableTextLabel12)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(doneButton, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(20, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -450,10 +486,12 @@ public class UserOtpDetails extends javax.swing.JDialog {
     private javax.swing.JPanel jPanel20;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel9;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel otpTextLabel;
     private javax.swing.JLabel otpTextLabel1;
+    private javax.swing.JLabel otpTextLabel2;
     private javax.swing.JLabel payableTextLabel10;
     private javax.swing.JLabel payableTextLabel11;
     private javax.swing.JLabel payableTextLabel12;
@@ -461,7 +499,6 @@ public class UserOtpDetails extends javax.swing.JDialog {
     private javax.swing.JLabel payableTextLabel4;
     private javax.swing.JLabel payableTextLabel5;
     private javax.swing.JLabel payableTextLabel6;
-    private javax.swing.JLabel payableTextLabel7;
     private javax.swing.JLabel payableTextLabel8;
     private javax.swing.JLabel payableTextLabel9;
     private javax.swing.JLabel supplierNameShowLabel;
