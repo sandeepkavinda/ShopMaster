@@ -1,12 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
- */
 package panels;
 
 import GUI.Home;
 import SubGUI.AddNewUser;
-import SubGUI.UserDetails;
 import SubGUI.UserDetails;
 import SubGUI.UserOtpDetails;
 import java.awt.event.ItemEvent;
@@ -208,7 +203,7 @@ public class UserManagement extends javax.swing.JPanel {
         if (selectedRow != -1) {
             String username = String.valueOf(userTable.getValueAt(selectedRow, 0));
             ClipboardUtils.copyToClipboard(username);
-            ToastUtils.showBottomToast(home, "Username Copied To Clipboard", 1500);
+            ToastUtils.showBottomToast(home, "Copied To Clipboard", 1500);
         }
     }
     
@@ -218,7 +213,7 @@ public class UserManagement extends javax.swing.JPanel {
         if (selectedRow != -1) {
             String email = String.valueOf(userTable.getValueAt(selectedRow, 1));
             ClipboardUtils.copyToClipboard(email);
-            ToastUtils.showBottomToast(home, "Email Copied To Clipboard", 1500);
+            ToastUtils.showBottomToast(home, "Copied To Clipboard", 1500);
         }
     }
 

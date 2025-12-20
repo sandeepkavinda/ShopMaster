@@ -334,15 +334,14 @@ public class AddNewProduct extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(this, "The Product Name must contain fewer than 50 characters.", "Warning", JOptionPane.WARNING_MESSAGE);
         } else if (categoryId == null) {
             JOptionPane.showMessageDialog(this, "Please Select a Category", "Warning", JOptionPane.WARNING_MESSAGE);
-
         } else if (measUnitId == null) {
             JOptionPane.showMessageDialog(this, "Please Select a Measurement Id", "Warning", JOptionPane.WARNING_MESSAGE);
         } else {
 
             try {
-                ResultSet resultset = MySQL.execute("SELECT * FROM `product` WHERE `name`='" + productName + "'");
+                ResultSet resultset = MySQL.execute("SELECT * FROM product WHERE name='" + productName + "' AND category_id='" + categoryId + "' AND measurement_unit_id='" + measUnitId + "' ");
                 if (resultset.next()) {
-                    JOptionPane.showMessageDialog(this, '"' + productName + '"' + " is Already Added", "Warning", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "This product already exists with the same category and unit.", "Duplicate Product", JOptionPane.WARNING_MESSAGE);
                 } else {
 
                     MySQL.execute("INSERT INTO `product` (`name`,`category_id`,`measurement_unit_id`) "

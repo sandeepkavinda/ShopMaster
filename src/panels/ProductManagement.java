@@ -7,6 +7,8 @@ package panels;
 import GUI.Home;
 import GUI.Notifications;
 import SubGUI.AddNewProduct;
+import SubGUI.ProductDetails;
+import SubGUI.UserDetails;
 import java.awt.event.ItemEvent;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,8 +17,11 @@ import java.util.Vector;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import model.MySQL;
+import utils.ClipboardUtils;
 import utils.ToastUtils;
 
 /**
@@ -38,6 +43,19 @@ public class ProductManagement extends javax.swing.JPanel {
         loadCategories();
         loadMeasurementUnits();
         loadProductTable();
+
+        //Table Data Alignment
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+
+        DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
+        rightRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
+
+        productTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
+        productTable.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
+        productTable.getColumnModel().getColumn(3).setCellRenderer(centerRenderer);
+        productTable.getColumnModel().getColumn(4).setCellRenderer(centerRenderer);
+
     }
 
     private void loadCategories() {
@@ -184,6 +202,24 @@ public class ProductManagement extends javax.swing.JPanel {
 
     }
 
+    private void openSelectedProductDetails(boolean editable) {
+        int selectedRow = productTable.getSelectedRow();
+        if (selectedRow != -1) {
+            String productId = productTable.getValueAt(selectedRow, 0).toString();
+            new ProductDetails(home, true, productId, this, editable);
+        }
+    }
+    
+      private void copySelectedProductId() {
+        int selectedRow = productTable.getSelectedRow();
+
+        if (selectedRow != -1) {
+            String productId = String.valueOf(productTable.getValueAt(selectedRow, 0));
+            ClipboardUtils.copyToClipboard(productId);
+            ToastUtils.showBottomToast(home, "Copied To Clipboard",1500);
+        }
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -193,6 +229,10 @@ public class ProductManagement extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        rightClickPopupMenu = new javax.swing.JPopupMenu();
+        jMenuItem1 = new javax.swing.JMenuItem();
+        jMenuItem2 = new javax.swing.JMenuItem();
+        jMenuItem3 = new javax.swing.JMenuItem();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
@@ -212,11 +252,33 @@ public class ProductManagement extends javax.swing.JPanel {
         addNewProductButton1 = new javax.swing.JButton();
         jPanel8 = new javax.swing.JPanel();
         addNewProductButton = new javax.swing.JButton();
-        jPanel6 = new javax.swing.JPanel();
-        deleteButton = new javax.swing.JButton();
         jPanel9 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         productTable = new javax.swing.JTable();
+
+        jMenuItem1.setText("Open Product Details");
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
+        rightClickPopupMenu.add(jMenuItem1);
+
+        jMenuItem2.setText("Edit");
+        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem2ActionPerformed(evt);
+            }
+        });
+        rightClickPopupMenu.add(jMenuItem2);
+
+        jMenuItem3.setText("Copy Product Id");
+        jMenuItem3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem3ActionPerformed(evt);
+            }
+        });
+        rightClickPopupMenu.add(jMenuItem3);
 
         setMinimumSize(new java.awt.Dimension(852, 617));
         setPreferredSize(new java.awt.Dimension(852, 617));
@@ -248,7 +310,7 @@ public class ProductManagement extends javax.swing.JPanel {
                     .addGroup(jPanel7Layout.createSequentialGroup()
                         .addComponent(jLabel6)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(searchTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 108, Short.MAX_VALUE))
+                    .addComponent(searchTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 128, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel7Layout.setVerticalGroup(
@@ -280,7 +342,7 @@ public class ProductManagement extends javax.swing.JPanel {
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(categotyComboBox, 0, 108, Short.MAX_VALUE)
+                    .addComponent(categotyComboBox, 0, 128, Short.MAX_VALUE)
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addGap(0, 0, Short.MAX_VALUE)))
@@ -318,7 +380,7 @@ public class ProductManagement extends javax.swing.JPanel {
                     .addComponent(measUnitsComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel4)
-                        .addGap(0, 10, Short.MAX_VALUE)))
+                        .addGap(0, 30, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -351,7 +413,7 @@ public class ProductManagement extends javax.swing.JPanel {
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sortByComboBox, 0, 108, Short.MAX_VALUE)
+                    .addComponent(sortByComboBox, 0, 128, Short.MAX_VALUE)
                     .addGroup(jPanel4Layout.createSequentialGroup()
                         .addComponent(jLabel5)
                         .addGap(0, 0, Short.MAX_VALUE)))
@@ -387,7 +449,7 @@ public class ProductManagement extends javax.swing.JPanel {
             jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel10Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(addNewProductButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE)
+                .addComponent(addNewProductButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 122, Short.MAX_VALUE)
                 .addGap(12, 12, 12))
         );
         jPanel10Layout.setVerticalGroup(
@@ -418,7 +480,7 @@ public class ProductManagement extends javax.swing.JPanel {
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel8Layout.createSequentialGroup()
                 .addGap(12, 12, 12)
-                .addComponent(addNewProductButton, javax.swing.GroupLayout.DEFAULT_SIZE, 101, Short.MAX_VALUE)
+                .addComponent(addNewProductButton, javax.swing.GroupLayout.DEFAULT_SIZE, 121, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel8Layout.setVerticalGroup(
@@ -430,36 +492,6 @@ public class ProductManagement extends javax.swing.JPanel {
         );
 
         jPanel2.add(jPanel8);
-
-        jPanel6.setForeground(new java.awt.Color(255, 51, 51));
-
-        deleteButton.setText("Delete");
-        deleteButton.setToolTipText("Delete Selected Product");
-        deleteButton.setBorder(null);
-        deleteButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                deleteButtonActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
-        jPanel6.setLayout(jPanel6Layout);
-        jPanel6Layout.setHorizontalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel6Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(deleteButton, javax.swing.GroupLayout.DEFAULT_SIZE, 108, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-        jPanel6Layout.setVerticalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel6Layout.createSequentialGroup()
-                .addGap(28, 28, 28)
-                .addComponent(deleteButton, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-
-        jPanel2.add(jPanel6);
 
         jScrollPane1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
 
@@ -533,6 +565,9 @@ public class ProductManagement extends javax.swing.JPanel {
         productTable.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 productTableMouseClicked(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                productTableMouseReleased(evt);
             }
         });
         jScrollPane1.setViewportView(productTable);
@@ -622,12 +657,9 @@ public class ProductManagement extends javax.swing.JPanel {
     }//GEN-LAST:event_searchTextFieldKeyReleased
 
     private void productTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_productTableMouseClicked
-        // TODO add your handling code here:
-
-        if (evt.getClickCount() == 3) {
-            deleteSelectedProduct();
+        if (evt.getClickCount() == 2) {
+            openSelectedProductDetails(false);
         }
-
     }//GEN-LAST:event_productTableMouseClicked
 
     private void addNewProductButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addNewProductButtonActionPerformed
@@ -636,41 +668,60 @@ public class ProductManagement extends javax.swing.JPanel {
         addNewProduct.setVisible(true);
     }//GEN-LAST:event_addNewProductButtonActionPerformed
 
-    private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
-        // TODO add your handling code here:
-        deleteSelectedProduct();
-    }//GEN-LAST:event_deleteButtonActionPerformed
-
     private void addNewProductButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addNewProductButton1ActionPerformed
         // TODO add your handling code here:
         clearSearch();
         ToastUtils.showBottomToast(home, "Search Cleared", 2000);
     }//GEN-LAST:event_addNewProductButton1ActionPerformed
 
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+        openSelectedProductDetails(false);
+    }//GEN-LAST:event_jMenuItem1ActionPerformed
+
+    private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
+        copySelectedProductId();
+    }//GEN-LAST:event_jMenuItem3ActionPerformed
+
+    private void productTableMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_productTableMouseReleased
+        int row = productTable.rowAtPoint(evt.getPoint());
+        if (row >= 0) {
+            productTable.setRowSelectionInterval(row, row); // Select the row
+            if (evt.isPopupTrigger()) { // Right-click
+                rightClickPopupMenu.show(evt.getComponent(), evt.getX(), evt.getY());
+            }
+        }
+    }//GEN-LAST:event_productTableMouseReleased
+
+    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
+         openSelectedProductDetails(true);
+    }//GEN-LAST:event_jMenuItem2ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addNewProductButton;
     private javax.swing.JButton addNewProductButton1;
     private javax.swing.JComboBox<String> categotyComboBox;
-    private javax.swing.JButton deleteButton;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItem2;
+    private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
-    private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel9;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JComboBox<String> measUnitsComboBox;
     private javax.swing.JTable productTable;
+    private javax.swing.JPopupMenu rightClickPopupMenu;
     private javax.swing.JTextField searchTextField;
     private javax.swing.JComboBox<String> sortByComboBox;
     // End of variables declaration//GEN-END:variables

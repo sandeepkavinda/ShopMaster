@@ -48,4 +48,5 @@ public class UserEditableData {
         this.userTypeId = userTypeId;
     }
 
+  
 }
