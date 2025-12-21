@@ -69,9 +69,9 @@ public class AddNewStock extends javax.swing.JDialog {
             model.setRowCount(0);
 
             ResultSet results = MySQL.execute(""
-                    + "SELECT * FROM `stock` "
-                    + "INNER JOIN `product` ON `stock`.`product_id`=`product`.`id` "
-                    + "ORDER BY `stock`.`added_date_time` DESC");
+                    + "SELECT * FROM stock s "
+                    + "INNER JOIN product p ON s.product_id = p.id "
+                    + "ORDER BY s.added_date_time DESC");
 
             while (results.next()) {
 
@@ -82,7 +82,7 @@ public class AddNewStock extends javax.swing.JDialog {
                 Double selling_discount = Double.parseDouble(results.getString("selling_discount"));
 
                 v.add(results.getString("barcode"));
-                v.add(results.getString("product.name"));
+                v.add(results.getString("p.name"));
                 v.add(Numbers.formatPriceWithCurrencyCode(buyingPrice));
                 v.add(Numbers.formatPriceWithCurrencyCode(markedPrice));
                 v.add(Numbers.formatPriceWithCurrencyCode(selling_discount));
@@ -161,6 +161,9 @@ public class AddNewStock extends javax.swing.JDialog {
         sellingPriceFormattedTextField = new javax.swing.JFormattedTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         stockTable = new javax.swing.JTable();
+        jLabel1 = new javax.swing.JLabel();
+        jSeparator2 = new javax.swing.JSeparator();
+        jLabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Add New Stock");
@@ -242,11 +245,6 @@ public class AddNewStock extends javax.swing.JDialog {
 
         markedPriceFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("0.00"))));
         markedPriceFormattedTextField.setText("0.00");
-        markedPriceFormattedTextField.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                markedPriceFormattedTextFieldFocusLost(evt);
-            }
-        });
         markedPriceFormattedTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 markedPriceFormattedTextFieldActionPerformed(evt);
@@ -292,11 +290,6 @@ public class AddNewStock extends javax.swing.JDialog {
 
         sellingDiscountFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("0.00"))));
         sellingDiscountFormattedTextField.setText("0.00");
-        sellingDiscountFormattedTextField.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                sellingDiscountFormattedTextFieldFocusLost(evt);
-            }
-        });
         sellingDiscountFormattedTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 sellingDiscountFormattedTextFieldActionPerformed(evt);
@@ -439,9 +432,22 @@ public class AddNewStock extends javax.swing.JDialog {
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 589, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 601, Short.MAX_VALUE)
                 .addContainerGap())
         );
+
+        jLabel1.setFont(new java.awt.Font("Poppins", 1, 14)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(0, 105, 75));
+        jLabel1.setText("Add New Stock");
+        jLabel1.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 10, 1, 1));
+
+        jSeparator2.setForeground(new java.awt.Color(204, 204, 204));
+
+        jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel2.setForeground(new java.awt.Color(0, 105, 75));
+        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/logo-extra-sm.png"))); // NOI18N
+        jLabel2.setIconTextGap(20);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -449,13 +455,23 @@ public class AddNewStock extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jSeparator2, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(21, 21, 21)
+                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(21, 21, 21)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
@@ -627,15 +643,6 @@ public class AddNewStock extends javax.swing.JDialog {
         // TODO add your handling code here:
     }//GEN-LAST:event_sellingPriceFormattedTextFieldActionPerformed
 
-    private void sellingDiscountFormattedTextFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_sellingDiscountFormattedTextFieldFocusLost
-        calculateSellingPrice();
-    }//GEN-LAST:event_sellingDiscountFormattedTextFieldFocusLost
-
-    private void markedPriceFormattedTextFieldFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_markedPriceFormattedTextFieldFocusLost
-        calculateSellingPrice();
-
-    }//GEN-LAST:event_markedPriceFormattedTextFieldFocusLost
-
     private void markedPriceFormattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_markedPriceFormattedTextFieldActionPerformed
         sellingDiscountFormattedTextField.grabFocus();
     }//GEN-LAST:event_markedPriceFormattedTextFieldActionPerformed
@@ -684,12 +691,15 @@ public class AddNewStock extends javax.swing.JDialog {
     private javax.swing.JLabel buyingPriceLabel;
     private javax.swing.JButton generateBarcodeButtom;
     private javax.swing.JButton jButton2;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JSeparator jSeparator2;
     private javax.swing.JFormattedTextField markedPriceFormattedTextField;
     private javax.swing.JLabel markedPriceLabel;
     private javax.swing.JComboBox<String> productComboBox;
