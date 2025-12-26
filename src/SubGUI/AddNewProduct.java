@@ -21,17 +21,19 @@ import panels.ProductManagement;
  */
 public class AddNewProduct extends javax.swing.JDialog {
 
-    ProductManagement productManagement;
-    
+    private ProductManagement productManagement;
+    private AddNewStock addNewStock;
+
     HashMap<String, String> categoryMap = new HashMap<>();
     HashMap<String, String> measUnitsMap = new HashMap<>();
 
     /**
      * Creates new form AddNewProduct
      */
-    public AddNewProduct(java.awt.Frame parent, boolean modal,ProductManagement productManagement) {
+    public AddNewProduct(java.awt.Frame parent, boolean modal, ProductManagement productManagement, AddNewStock addNewStock) {
         super(parent, modal);
         this.productManagement = productManagement;
+        this.addNewStock = addNewStock;
         this.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resource/icon.png")));
         initComponents();
         loadCategories();
@@ -92,8 +94,6 @@ public class AddNewProduct extends javax.swing.JDialog {
                 v.add(results.getString("category.name"));
                 model.addRow(v);
             }
-            
-            productManagement.loadProductTable();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -104,7 +104,59 @@ public class AddNewProduct extends javax.swing.JDialog {
         productNameTextField.setText("");
         categotyComboBox.setSelectedIndex(0);
         measUnitsComboBox.setSelectedIndex(0);
+    }
 
+    private void addNewProduct() {
+        String productName = productNameTextField.getText();
+        String categoryId = categoryMap.get(categotyComboBox.getSelectedItem());
+        String measUnitId = measUnitsMap.get(measUnitsComboBox.getSelectedItem());
+
+        if (productName.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please Enter the Product Name", "Warning", JOptionPane.WARNING_MESSAGE);
+        } else if (productName.length() > 50) {
+            JOptionPane.showMessageDialog(this, "The Product Name must contain fewer than 50 characters.", "Warning", JOptionPane.WARNING_MESSAGE);
+        } else if (categoryId == null) {
+            JOptionPane.showMessageDialog(this, "Please Select a Category", "Warning", JOptionPane.WARNING_MESSAGE);
+        } else if (measUnitId == null) {
+            JOptionPane.showMessageDialog(this, "Please Select a Measurement Id", "Warning", JOptionPane.WARNING_MESSAGE);
+        } else {
+
+            try {
+                ResultSet resultset = MySQL.execute("SELECT * FROM product WHERE name='" + productName + "' AND category_id='" + categoryId + "' AND measurement_unit_id='" + measUnitId + "' ");
+                if (resultset.next()) {
+                    JOptionPane.showMessageDialog(this, "This product already exists with the same category and unit.", "Duplicate Product", JOptionPane.WARNING_MESSAGE);
+                } else {
+
+                    MySQL.execute("INSERT INTO `product` (`name`,`category_id`,`measurement_unit_id`) "
+                            + "VALUES ('" + productName + "','" + categoryId + "','" + measUnitId + "')");
+
+                    if (addNewStock != null) {
+                        ResultSet resultSet = MySQL.execute("SELECT id FROM product WHERE name ='" + productName + "' AND category_id ='" + categoryId + "' AND measurement_unit_id ='" + measUnitId + "' ");
+
+                        if (resultSet.next()) {
+                            addNewStock.setProduct(resultSet.getString("id"));
+                            this.dispose();
+                        } else {
+                            JOptionPane.showMessageDialog(this, "An unexpected error has occurred. Please try again later or contact support if the issue persists.", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
+                        }
+
+                    }
+
+                    JOptionPane.showMessageDialog(this, "Product Added Successfully", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));
+                    loadProductTable();
+                    resetFields();
+
+                    if (productManagement != null) {
+                        productManagement.loadProductTable();
+                    }
+
+                }
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "An error occurred: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -128,7 +180,7 @@ public class AddNewProduct extends javax.swing.JDialog {
         jSeparator1 = new javax.swing.JSeparator();
         addNewProductButton1 = new javax.swing.JButton();
         addNewProductButton2 = new javax.swing.JButton();
-        addNewProductButton3 = new javax.swing.JButton();
+        resetButton = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         productTable = new javax.swing.JTable();
 
@@ -138,11 +190,6 @@ public class AddNewProduct extends javax.swing.JDialog {
         setResizable(false);
 
         productNameTextField.setPreferredSize(new java.awt.Dimension(64, 35));
-        productNameTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                productNameTextFieldKeyReleased(evt);
-            }
-        });
 
         jLabel6.setText("Product Name");
 
@@ -171,11 +218,6 @@ public class AddNewProduct extends javax.swing.JDialog {
         addNewProductButton1.setText("Go to Add Measurement Unit");
         addNewProductButton1.setBorder(null);
         addNewProductButton1.setPreferredSize(new java.awt.Dimension(99, 35));
-        addNewProductButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addNewProductButton1ActionPerformed(evt);
-            }
-        });
 
         addNewProductButton2.setBackground(new java.awt.Color(255, 255, 255));
         addNewProductButton2.setFont(new java.awt.Font("Poppins", 0, 10)); // NOI18N
@@ -183,20 +225,15 @@ public class AddNewProduct extends javax.swing.JDialog {
         addNewProductButton2.setText("Go to Add Category");
         addNewProductButton2.setBorder(null);
         addNewProductButton2.setPreferredSize(new java.awt.Dimension(99, 35));
-        addNewProductButton2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addNewProductButton2ActionPerformed(evt);
-            }
-        });
 
-        addNewProductButton3.setBackground(new java.awt.Color(255, 255, 255));
-        addNewProductButton3.setForeground(new java.awt.Color(0, 105, 75));
-        addNewProductButton3.setText("Reset");
-        addNewProductButton3.setBorder(null);
-        addNewProductButton3.setPreferredSize(new java.awt.Dimension(99, 35));
-        addNewProductButton3.addActionListener(new java.awt.event.ActionListener() {
+        resetButton.setBackground(new java.awt.Color(255, 255, 255));
+        resetButton.setForeground(new java.awt.Color(0, 105, 75));
+        resetButton.setText("Reset");
+        resetButton.setBorder(null);
+        resetButton.setPreferredSize(new java.awt.Dimension(99, 35));
+        resetButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addNewProductButton3ActionPerformed(evt);
+                resetButtonActionPerformed(evt);
             }
         });
 
@@ -220,7 +257,7 @@ public class AddNewProduct extends javax.swing.JDialog {
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(addNewProductButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 218, Short.MAX_VALUE)
                     .addComponent(addNewProductButton2, javax.swing.GroupLayout.DEFAULT_SIZE, 218, Short.MAX_VALUE)
-                    .addComponent(addNewProductButton3, javax.swing.GroupLayout.DEFAULT_SIZE, 218, Short.MAX_VALUE))
+                    .addComponent(resetButton, javax.swing.GroupLayout.DEFAULT_SIZE, 218, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -241,7 +278,7 @@ public class AddNewProduct extends javax.swing.JDialog {
                 .addGap(24, 24, 24)
                 .addComponent(addNewProductButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(addNewProductButton3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(resetButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
@@ -317,62 +354,13 @@ public class AddNewProduct extends javax.swing.JDialog {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void productNameTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_productNameTextFieldKeyReleased
-        // TODO add your handling code here:
-    }//GEN-LAST:event_productNameTextFieldKeyReleased
-
     private void addNewProductButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addNewProductButtonActionPerformed
-        // TODO add your handling code here:
-
-        String productName = productNameTextField.getText();
-        String categoryId = categoryMap.get(categotyComboBox.getSelectedItem());
-        String measUnitId = measUnitsMap.get(measUnitsComboBox.getSelectedItem());
-
-        if (productName.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please Enter the Product Name", "Warning", JOptionPane.WARNING_MESSAGE);
-        } else if (productName.length() > 50) {
-            JOptionPane.showMessageDialog(this, "The Product Name must contain fewer than 50 characters.", "Warning", JOptionPane.WARNING_MESSAGE);
-        } else if (categoryId == null) {
-            JOptionPane.showMessageDialog(this, "Please Select a Category", "Warning", JOptionPane.WARNING_MESSAGE);
-        } else if (measUnitId == null) {
-            JOptionPane.showMessageDialog(this, "Please Select a Measurement Id", "Warning", JOptionPane.WARNING_MESSAGE);
-        } else {
-
-            try {
-                ResultSet resultset = MySQL.execute("SELECT * FROM product WHERE name='" + productName + "' AND category_id='" + categoryId + "' AND measurement_unit_id='" + measUnitId + "' ");
-                if (resultset.next()) {
-                    JOptionPane.showMessageDialog(this, "This product already exists with the same category and unit.", "Duplicate Product", JOptionPane.WARNING_MESSAGE);
-                } else {
-
-                    MySQL.execute("INSERT INTO `product` (`name`,`category_id`,`measurement_unit_id`) "
-                            + "VALUES ('" + productName + "','" + categoryId + "','" + measUnitId + "')");
-                    JOptionPane.showMessageDialog(this, "Product Added Successfully", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));
-                    loadProductTable();
-                    resetFields();
-                }
-
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "An error occurred: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                e.printStackTrace();
-            }
-
-        }
-
-
+        addNewProduct();
     }//GEN-LAST:event_addNewProductButtonActionPerformed
 
-    private void addNewProductButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addNewProductButton1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_addNewProductButton1ActionPerformed
-
-    private void addNewProductButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addNewProductButton2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_addNewProductButton2ActionPerformed
-
-    private void addNewProductButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addNewProductButton3ActionPerformed
-        // TODO add your handling code here:
+    private void resetButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetButtonActionPerformed
         resetFields();
-    }//GEN-LAST:event_addNewProductButton3ActionPerformed
+    }//GEN-LAST:event_resetButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -404,7 +392,7 @@ public class AddNewProduct extends javax.swing.JDialog {
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-;
+                ;
             }
         });
     }
@@ -413,7 +401,6 @@ public class AddNewProduct extends javax.swing.JDialog {
     private javax.swing.JButton addNewProductButton;
     private javax.swing.JButton addNewProductButton1;
     private javax.swing.JButton addNewProductButton2;
-    private javax.swing.JButton addNewProductButton3;
     private javax.swing.JComboBox<String> categotyComboBox;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
@@ -425,5 +412,6 @@ public class AddNewProduct extends javax.swing.JDialog {
     private javax.swing.JComboBox<String> measUnitsComboBox;
     private javax.swing.JTextField productNameTextField;
     private javax.swing.JTable productTable;
+    private javax.swing.JButton resetButton;
     // End of variables declaration//GEN-END:variables
 }

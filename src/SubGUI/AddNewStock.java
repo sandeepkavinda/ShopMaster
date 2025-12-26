@@ -6,13 +6,13 @@ package SubGUI;
 
 import java.awt.Toolkit;
 import java.sql.ResultSet;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Vector;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import model.Generate;
 import model.MySQL;
@@ -25,11 +25,12 @@ import panels.StockManagement;
  */
 public class AddNewStock extends javax.swing.JDialog {
 
-    HashMap<String, String> productMap = new HashMap<>();
+    HashMap<Integer, String> productIdMap = new HashMap<>();
+    HashMap<String, Integer> comboBoxIndexMap = new HashMap<>();
+    HashMap<String, String> productMeasurementUnitMap = new HashMap<>();
 
     StockManagement stockManagement;
     java.awt.Frame parent;
-    boolean modal;
 
     /**
      * Creates new form AddNewProduct
@@ -37,23 +38,38 @@ public class AddNewStock extends javax.swing.JDialog {
     public AddNewStock(java.awt.Frame parent, boolean modal, StockManagement stockManagement) {
         super(parent, modal);
         this.parent = parent;
-        this.modal = modal;
         this.stockManagement = stockManagement;
         this.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resource/icon.png")));
         initComponents();
         loadProducts();
         loadStockTable();
+
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+
+        stockTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
+        stockTable.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
+        stockTable.getColumnModel().getColumn(3).setCellRenderer(centerRenderer);
+        stockTable.getColumnModel().getColumn(4).setCellRenderer(centerRenderer);
     }
 
     private void loadProducts() {
         try {
-            ResultSet result = MySQL.execute("SELECT * FROM `product`");
+            ResultSet result = MySQL.execute("SELECT * FROM product p "
+                    + "INNER JOIN measurement_unit mu ON p.measurement_unit_id = mu.id");
             Vector v = new Vector();
             v.add("Select");
+
+            int comboboxIndex = 1;
+
             while (result.next()) {
-                v.add(result.getString("name"));
-                productMap.put(result.getString("name"), result.getString("id"));
+                v.add(result.getString("p.name"));
+                productIdMap.put(comboboxIndex, result.getString("p.id"));
+                comboBoxIndexMap.put(result.getString("p.id"), comboboxIndex);
+                productMeasurementUnitMap.put(result.getString("p.id"), result.getString("mu.name"));
+                comboboxIndex++;
             }
+
             DefaultComboBoxModel model = new DefaultComboBoxModel(v);
             productComboBox.setModel(model);
 
@@ -62,67 +78,130 @@ public class AddNewStock extends javax.swing.JDialog {
         }
     }
 
+    public void setProduct(String id) {
+        loadProducts();
+        int comboboxIndex = comboBoxIndexMap.get(id);
+        productComboBox.setSelectedIndex(comboboxIndex);
+    }
+
     private void loadStockTable() {
         try {
 
             DefaultTableModel model = (DefaultTableModel) stockTable.getModel();
             model.setRowCount(0);
 
-            ResultSet results = MySQL.execute(""
-                    + "SELECT * FROM stock s "
+            ResultSet results = MySQL.execute("SELECT * FROM stock s "
                     + "INNER JOIN product p ON s.product_id = p.id "
-                    + "ORDER BY s.added_date_time DESC");
+                    + "INNER JOIN measurement_unit mu ON p.measurement_unit_id=mu.id "
+                    + "ORDER BY s.created_at DESC");
 
             while (results.next()) {
 
                 Vector v = new Vector();
 
-                Double buyingPrice = Double.parseDouble(results.getString("buying_price"));
-                Double markedPrice = Double.parseDouble(results.getString("marked_price"));
-                Double selling_discount = Double.parseDouble(results.getString("selling_discount"));
-
-                v.add(results.getString("barcode"));
+                v.add(results.getString("s.barcode"));
+                v.add(results.getString("p.id"));
                 v.add(results.getString("p.name"));
-                v.add(Numbers.formatPriceWithCurrencyCode(buyingPrice));
-                v.add(Numbers.formatPriceWithCurrencyCode(markedPrice));
-                v.add(Numbers.formatPriceWithCurrencyCode(selling_discount));
+                v.add(Numbers.formatQuantity(results.getDouble("s.reorder_level")));
+                v.add(results.getString("mu.name"));
 
                 model.addRow(v);
             }
-            stockManagement.loadStockTable();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void resetFrame() {
+    private void resetData() {
+        stockBarcodeFormattedTextField.setText("");
+        productComboBox.setSelectedIndex(0);
+        reorderLevelFormattedTextField.setText("0");
+        stockBarcodeFormattedTextField.grabFocus();
+
+        loadProducts();
+        loadStockTable();
+    }
+
+    private void changeMeasurementUnitToSelectedProduct() {
+
+        int selectedIndex = productComboBox.getSelectedIndex();
+
+        if (selectedIndex != 0) {
+            String selectedProductId = productIdMap.get(selectedIndex);
+            String measUnitName = productMeasurementUnitMap.get(selectedProductId);
+            reorderLevelLabel.setText("Reorder Level (" + measUnitName + ")");
+        }
+
+    }
+    
+    private void generateUniqueBarcode() {
+
+        String generatedBarcode = Generate.GenerateBarcode();
+        boolean isUniqueBarcode = false;
+
         try {
-            this.dispose();
-            AddNewStock addNewStock = new AddNewStock(parent, modal, stockManagement);
-            addNewStock.setVisible(true);
+            while (!isUniqueBarcode) {
+                ResultSet resultSet = MySQL.execute("SELECT * FROM `stock` WHERE `barcode`='" + generatedBarcode + "'");
+
+                if (resultSet.next()) {
+                    generatedBarcode = Generate.GenerateBarcode();
+                } else {
+                    stockBarcodeFormattedTextField.setText(generatedBarcode);
+                    isUniqueBarcode = true;
+                }
+            }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "An unexpected error has occurred. Please try again later or contact support if the issue persists.", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "An error occurred: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
 
     }
+    private void addStock() {
 
-    public void setProduct(String product) {
-        productComboBox.setSelectedItem(product);
-    }
+        String stockBarcode = stockBarcodeFormattedTextField.getText();
+        String productId = productIdMap.get(productComboBox.getSelectedIndex());
+        String reorderLevel = reorderLevelFormattedTextField.getText();
 
-    private void calculateSellingPrice() {
-        Double markedPrice = Double.parseDouble(markedPriceFormattedTextField.getText());
-        Double sellingDiscount = Double.parseDouble(sellingDiscountFormattedTextField.getText());
-
-        if (sellingDiscount < markedPrice) {
-            sellingPriceFormattedTextField.setText(String.valueOf(markedPrice - sellingDiscount));
+        if (stockBarcode.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please Enter the Stock Barcode", "Warning", JOptionPane.WARNING_MESSAGE);
+        } else if (stockBarcode.length() > 20) {
+            JOptionPane.showMessageDialog(this, "Stock barcode cannot be longer than 20 characters", "Warning", JOptionPane.WARNING_MESSAGE);
+        } else if (productId == null) {
+            JOptionPane.showMessageDialog(this, "Please Select the Product", "Warning", JOptionPane.WARNING_MESSAGE);
+        } else if (reorderLevel.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please Enter Reorder Level", "Warning", JOptionPane.WARNING_MESSAGE);
         } else {
-            JOptionPane.showMessageDialog(this, "The selling discount cannot exceed the marked price.", "Warning", JOptionPane.WARNING_MESSAGE);
-            sellingDiscountFormattedTextField.setText("0.00");
-            sellingDiscountFormattedTextField.grabFocus();
-            sellingDiscountFormattedTextField.selectAll();
-            calculateSellingPrice();
+            try {
+                ResultSet resultSet = MySQL.execute("SELECT * FROM stock WHERE barcode = '" + stockBarcode + "' ");
+
+                if (resultSet.next()) {
+                    JOptionPane.showMessageDialog(this, "The entered stock barcode already exists in the system.", "Warning", JOptionPane.WARNING_MESSAGE);
+                } else {
+
+                    try {
+                        Double.parseDouble(reorderLevel);
+
+                        try {
+                            MySQL.execute("INSERT INTO stock (barcode,product_id,reorder_level,current_quantity) "
+                                    + "VALUES ('" + stockBarcode + "','" + productId + "','" + reorderLevel + "','0')");
+                            JOptionPane.showMessageDialog(this, "Stock Added Successfully", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));
+                            resetData();
+                            stockManagement.loadStockTable();
+                        } catch (Exception e) {
+                            JOptionPane.showMessageDialog(this, "An unexpected error has occurred. Please try again later or contact support if the issue persists.", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
+                            e.printStackTrace();
+                        }
+
+                    } catch (NumberFormatException e) {
+                        // invalid double
+                        JOptionPane.showMessageDialog(this, "Invalid Reorder Level", "Warning", JOptionPane.WARNING_MESSAGE);
+                    }
+                }
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "An unexpected error has occurred. Please try again later or contact support if the issue persists.", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
         }
 
     }
@@ -141,24 +220,15 @@ public class AddNewStock extends javax.swing.JDialog {
         jLabel6 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         productComboBox = new javax.swing.JComboBox<>();
-        buyingPriceLabel = new javax.swing.JLabel();
-        addNewProductButton = new javax.swing.JButton();
+        addNewStockButton = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
-        addNewProductButton1 = new javax.swing.JButton();
         addNewProductButton2 = new javax.swing.JButton();
         resetButton = new javax.swing.JButton();
         stockBarcodeFormattedTextField = new javax.swing.JFormattedTextField();
-        markedPriceLabel = new javax.swing.JLabel();
-        markedPriceFormattedTextField = new javax.swing.JFormattedTextField();
-        startingQuantityLabel = new javax.swing.JLabel();
-        startingQtyFormattedTextField = new javax.swing.JFormattedTextField();
-        buyingPriceFormattedTextField = new javax.swing.JFormattedTextField();
-        generateBarcodeButtom = new javax.swing.JButton();
+        reorderLevelLabel = new javax.swing.JLabel();
+        reorderLevelFormattedTextField = new javax.swing.JFormattedTextField();
+        generateBarcodeButton = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
-        sellingPriceLabel1 = new javax.swing.JLabel();
-        sellingDiscountFormattedTextField = new javax.swing.JFormattedTextField();
-        sellingPriceLabel2 = new javax.swing.JLabel();
-        sellingPriceFormattedTextField = new javax.swing.JFormattedTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         stockTable = new javax.swing.JTable();
         jLabel1 = new javax.swing.JLabel();
@@ -186,33 +256,18 @@ public class AddNewStock extends javax.swing.JDialog {
             }
         });
 
-        buyingPriceLabel.setText("Buying Price");
-
-        addNewProductButton.setText("Add Stock");
-        addNewProductButton.setBorder(null);
-        addNewProductButton.setPreferredSize(new java.awt.Dimension(99, 35));
-        addNewProductButton.addActionListener(new java.awt.event.ActionListener() {
+        addNewStockButton.setText("Add Stock");
+        addNewStockButton.setBorder(null);
+        addNewStockButton.setPreferredSize(new java.awt.Dimension(99, 35));
+        addNewStockButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addNewProductButtonActionPerformed(evt);
+                addNewStockButtonActionPerformed(evt);
             }
         });
 
         jSeparator1.setForeground(new java.awt.Color(204, 204, 204));
 
-        addNewProductButton1.setBackground(new java.awt.Color(255, 255, 255));
-        addNewProductButton1.setFont(new java.awt.Font("Poppins", 0, 10)); // NOI18N
-        addNewProductButton1.setForeground(new java.awt.Color(0, 105, 75));
-        addNewProductButton1.setText("Go to Add Measurement Unit");
-        addNewProductButton1.setBorder(null);
-        addNewProductButton1.setPreferredSize(new java.awt.Dimension(99, 35));
-        addNewProductButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addNewProductButton1ActionPerformed(evt);
-            }
-        });
-
         addNewProductButton2.setBackground(new java.awt.Color(255, 255, 255));
-        addNewProductButton2.setFont(new java.awt.Font("Poppins", 0, 10)); // NOI18N
         addNewProductButton2.setForeground(new java.awt.Color(0, 105, 75));
         addNewProductButton2.setText("Go to Add Product");
         addNewProductButton2.setBorder(null);
@@ -223,8 +278,8 @@ public class AddNewStock extends javax.swing.JDialog {
             }
         });
 
-        resetButton.setBackground(new java.awt.Color(255, 255, 255));
-        resetButton.setForeground(new java.awt.Color(0, 105, 75));
+        resetButton.setBackground(new java.awt.Color(102, 102, 102));
+        resetButton.setForeground(new java.awt.Color(255, 255, 255));
         resetButton.setText("Reset");
         resetButton.setBorder(null);
         resetButton.setPreferredSize(new java.awt.Dimension(99, 35));
@@ -241,69 +296,32 @@ public class AddNewStock extends javax.swing.JDialog {
             }
         });
 
-        markedPriceLabel.setText("Marked Price");
+        reorderLevelLabel.setText("Reorder Level");
 
-        markedPriceFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("0.00"))));
-        markedPriceFormattedTextField.setText("0.00");
-        markedPriceFormattedTextField.addActionListener(new java.awt.event.ActionListener() {
+        reorderLevelFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#.###"))));
+        reorderLevelFormattedTextField.setText("0");
+        reorderLevelFormattedTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                markedPriceFormattedTextFieldActionPerformed(evt);
+                reorderLevelFormattedTextFieldActionPerformed(evt);
             }
         });
 
-        startingQuantityLabel.setText("Starting Quantity");
-
-        startingQtyFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#.###"))));
-        startingQtyFormattedTextField.addActionListener(new java.awt.event.ActionListener() {
+        generateBarcodeButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/refresh.png"))); // NOI18N
+        generateBarcodeButton.setToolTipText("Generate Unique Barcode");
+        generateBarcodeButton.setBorder(null);
+        generateBarcodeButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                startingQtyFormattedTextFieldActionPerformed(evt);
+                generateBarcodeButtonActionPerformed(evt);
             }
         });
 
-        buyingPriceFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("0.00"))));
-        buyingPriceFormattedTextField.setText("0.00");
-        buyingPriceFormattedTextField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                buyingPriceFormattedTextFieldActionPerformed(evt);
-            }
-        });
-
-        generateBarcodeButtom.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/refresh.png"))); // NOI18N
-        generateBarcodeButtom.setToolTipText("Generate Unique Barcode");
-        generateBarcodeButtom.setBorder(null);
-        generateBarcodeButtom.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                generateBarcodeButtomActionPerformed(evt);
-            }
-        });
-
+        jButton2.setForeground(new java.awt.Color(255, 255, 255));
         jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/add.png"))); // NOI18N
         jButton2.setToolTipText("Select Product");
         jButton2.setBorder(null);
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton2ActionPerformed(evt);
-            }
-        });
-
-        sellingPriceLabel1.setText("Selling Discount");
-
-        sellingDiscountFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("0.00"))));
-        sellingDiscountFormattedTextField.setText("0.00");
-        sellingDiscountFormattedTextField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                sellingDiscountFormattedTextFieldActionPerformed(evt);
-            }
-        });
-
-        sellingPriceLabel2.setText("Selling Price");
-
-        sellingPriceFormattedTextField.setEditable(false);
-        sellingPriceFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("0.00"))));
-        sellingPriceFormattedTextField.setText("0.00");
-        sellingPriceFormattedTextField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                sellingPriceFormattedTextFieldActionPerformed(evt);
             }
         });
 
@@ -314,34 +332,25 @@ public class AddNewStock extends javax.swing.JDialog {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(buyingPriceLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(addNewProductButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(addNewStockButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jSeparator1)
-                    .addComponent(addNewProductButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(addNewProductButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(resetButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(markedPriceFormattedTextField)
-                    .addComponent(startingQtyFormattedTextField)
-                    .addComponent(buyingPriceFormattedTextField)
+                    .addComponent(reorderLevelFormattedTextField)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(productComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(stockBarcodeFormattedTextField, javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel2Layout.createSequentialGroup()
                                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                     .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.LEADING))
-                                .addGap(0, 138, Short.MAX_VALUE)))
+                                .addGap(0, 159, Short.MAX_VALUE))
+                            .addComponent(productComboBox, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(generateBarcodeButtom, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(generateBarcodeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jButton2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(startingQuantityLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(markedPriceLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(sellingDiscountFormattedTextField)
-                    .addComponent(sellingPriceLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(sellingPriceFormattedTextField)
-                    .addComponent(sellingPriceLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(reorderLevelLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -351,7 +360,7 @@ public class AddNewStock extends javax.swing.JDialog {
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(generateBarcodeButtom, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(generateBarcodeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(stockBarcodeFormattedTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 35, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel7)
@@ -360,36 +369,18 @@ public class AddNewStock extends javax.swing.JDialog {
                     .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(productComboBox, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(buyingPriceLabel)
+                .addComponent(reorderLevelLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(buyingPriceFormattedTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(markedPriceLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(markedPriceFormattedTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(sellingPriceLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(sellingDiscountFormattedTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(sellingPriceLabel2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(sellingPriceFormattedTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(startingQuantityLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(startingQtyFormattedTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(addNewProductButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(reorderLevelFormattedTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(addNewStockButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(resetButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, 0)
-                .addComponent(addNewProductButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, 0)
-                .addComponent(addNewProductButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 4, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(addNewProductButton2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(9, 9, 9))
         );
 
         jScrollPane1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
@@ -402,11 +393,11 @@ public class AddNewStock extends javax.swing.JDialog {
                 {null, null, null, null, null}
             },
             new String [] {
-                "Barcode", "Product Name", "Buying Price", "Selling Price", "Selling Discount"
+                "Barcode", "Product Id", "Product Name", "Reorder Level", "Measurement Unit"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false
+                false, true, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -415,7 +406,7 @@ public class AddNewStock extends javax.swing.JDialog {
         });
         jScrollPane1.setViewportView(stockTable);
         if (stockTable.getColumnModel().getColumnCount() > 0) {
-            stockTable.getColumnModel().getColumn(1).setMinWidth(160);
+            stockTable.getColumnModel().getColumn(2).setMinWidth(160);
         }
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -424,7 +415,7 @@ public class AddNewStock extends javax.swing.JDialog {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 638, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         jPanel1Layout.setVerticalGroup(
@@ -432,8 +423,8 @@ public class AddNewStock extends javax.swing.JDialog {
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 601, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 455, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(8, Short.MAX_VALUE))
         );
 
         jLabel1.setFont(new java.awt.Font("Poppins", 1, 14)); // NOI18N
@@ -480,172 +471,44 @@ public class AddNewStock extends javax.swing.JDialog {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void addNewProductButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addNewProductButtonActionPerformed
-        //Get Input Values
-        String stockBarcode = stockBarcodeFormattedTextField.getText();
-        String productId = productMap.get(productComboBox.getSelectedItem());
-        String buyingPrice = buyingPriceFormattedTextField.getText();
-        String markedPrice = markedPriceFormattedTextField.getText();
-        String sellingDiscount = sellingDiscountFormattedTextField.getText();
-        String startingQty = startingQtyFormattedTextField.getText();
-
-        //Validations
-        if (stockBarcode.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please Enter the Stock Barcode", "Warning", JOptionPane.WARNING_MESSAGE);
-        } else if (stockBarcode.length() != 13) {
-            JOptionPane.showMessageDialog(this, "The Stock Barcode must be 13 Numbers", "Warning", JOptionPane.WARNING_MESSAGE);
-        } else if (productId == null) {
-            JOptionPane.showMessageDialog(this, "Please Select the Product", "Warning", JOptionPane.WARNING_MESSAGE);
-        } else if (buyingPrice.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please Enter Buying Price", "Warning", JOptionPane.WARNING_MESSAGE);
-        } else if (Double.parseDouble(buyingPrice) < 0) {
-            JOptionPane.showMessageDialog(this, "Buying Price Cannot be Less Than Zero.", "Warning", JOptionPane.WARNING_MESSAGE);
-        } else if (markedPrice.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please Enter Marked Price", "Warning", JOptionPane.WARNING_MESSAGE);
-        } else if (Double.parseDouble(markedPrice) < 0) {
-            JOptionPane.showMessageDialog(this, "Marked Price Cannot be Less Than Zero.", "Warning", JOptionPane.WARNING_MESSAGE);
-        } else if (sellingDiscount.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please Enter Selling Discount", "Warning", JOptionPane.WARNING_MESSAGE);
-        } else if (Double.parseDouble(sellingDiscount) < 0) {
-            JOptionPane.showMessageDialog(this, "Selling Discount Cannot be Less Than Zero.", "Warning", JOptionPane.WARNING_MESSAGE);
-        } else if (Double.parseDouble(markedPrice) < Double.parseDouble(sellingDiscount)) {
-            JOptionPane.showMessageDialog(this, "The selling discount cannot exceed the marked price.", "Warning", JOptionPane.WARNING_MESSAGE);
-        } else if (startingQty.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please Enter Starting Quantity", "Warning", JOptionPane.WARNING_MESSAGE);
-        } else {
-            try {
-                ResultSet stockBarcodeResultSet = MySQL.execute("SELECT * FROM `stock` WHERE `barcode`='" + stockBarcode + "'");
-                ResultSet otherDetailsResultset = MySQL.execute("SELECT * FROM `stock` "
-                        + "WHERE `product_id`='" + productId + "' "
-                        + "AND `buying_price`='" + buyingPrice + "'"
-                        + "AND `marked_price`='" + markedPrice + "'");
-
-                if (stockBarcodeResultSet.next()) {
-                    JOptionPane.showMessageDialog(this, "\"" + stockBarcode + "\" Barcode is Already Added", "Warning", JOptionPane.WARNING_MESSAGE);
-                } else if (otherDetailsResultset.next()) {
-                    String searchedBarcode = otherDetailsResultset.getString("barcode");
-                    JOptionPane.showMessageDialog(
-                            this,
-                            "Stock already exists for this product with the current buying and selling prices. - Barcode: " + searchedBarcode + "",
-                            "Warning",
-                            JOptionPane.WARNING_MESSAGE
-                    );
-                } else {
-
-                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    Date now = new Date();
-                    String formattedDateTime = formatter.format(now);
-
-                    MySQL.execute("INSERT INTO `stock` (`barcode`,`product_id`,`buying_price`,`marked_price`,`selling_discount`,`current_quantity`,`added_date_time`) "
-                            + "VALUES ('" + stockBarcode + "','" + productId + "','" + buyingPrice + "','" + markedPrice + "','" + sellingDiscount + "','" + startingQty + "','" + formattedDateTime + "')");
-
-                    MySQL.execute("INSERT INTO `stock_history` (`stock_barcode`,`stock_change_status_id`,`changed_qty`,`description`,`qunatity_after_change`,`changed_date_time`) "
-                            + "VALUES ('" + stockBarcode + "','1','" + startingQty + "','Starting Quantity','" + startingQty + "','" + formattedDateTime + "')");
-
-                    JOptionPane.showMessageDialog(this, "Stock Added Successfully", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));
-                    resetFrame();
-                }
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "An unexpected error has occurred. Please try again later or contact support if the issue persists.", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
-                e.printStackTrace();
-            }
-        }
-    }//GEN-LAST:event_addNewProductButtonActionPerformed
-
-    private void addNewProductButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addNewProductButton1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_addNewProductButton1ActionPerformed
+    private void addNewStockButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addNewStockButtonActionPerformed
+        addStock();
+    }//GEN-LAST:event_addNewStockButtonActionPerformed
 
     private void addNewProductButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addNewProductButton2ActionPerformed
-        // TODO add your handling code here:
+        AddNewProduct addNewProduct = new AddNewProduct(stockManagement.home, true, null, this);
+        addNewProduct.setVisible(true);
     }//GEN-LAST:event_addNewProductButton2ActionPerformed
 
     private void resetButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetButtonActionPerformed
-        resetFrame();
+        resetData();
     }//GEN-LAST:event_resetButtonActionPerformed
 
-    private void generateBarcodeButtomActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_generateBarcodeButtomActionPerformed
-        //Generate Barcode
-        String generatedBarcode = Generate.GenerateBarcode();
-        boolean isUniqueBarcode = false;
-
-        try {
-            while (!isUniqueBarcode) {
-                ResultSet resultSet = MySQL.execute("SELECT * FROM `stock` WHERE `barcode`='" + generatedBarcode + "'");
-
-                if (resultSet.next()) {
-                    generatedBarcode = Generate.GenerateBarcode();
-                } else {
-                    stockBarcodeFormattedTextField.setText(generatedBarcode);
-                    isUniqueBarcode = true;
-                }
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "An error occurred: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }//GEN-LAST:event_generateBarcodeButtomActionPerformed
+    private void generateBarcodeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_generateBarcodeButtonActionPerformed
+       generateUniqueBarcode();
+    }//GEN-LAST:event_generateBarcodeButtonActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         SelectProduct selectProduct = new SelectProduct(parent, true, this);
         selectProduct.setVisible(true);
     }//GEN-LAST:event_jButton2ActionPerformed
 
-    private void buyingPriceFormattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buyingPriceFormattedTextFieldActionPerformed
-        markedPriceFormattedTextField.grabFocus();
-    }//GEN-LAST:event_buyingPriceFormattedTextFieldActionPerformed
-
     private void stockBarcodeFormattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stockBarcodeFormattedTextFieldActionPerformed
         productComboBox.grabFocus();
     }//GEN-LAST:event_stockBarcodeFormattedTextFieldActionPerformed
 
     private void productComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productComboBoxActionPerformed
-        buyingPriceFormattedTextField.grabFocus();
+        reorderLevelFormattedTextField.grabFocus();
+        reorderLevelFormattedTextField.selectAll();
     }//GEN-LAST:event_productComboBoxActionPerformed
 
-    private void startingQtyFormattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startingQtyFormattedTextFieldActionPerformed
-        addNewProductButton.grabFocus();
-    }//GEN-LAST:event_startingQtyFormattedTextFieldActionPerformed
+    private void reorderLevelFormattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reorderLevelFormattedTextFieldActionPerformed
+        addNewStockButton.grabFocus();
+    }//GEN-LAST:event_reorderLevelFormattedTextFieldActionPerformed
 
     private void productComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_productComboBoxItemStateChanged
-        if (productComboBox.getSelectedIndex() != 0) {
-            try {
-                String selectedProductId = productMap.get(String.valueOf(productComboBox.getSelectedItem()));
-
-                ResultSet resultSet = MySQL.execute("SELECT * FROM `product` "
-                        + "INNER JOIN `measurement_unit` ON `product`.`measurement_unit_id`=`measurement_unit`.`id` "
-                        + "WHERE `product`.`id`='" + selectedProductId + "'");
-
-                if (resultSet.next()) {
-                    String measurementUnit = String.valueOf(resultSet.getString("measurement_unit.name"));
-                    startingQuantityLabel.setText("Starting Quantity (" + measurementUnit + ")");
-                    buyingPriceLabel.setText("Buying Price (Per " + measurementUnit + ")");
-                    markedPriceLabel.setText("Marked Price (Per " + measurementUnit + ")");
-                } else {
-                    JOptionPane.showMessageDialog(this, "Something Went Wrong", "Error", JOptionPane.ERROR_MESSAGE);
-
-                }
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "An error occurred: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                e.printStackTrace();
-            }
-        } else {
-            startingQuantityLabel.setText("Starting Quantity");
-            buyingPriceLabel.setText("Buying Price");
-            markedPriceLabel.setText("Selling Price");
-        }
+        changeMeasurementUnitToSelectedProduct();
     }//GEN-LAST:event_productComboBoxItemStateChanged
-
-    private void sellingDiscountFormattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sellingDiscountFormattedTextFieldActionPerformed
-        startingQtyFormattedTextField.grabFocus();
-    }//GEN-LAST:event_sellingDiscountFormattedTextFieldActionPerformed
-
-    private void sellingPriceFormattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sellingPriceFormattedTextFieldActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_sellingPriceFormattedTextFieldActionPerformed
-
-    private void markedPriceFormattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_markedPriceFormattedTextFieldActionPerformed
-        sellingDiscountFormattedTextField.grabFocus();
-    }//GEN-LAST:event_markedPriceFormattedTextFieldActionPerformed
 
     /**
      * @param args the command line arguments
@@ -684,12 +547,9 @@ public class AddNewStock extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton addNewProductButton;
-    private javax.swing.JButton addNewProductButton1;
     private javax.swing.JButton addNewProductButton2;
-    private javax.swing.JFormattedTextField buyingPriceFormattedTextField;
-    private javax.swing.JLabel buyingPriceLabel;
-    private javax.swing.JButton generateBarcodeButtom;
+    private javax.swing.JButton addNewStockButton;
+    private javax.swing.JButton generateBarcodeButton;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -700,16 +560,10 @@ public class AddNewStock extends javax.swing.JDialog {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
-    private javax.swing.JFormattedTextField markedPriceFormattedTextField;
-    private javax.swing.JLabel markedPriceLabel;
     private javax.swing.JComboBox<String> productComboBox;
+    private javax.swing.JFormattedTextField reorderLevelFormattedTextField;
+    private javax.swing.JLabel reorderLevelLabel;
     private javax.swing.JButton resetButton;
-    private javax.swing.JFormattedTextField sellingDiscountFormattedTextField;
-    private javax.swing.JFormattedTextField sellingPriceFormattedTextField;
-    private javax.swing.JLabel sellingPriceLabel1;
-    private javax.swing.JLabel sellingPriceLabel2;
-    private javax.swing.JFormattedTextField startingQtyFormattedTextField;
-    private javax.swing.JLabel startingQuantityLabel;
     private javax.swing.JFormattedTextField stockBarcodeFormattedTextField;
     private javax.swing.JTable stockTable;
     // End of variables declaration//GEN-END:variables

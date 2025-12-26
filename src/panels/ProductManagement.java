@@ -1,14 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
- */
 package panels;
 
 import GUI.Home;
-import GUI.Notifications;
 import SubGUI.AddNewProduct;
 import SubGUI.ProductDetails;
-import SubGUI.UserDetails;
 import java.awt.event.ItemEvent;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -663,8 +657,7 @@ public class ProductManagement extends javax.swing.JPanel {
     }//GEN-LAST:event_productTableMouseClicked
 
     private void addNewProductButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addNewProductButtonActionPerformed
-        // TODO add your handling code here:
-        AddNewProduct addNewProduct = new AddNewProduct(home, true, this);
+        AddNewProduct addNewProduct = new AddNewProduct(home, true, this, null);
         addNewProduct.setVisible(true);
     }//GEN-LAST:event_addNewProductButtonActionPerformed
 

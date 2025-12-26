@@ -11,6 +11,8 @@ import java.util.Vector;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import model.MySQL;
 
@@ -22,13 +24,24 @@ public class SelectProduct extends javax.swing.JDialog {
 
     private AddNewStock addNewStock;
     HashMap<String, String> categoryMap = new HashMap<>();
+    HashMap<String, String> unitMap = new HashMap<>();
 
     public SelectProduct(java.awt.Frame parent, boolean modal, AddNewStock addNewStock) {
         super(parent, modal);
         this.addNewStock = addNewStock;
         initComponents();
+
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+
+        productTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
+        productTable.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
+        productTable.getColumnModel().getColumn(3).setCellRenderer(centerRenderer);
+
         loadCategories();
+        loadUnits();
         loadProductTable();
+
     }
 
     private void loadCategories() {
@@ -48,32 +61,58 @@ public class SelectProduct extends javax.swing.JDialog {
         }
     }
 
+    private void loadUnits() {
+        try {
+            ResultSet result = MySQL.execute("SELECT * FROM measurement_unit");
+            Vector v = new Vector();
+            v.add("All Units");
+            while (result.next()) {
+                v.add(result.getString("name"));
+                unitMap.put(result.getString("name"), result.getString("id"));
+            }
+            DefaultComboBoxModel model = new DefaultComboBoxModel(v);
+            unitComboBox.setModel(model);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void loadProductTable() {
         try {
             String search = searchTextField.getText();
             String categoryId = categoryMap.get(String.valueOf(categotyComboBox.getSelectedItem()));
+            String unitId = unitMap.get(String.valueOf(unitComboBox.getSelectedItem()));
 
             String searchByCategoryQueryPart = "";
+            String searchByMeasUnitQueryPart = "";
 
             if (categoryId != null) {
-                searchByCategoryQueryPart = "AND `product`.`category_id`='" + categoryId + "' ";
+                searchByCategoryQueryPart = "AND p.category_id='" + categoryId + "' ";
+            }
+
+            if (unitId != null) {
+                searchByMeasUnitQueryPart = "AND p.measurement_unit_id='" + unitId + "' ";
             }
 
             DefaultTableModel model = (DefaultTableModel) productTable.getModel();
             model.setRowCount(0);
 
             ResultSet results = MySQL.execute(""
-                    + "SELECT * FROM `product` "
-                    + "INNER JOIN `category` ON `product`.`category_id`=`category`.`id` "
-                    + "WHERE (`product`.`name` LIKE '%" + search + "%' OR `product`.`id` LIKE '%" + search + "%')"
+                    + "SELECT * FROM product p "
+                    + "INNER JOIN category c ON p.category_id = c.id "
+                    + "INNER JOIN measurement_unit mu ON p.measurement_unit_id =mu.id "
+                    + "WHERE (p.name LIKE '%" + search + "%' OR p.id LIKE '%" + search + "%')"
                     + searchByCategoryQueryPart
-                    + "ORDER BY `product`.`id` DESC");
+                    + searchByMeasUnitQueryPart
+                    + "ORDER BY p.id DESC");
 
             while (results.next()) {
                 Vector v = new Vector();
-                v.add(results.getString("id"));
-                v.add(results.getString("name"));
-                v.add(results.getString("category.name"));
+                v.add(results.getString("p.id"));
+                v.add(results.getString("p.name"));
+                v.add(results.getString("c.name"));
+                v.add(results.getString("mu.name"));
                 model.addRow(v);
             }
         } catch (Exception e) {
@@ -82,8 +121,13 @@ public class SelectProduct extends javax.swing.JDialog {
     }
 
     private void clearSearch() {
+        loadCategories();
+        loadUnits();
+        loadProductTable();
         searchTextField.setText("");
         categotyComboBox.setSelectedIndex(0);
+        unitComboBox.setSelectedIndex(0);
+        
     }
 
     /**
@@ -103,6 +147,9 @@ public class SelectProduct extends javax.swing.JDialog {
         jPanel5 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         categotyComboBox = new javax.swing.JComboBox<>();
+        jPanel6 = new javax.swing.JPanel();
+        jLabel4 = new javax.swing.JLabel();
+        unitComboBox = new javax.swing.JComboBox<>();
         jPanel10 = new javax.swing.JPanel();
         clearSearchButton = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
@@ -114,7 +161,7 @@ public class SelectProduct extends javax.swing.JDialog {
         setTitle("Select Product");
         setResizable(false);
 
-        jPanel2.setLayout(new java.awt.GridLayout());
+        jPanel2.setLayout(new java.awt.GridLayout(1, 0));
 
         jPanel7.setForeground(new java.awt.Color(255, 51, 51));
 
@@ -136,7 +183,7 @@ public class SelectProduct extends javax.swing.JDialog {
                     .addGroup(jPanel7Layout.createSequentialGroup()
                         .addComponent(jLabel6)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(searchTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 135, Short.MAX_VALUE))
+                    .addComponent(searchTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel7Layout.setVerticalGroup(
@@ -168,7 +215,7 @@ public class SelectProduct extends javax.swing.JDialog {
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(categotyComboBox, 0, 135, Short.MAX_VALUE)
+                    .addComponent(categotyComboBox, 0, 98, Short.MAX_VALUE)
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addGap(0, 0, Short.MAX_VALUE)))
@@ -185,6 +232,41 @@ public class SelectProduct extends javax.swing.JDialog {
         );
 
         jPanel2.add(jPanel5);
+
+        jPanel6.setForeground(new java.awt.Color(255, 51, 51));
+
+        jLabel4.setText("Unit");
+
+        unitComboBox.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                unitComboBoxItemStateChanged(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
+        jPanel6.setLayout(jPanel6Layout);
+        jPanel6Layout.setHorizontalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(unitComboBox, 0, 98, Short.MAX_VALUE)
+                    .addGroup(jPanel6Layout.createSequentialGroup()
+                        .addComponent(jLabel4)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        jPanel6Layout.setVerticalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel4)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(unitComboBox, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        jPanel2.add(jPanel6);
 
         jPanel10.setForeground(new java.awt.Color(255, 51, 51));
 
@@ -204,7 +286,7 @@ public class SelectProduct extends javax.swing.JDialog {
             jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel10Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(clearSearchButton, javax.swing.GroupLayout.DEFAULT_SIZE, 135, Short.MAX_VALUE)
+                .addComponent(clearSearchButton, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel10Layout.setVerticalGroup(
@@ -224,11 +306,11 @@ public class SelectProduct extends javax.swing.JDialog {
 
             },
             new String [] {
-                "Id", "Product Name", "Category"
+                "Id", "Product Name", "Category", "Unit"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false
+                false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -332,13 +414,12 @@ public class SelectProduct extends javax.swing.JDialog {
             int selectedRow = productTable.getSelectedRow();
 
             if (selectedRow != -1) {
-                String productName = String.valueOf(productTable.getValueAt(selectedRow, 1));
+                String productId = String.valueOf(productTable.getValueAt(selectedRow, 0));
                 //Set to add new stock
                 if (addNewStock != null) {
-                    addNewStock.setProduct(productName);
+                    addNewStock.setProduct(productId);
                 } else {
                     JOptionPane.showMessageDialog(this, "Something Went Wrong", "Warning", JOptionPane.WARNING_MESSAGE);
-
                 }
                 this.dispose();
             } else {
@@ -346,6 +427,10 @@ public class SelectProduct extends javax.swing.JDialog {
             }
         }
     }//GEN-LAST:event_productTableMouseClicked
+
+    private void unitComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_unitComboBoxItemStateChanged
+        loadProductTable();
+    }//GEN-LAST:event_unitComboBoxItemStateChanged
 
     /**
      * @param args the command line arguments
@@ -387,15 +472,18 @@ public class SelectProduct extends javax.swing.JDialog {
     private javax.swing.JButton clearSearchButton;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable productTable;
     private javax.swing.JTextField searchTextField;
+    private javax.swing.JComboBox<String> unitComboBox;
     // End of variables declaration//GEN-END:variables
 }
