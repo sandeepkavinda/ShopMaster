@@ -15,6 +15,7 @@ import panels.Quatations;
 import panels.Reports;
 import panels.ReturnManagement;
 import panels.StockManagement;
+import panels.SupplierManagement;
 import panels.UserManagement;
 
 /**
@@ -49,6 +50,7 @@ public class Home extends javax.swing.JFrame {
         userManagementButton.setBackground(dafaultLightColor);
         productManagementButton.setBackground(dafaultLightColor);
         stockManagementButton.setBackground(dafaultLightColor);
+        supplierManagementButton.setBackground(dafaultLightColor);
         grnManagementButton.setBackground(dafaultLightColor);
         invoiceManagementButton.setBackground(dafaultLightColor);
         returnManagementButton.setBackground(dafaultLightColor);
@@ -59,6 +61,7 @@ public class Home extends javax.swing.JFrame {
         userManagementActiveBar.setBackground(dafaultLightColor);
         productManagementActiveBar.setBackground(dafaultLightColor);
         stockManagementActiveBar.setBackground(dafaultLightColor);
+        supplierManagementActiveBar.setBackground(dafaultLightColor);
         grnManagementActiveBar.setBackground(dafaultLightColor);
         invoiceManagementActiveBar.setBackground(dafaultLightColor);
         returnManagementActiveBar.setBackground(dafaultLightColor);
@@ -177,12 +180,11 @@ public class Home extends javax.swing.JFrame {
         returnManagementButton = new javax.swing.JButton();
         quatationsButton = new javax.swing.JButton();
         reportsButton = new javax.swing.JButton();
-        jLabel2 = new javax.swing.JLabel();
-        quatationButton2 = new javax.swing.JButton();
-        quatationButton3 = new javax.swing.JButton();
         quatationButton4 = new javax.swing.JButton();
         userManagementActiveBar = new javax.swing.JPanel();
         userManagementButton = new javax.swing.JButton();
+        supplierManagementActiveBar = new javax.swing.JPanel();
+        supplierManagementButton = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenu2 = new javax.swing.JMenu();
@@ -589,28 +591,6 @@ public class Home extends javax.swing.JFrame {
             }
         });
 
-        jLabel2.setText("Shortcuts");
-
-        quatationButton2.setBackground(new java.awt.Color(255, 255, 255));
-        quatationButton2.setForeground(new java.awt.Color(51, 51, 51));
-        quatationButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/plus.png"))); // NOI18N
-        quatationButton2.setText("New GRN");
-        quatationButton2.setToolTipText("Dashboard");
-        quatationButton2.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 14, 0, 0));
-        quatationButton2.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        quatationButton2.setIconTextGap(15);
-        quatationButton2.setPreferredSize(new java.awt.Dimension(228, 40));
-
-        quatationButton3.setBackground(new java.awt.Color(255, 255, 255));
-        quatationButton3.setForeground(new java.awt.Color(51, 51, 51));
-        quatationButton3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/plus.png"))); // NOI18N
-        quatationButton3.setText("New Invoice");
-        quatationButton3.setToolTipText("Dashboard");
-        quatationButton3.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 14, 0, 0));
-        quatationButton3.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        quatationButton3.setIconTextGap(15);
-        quatationButton3.setPreferredSize(new java.awt.Dimension(228, 40));
-
         quatationButton4.setBackground(new java.awt.Color(255, 255, 255));
         quatationButton4.setForeground(new java.awt.Color(51, 51, 51));
         quatationButton4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/plus.png"))); // NOI18N
@@ -650,14 +630,39 @@ public class Home extends javax.swing.JFrame {
             }
         });
 
+        supplierManagementActiveBar.setBackground(new java.awt.Color(0, 105, 75));
+        supplierManagementActiveBar.setPreferredSize(new java.awt.Dimension(4, 40));
+
+        javax.swing.GroupLayout supplierManagementActiveBarLayout = new javax.swing.GroupLayout(supplierManagementActiveBar);
+        supplierManagementActiveBar.setLayout(supplierManagementActiveBarLayout);
+        supplierManagementActiveBarLayout.setHorizontalGroup(
+            supplierManagementActiveBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 4, Short.MAX_VALUE)
+        );
+        supplierManagementActiveBarLayout.setVerticalGroup(
+            supplierManagementActiveBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 40, Short.MAX_VALUE)
+        );
+
+        supplierManagementButton.setBackground(new java.awt.Color(255, 255, 255));
+        supplierManagementButton.setForeground(new java.awt.Color(51, 51, 51));
+        supplierManagementButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/supplier.png"))); // NOI18N
+        supplierManagementButton.setText("Supplier Management");
+        supplierManagementButton.setToolTipText("Supplier Management");
+        supplierManagementButton.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 10, 0, 0));
+        supplierManagementButton.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        supplierManagementButton.setIconTextGap(15);
+        supplierManagementButton.setPreferredSize(new java.awt.Dimension(228, 40));
+        supplierManagementButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                supplierManagementButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout NavigationPanelLayout = new javax.swing.GroupLayout(NavigationPanel);
         NavigationPanel.setLayout(NavigationPanelLayout);
         NavigationPanelLayout.setHorizontalGroup(
             NavigationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(NavigationPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 222, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(NavigationPanelLayout.createSequentialGroup()
                 .addGroup(NavigationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(NavigationPanelLayout.createSequentialGroup()
@@ -677,7 +682,7 @@ public class Home extends javax.swing.JFrame {
                         .addComponent(stockManagementActiveBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, 0)
                         .addComponent(stockManagementButton, javax.swing.GroupLayout.PREFERRED_SIZE, 234, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(NavigationPanelLayout.createSequentialGroup()
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, NavigationPanelLayout.createSequentialGroup()
                         .addComponent(grnManagementActiveBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, 0)
                         .addComponent(grnManagementButton, javax.swing.GroupLayout.PREFERRED_SIZE, 234, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -697,14 +702,16 @@ public class Home extends javax.swing.JFrame {
                         .addComponent(reportsActiveBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, 0)
                         .addComponent(reportsButton, javax.swing.GroupLayout.PREFERRED_SIZE, 234, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(quatationButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 238, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(quatationButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 238, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(quatationButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 238, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(NavigationPanelLayout.createSequentialGroup()
                         .addComponent(userManagementActiveBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, 0)
-                        .addComponent(userManagementButton, javax.swing.GroupLayout.PREFERRED_SIZE, 234, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(0, 0, Short.MAX_VALUE))
+                        .addComponent(userManagementButton, javax.swing.GroupLayout.PREFERRED_SIZE, 234, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, NavigationPanelLayout.createSequentialGroup()
+                        .addComponent(supplierManagementActiveBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, 0)
+                        .addComponent(supplierManagementButton, javax.swing.GroupLayout.PREFERRED_SIZE, 234, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(0, 12, Short.MAX_VALUE))
         );
         NavigationPanelLayout.setVerticalGroup(
             NavigationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -726,6 +733,11 @@ public class Home extends javax.swing.JFrame {
                 .addGroup(NavigationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(stockManagementActiveBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(stockManagementButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(0, 0, 0)
+                .addGroup(NavigationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(supplierManagementActiveBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(supplierManagementButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(0, 0, 0)
                 .addGroup(NavigationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(grnManagementActiveBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(grnManagementButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -742,14 +754,8 @@ public class Home extends javax.swing.JFrame {
                     .addComponent(reportsActiveBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(reportsButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel2)
-                .addGap(18, 18, 18)
-                .addComponent(quatationButton2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, 0)
-                .addComponent(quatationButton3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, 0)
                 .addComponent(quatationButton4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(28, 28, 28))
+                .addGap(13, 13, 13))
         );
 
         javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
@@ -759,7 +765,7 @@ public class Home extends javax.swing.JFrame {
             .addGroup(jPanel8Layout.createSequentialGroup()
                 .addComponent(NavigationPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
-                .addComponent(MainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(MainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 840, Short.MAX_VALUE))
         );
         jPanel8Layout.setVerticalGroup(
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -872,6 +878,10 @@ public class Home extends javax.swing.JFrame {
         loadPanel(new UserManagement(this), userManagementButton, userManagementActiveBar);
     }//GEN-LAST:event_userManagementButtonActionPerformed
 
+    private void supplierManagementButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_supplierManagementButtonActionPerformed
+       loadPanel(new SupplierManagement(this), supplierManagementButton, supplierManagementActiveBar);
+    }//GEN-LAST:event_supplierManagementButtonActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -922,7 +932,6 @@ public class Home extends javax.swing.JFrame {
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
@@ -937,18 +946,19 @@ public class Home extends javax.swing.JFrame {
     private javax.swing.JButton notoficationsButton;
     private javax.swing.JPanel productManagementActiveBar;
     private javax.swing.JButton productManagementButton;
-    private javax.swing.JButton quatationButton2;
-    private javax.swing.JButton quatationButton3;
     private javax.swing.JButton quatationButton4;
     private javax.swing.JPanel quatationsActiveBar;
     private javax.swing.JButton quatationsButton;
     private javax.swing.JPanel reportsActiveBar;
+    private javax.swing.JPanel reportsActiveBar1;
     private javax.swing.JButton reportsButton;
     private javax.swing.JPanel returnManagementActiveBar;
     private javax.swing.JButton returnManagementButton;
     private javax.swing.JButton settingsButton;
     private javax.swing.JPanel stockManagementActiveBar;
     private javax.swing.JButton stockManagementButton;
+    private javax.swing.JPanel supplierManagementActiveBar;
+    private javax.swing.JButton supplierManagementButton;
     private javax.swing.JPanel userManagementActiveBar;
     private javax.swing.JButton userManagementButton;
     // End of variables declaration//GEN-END:variables
