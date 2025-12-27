@@ -21,7 +21,6 @@ import model.MySQL;
 import model.Numbers;
 import model.Validation;
 import javax.swing.table.DefaultTableCellRenderer;
-import model.Generate;
 import model.IdGenerater;
 import panels.GrnManagement;
 
@@ -33,6 +32,7 @@ public class NewGRN extends javax.swing.JFrame {
 
     //Inisilize Varables
     private HashMap<String, Integer> rowNumberMap = new HashMap<String, Integer>();
+    private String supplierId;
     private String selectedStockBarcode;
     private String selectedProductName;
     private String selectedBuyingPrice;
@@ -52,6 +52,35 @@ public class NewGRN extends javax.swing.JFrame {
         timePickerTextField.setText("Now");
         confirmedGRN(false);
         rowDiscountTextField.setText("0.00");
+    }
+
+    public void setSupplier(String id) {
+        try {
+            ResultSet results = MySQL.execute("SELECT * FROM stock supplier "
+                    + "WHERE id='" + id + "'");
+
+            if (results.next()) {
+                supplierId = id;
+
+                supplierNameTextField.setText(results.getString("name"));
+                supplierPhoneTextField.setText(results.getString("phone"));
+
+                noteTextField.grabFocus();
+                noteTextField.selectAll();
+            } else {
+                JOptionPane.showMessageDialog(this, "Something Went Wrong", "Unexpected Error", JOptionPane.WARNING_MESSAGE);
+            }
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Something Went Wrong", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        }
+    }
+
+    private void clearSupplier() {
+        supplierId = null;
+        supplierNameTextField.setText("");
+        supplierPhoneTextField.setText("");
     }
 
     public void setStock(String stockBarcode) {
@@ -95,13 +124,11 @@ public class NewGRN extends javax.swing.JFrame {
     //Change Designs Confimed GRNS or Not
     private void confirmedGRN(boolean isConfirmed) {
         if (isConfirmed) {
-            supplierNameLabel.setEnabled(false);
-            supplierMobileLabel.setEnabled(false);
             noteLabel.setEnabled(false);
             dateLabel.setEnabled(false);
             timeLabel.setEnabled(false);
             supplierNameTextField.setEnabled(false);
-            supplierMobileTextField.setEnabled(false);
+            supplierPhoneTextField.setEnabled(false);
             noteTextField.setEnabled(false);
             currentDateTimeCheckBox.setEnabled(false);
             if (!currentDateTimeCheckBox.isSelected()) {
@@ -146,13 +173,11 @@ public class NewGRN extends javax.swing.JFrame {
             confirmGrnButton.setText("Confirmed");
 
         } else {
-            supplierNameLabel.setEnabled(true);
-            supplierMobileLabel.setEnabled(true);
             noteLabel.setEnabled(true);
             dateLabel.setEnabled(true);
             timeLabel.setEnabled(true);
             supplierNameTextField.setEnabled(true);
-            supplierMobileTextField.setEnabled(true);
+            supplierPhoneTextField.setEnabled(true);
             noteTextField.setEnabled(true);
             currentDateTimeCheckBox.setEnabled(true);
             if (!currentDateTimeCheckBox.isSelected()) {
@@ -335,8 +360,11 @@ public class NewGRN extends javax.swing.JFrame {
         supplierNameLabel = new javax.swing.JLabel();
         supplierNameTextField = new javax.swing.JTextField();
         jPanel15 = new javax.swing.JPanel();
-        supplierMobileLabel = new javax.swing.JLabel();
-        supplierMobileTextField = new javax.swing.JTextField();
+        supplierPhoneLabel = new javax.swing.JLabel();
+        supplierPhoneTextField = new javax.swing.JTextField();
+        jPanel22 = new javax.swing.JPanel();
+        selectSupplierButton = new javax.swing.JButton();
+        cleanSupplierButton = new javax.swing.JButton();
         jPanel4 = new javax.swing.JPanel();
         noteLabel = new javax.swing.JLabel();
         noteTextField = new javax.swing.JTextField();
@@ -426,6 +454,8 @@ public class NewGRN extends javax.swing.JFrame {
 
         supplierNameLabel.setText("Supplier Name");
 
+        supplierNameTextField.setEditable(false);
+        supplierNameTextField.setEnabled(false);
         supplierNameTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 supplierNameTextFieldActionPerformed(evt);
@@ -442,7 +472,7 @@ public class NewGRN extends javax.swing.JFrame {
                     .addComponent(supplierNameTextField)
                     .addGroup(jPanel6Layout.createSequentialGroup()
                         .addComponent(supplierNameLabel)
-                        .addGap(0, 55, Short.MAX_VALUE)))
+                        .addGap(0, 37, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel6Layout.setVerticalGroup(
@@ -459,11 +489,13 @@ public class NewGRN extends javax.swing.JFrame {
 
         jPanel15.setForeground(new java.awt.Color(255, 51, 51));
 
-        supplierMobileLabel.setText("Supplier Mobile");
+        supplierPhoneLabel.setText("Supplier Phone No.");
 
-        supplierMobileTextField.addActionListener(new java.awt.event.ActionListener() {
+        supplierPhoneTextField.setEditable(false);
+        supplierPhoneTextField.setEnabled(false);
+        supplierPhoneTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                supplierMobileTextFieldActionPerformed(evt);
+                supplierPhoneTextFieldActionPerformed(evt);
             }
         });
 
@@ -474,23 +506,67 @@ public class NewGRN extends javax.swing.JFrame {
             .addGroup(jPanel15Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(supplierMobileTextField)
+                    .addComponent(supplierPhoneTextField)
                     .addGroup(jPanel15Layout.createSequentialGroup()
-                        .addComponent(supplierMobileLabel)
-                        .addGap(0, 50, Short.MAX_VALUE)))
+                        .addComponent(supplierPhoneLabel)
+                        .addGap(0, 13, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel15Layout.setVerticalGroup(
             jPanel15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel15Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(supplierMobileLabel)
+                .addComponent(supplierPhoneLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(supplierMobileTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE)
+                .addComponent(supplierPhoneTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
         jPanel3.add(jPanel15);
+
+        jPanel22.setForeground(new java.awt.Color(255, 51, 51));
+
+        selectSupplierButton.setText("Select");
+        selectSupplierButton.setToolTipText("Select Supplier");
+        selectSupplierButton.setBorder(null);
+        selectSupplierButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectSupplierButtonActionPerformed(evt);
+            }
+        });
+
+        cleanSupplierButton.setBackground(new java.awt.Color(102, 102, 102));
+        cleanSupplierButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/clean.png"))); // NOI18N
+        cleanSupplierButton.setToolTipText("Clear Supplier");
+        cleanSupplierButton.setBorder(null);
+        cleanSupplierButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cleanSupplierButtonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel22Layout = new javax.swing.GroupLayout(jPanel22);
+        jPanel22.setLayout(jPanel22Layout);
+        jPanel22Layout.setHorizontalGroup(
+            jPanel22Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel22Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(selectSupplierButton, javax.swing.GroupLayout.DEFAULT_SIZE, 72, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cleanSupplierButton, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanel22Layout.setVerticalGroup(
+            jPanel22Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel22Layout.createSequentialGroup()
+                .addGap(28, 28, 28)
+                .addGroup(jPanel22Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(cleanSupplierButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(selectSupplierButton, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+
+        jPanel3.add(jPanel22);
 
         jPanel4.setForeground(new java.awt.Color(255, 51, 51));
 
@@ -512,7 +588,7 @@ public class NewGRN extends javax.swing.JFrame {
                     .addComponent(noteTextField)
                     .addGroup(jPanel4Layout.createSequentialGroup()
                         .addComponent(noteLabel)
-                        .addGap(0, 102, Short.MAX_VALUE)))
+                        .addGap(0, 84, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
@@ -546,7 +622,7 @@ public class NewGRN extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel17Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel17Layout.createSequentialGroup()
-                        .addComponent(dateChooseTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 90, Short.MAX_VALUE)
+                        .addComponent(dateChooseTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 72, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(setDateButton, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel17Layout.createSequentialGroup()
@@ -589,7 +665,7 @@ public class NewGRN extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel21Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel21Layout.createSequentialGroup()
-                        .addComponent(timePickerTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 90, Short.MAX_VALUE)
+                        .addComponent(timePickerTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 72, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(setTimeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel21Layout.createSequentialGroup()
@@ -627,7 +703,7 @@ public class NewGRN extends javax.swing.JFrame {
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel8Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(confirmGrnButton, javax.swing.GroupLayout.DEFAULT_SIZE, 133, Short.MAX_VALUE)
+                .addComponent(confirmGrnButton, javax.swing.GroupLayout.DEFAULT_SIZE, 115, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel8Layout.setVerticalGroup(
@@ -659,7 +735,7 @@ public class NewGRN extends javax.swing.JFrame {
             jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel10Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(editDetailsButton, javax.swing.GroupLayout.DEFAULT_SIZE, 133, Short.MAX_VALUE)
+                .addComponent(editDetailsButton, javax.swing.GroupLayout.DEFAULT_SIZE, 115, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel10Layout.setVerticalGroup(
@@ -1376,13 +1452,13 @@ public class NewGRN extends javax.swing.JFrame {
     }//GEN-LAST:event_noteTextFieldActionPerformed
 
     private void supplierNameTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_supplierNameTextFieldActionPerformed
-        supplierMobileTextField.grabFocus();
+        supplierPhoneTextField.grabFocus();
     }//GEN-LAST:event_supplierNameTextFieldActionPerformed
 
     private void addStockButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addStockButtonActionPerformed
         grnItemsTable.clearSelection();
         cleanRowInputs();
-        SelectStock selectStock = new SelectStock(this, true, this,null);
+        SelectStock selectStock = new SelectStock(this, true, this, null);
         selectStock.setVisible(true);
     }//GEN-LAST:event_addStockButtonActionPerformed
 
@@ -1422,9 +1498,9 @@ public class NewGRN extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_productNameTextFieldActionPerformed
 
-    private void supplierMobileTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_supplierMobileTextFieldActionPerformed
+    private void supplierPhoneTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_supplierPhoneTextFieldActionPerformed
         noteTextField.grabFocus();
-    }//GEN-LAST:event_supplierMobileTextFieldActionPerformed
+    }//GEN-LAST:event_supplierPhoneTextFieldActionPerformed
 
     private void quantityTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_quantityTextFieldActionPerformed
         String quantity = quantityTextField.getText();
@@ -1500,7 +1576,7 @@ public class NewGRN extends javax.swing.JFrame {
 
     private void confirmGrnButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_confirmGrnButtonActionPerformed
         String supplierName = supplierNameTextField.getText();
-        String supplierMobile = supplierMobileTextField.getText();
+        String supplierMobile = supplierPhoneTextField.getText();
         String note = noteTextField.getText();
         String date = dateChooseTextField.getText();
         String time = timePickerTextField.getText() + ":00";
@@ -1526,10 +1602,10 @@ public class NewGRN extends javax.swing.JFrame {
             supplierNameTextField.grabFocus();
         } else if (supplierMobile.isEmpty()) {
             JOptionPane.showMessageDialog(this, "<html>Please Enter Supplier Mobile.<br/>Enter <b>\"-\"</b> if no supplier mobile.</html>", "Warning", JOptionPane.WARNING_MESSAGE);
-            supplierMobileTextField.grabFocus();
+            supplierPhoneTextField.grabFocus();
         } else if (!Validation.isValidMobileBasic(supplierMobile)) {
             JOptionPane.showMessageDialog(this, "<html>Mobile number must be <b>10 digits</b> and<br><b>only contain digits.</b><html>", "Invalid Mobile", JOptionPane.WARNING_MESSAGE);
-            supplierMobileTextField.grabFocus();
+            supplierPhoneTextField.grabFocus();
         } else if (note.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please Enter a Note", "Warning", JOptionPane.WARNING_MESSAGE);
             noteTextField.grabFocus();
@@ -1587,7 +1663,7 @@ public class NewGRN extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(this, "No Items in the GRN", "Warning", JOptionPane.WARNING_MESSAGE);
             } else {
                 try {
-                //Generate GRN Barcode
+                    //Generate GRN Barcode
                     String newBarcode = IdGenerater.generateId("grn", "barcode", "GRN");
 
                     //Set Date and Time
@@ -1603,7 +1679,7 @@ public class NewGRN extends javax.swing.JFrame {
 
                     //Instet to GRN Table 
                     String supplierName = supplierNameTextField.getText();
-                    String supplierMobile = supplierMobileTextField.getText();
+                    String supplierMobile = supplierPhoneTextField.getText();
                     String note = noteTextField.getText();
 
                     MySQL.execute("INSERT INTO `grn` (`barcode`,`supplier_name`,`supplier_mobile`,`note`,`date_time`,`amount`,`discount`) "
@@ -1705,6 +1781,15 @@ public class NewGRN extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_addRowButtonActionPerformed
 
+    private void selectSupplierButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectSupplierButtonActionPerformed
+        SelectSupplier selectSupplier = new SelectSupplier(this, true, this);
+        selectSupplier.setVisible(true);
+    }//GEN-LAST:event_selectSupplierButtonActionPerformed
+
+    private void cleanSupplierButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cleanSupplierButtonActionPerformed
+        clearSupplier();
+    }//GEN-LAST:event_cleanSupplierButtonActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1724,6 +1809,7 @@ public class NewGRN extends javax.swing.JFrame {
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JLabel buyingPriceLabel;
     private javax.swing.JTextField buyingPriceTextField;
+    private javax.swing.JButton cleanSupplierButton;
     private javax.swing.JButton clearRowButton;
     private javax.swing.JButton confirmGrnButton;
     private javax.swing.JCheckBox currentDateTimeCheckBox;
@@ -1757,6 +1843,7 @@ public class NewGRN extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel20;
     private javax.swing.JPanel jPanel21;
+    private javax.swing.JPanel jPanel22;
     private javax.swing.JPanel jPanel27;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel33;
@@ -1783,17 +1870,18 @@ public class NewGRN extends javax.swing.JFrame {
     private javax.swing.JTextField rowDiscountTextField;
     private javax.swing.JButton saveAndPrintButton;
     private javax.swing.JButton saveOnlyButton;
+    private javax.swing.JButton selectSupplierButton;
     private javax.swing.JLabel sellingPriceLabel;
     private javax.swing.JTextField sellingPriceTextField;
     private javax.swing.JButton setDateButton;
     private javax.swing.JButton setTimeButton;
     private javax.swing.JLabel stockBarcodeLabel;
     private javax.swing.JTextField stockBarcodeTextField;
-    private javax.swing.JLabel supplierMobileLabel;
-    private javax.swing.JTextField supplierMobileTextField;
     private javax.swing.JLabel supplierNameLabel;
     private javax.swing.JLabel supplierNameShowLabel;
     private javax.swing.JTextField supplierNameTextField;
+    private javax.swing.JLabel supplierPhoneLabel;
+    private javax.swing.JTextField supplierPhoneTextField;
     private javax.swing.JLabel timeLabel;
     private com.raven.swing.TimePicker timePicker;
     private javax.swing.JTextField timePickerTextField;

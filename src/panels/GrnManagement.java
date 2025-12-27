@@ -10,9 +10,12 @@ import java.awt.event.ItemEvent;
 import java.sql.ResultSet;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.Vector;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import model.MySQL;
 import model.Numbers;
@@ -25,35 +28,51 @@ import utils.ToastUtils;
 public class GrnManagement extends javax.swing.JPanel {
 
     private Home home;
-    
+    private HashMap<Integer, String> supplierIdMap = new HashMap<>();
+
     /**
      * Creates new form ProductManagement
      */
     public GrnManagement(Home home) {
         initComponents();
         this.home = home;
-        loadYears();
+        loadSuppliers();
+        
+        //Table Data Alignment
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+
+        DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
+        rightRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
+
+        grnTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
+        grnTable.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
+        grnTable.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
+        grnTable.getColumnModel().getColumn(3).setCellRenderer(rightRenderer);
+        grnTable.getColumnModel().getColumn(4).setCellRenderer(rightRenderer);
+        grnTable.getColumnModel().getColumn(5).setCellRenderer(centerRenderer);
+        grnTable.getColumnModel().getColumn(6).setCellRenderer(centerRenderer);
+        grnTable.getColumnModel().getColumn(7).setCellRenderer(centerRenderer);
+        
+        
         loadGRNTable();
     }
 
-    private void loadYears() {
+    private void loadSuppliers() {
         try {
-            ResultSet result = MySQL.execute("SELECT * FROM `grn` ORDER BY `date_time` DESC ");
+            ResultSet result = MySQL.execute("SELECT * FROM supplier ORDER BY id ASC ");
             Vector v = new Vector();
-            v.add("All Years");
-            while (result.next()) {
-                //Get Year From Date Time
-                String dateTime = result.getString("date_time");
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                LocalDateTime localDateTime = LocalDateTime.parse(dateTime, formatter);
-                int year = localDateTime.getYear();
+            v.add("All Suppliers");
 
-                if (!v.contains(year)) {
-                    v.add(year);
-                }
+            int comboboxIndex = 1;
+
+            while (result.next()) {
+                supplierIdMap.put(comboboxIndex, result.getString("id"));
+                v.add(result.getString("id") + " - " + result.getString("name"));
+                comboboxIndex++;
             }
             DefaultComboBoxModel model = new DefaultComboBoxModel(v);
-            yearComboBox.setModel(model);
+            supplierComboBox.setModel(model);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -64,71 +83,72 @@ public class GrnManagement extends javax.swing.JPanel {
             barcodeTextField.setText("");
 
             String search = searchTextField.getText();
-            String year = String.valueOf(yearComboBox.getSelectedItem());
+            String supplierId = supplierIdMap.get(supplierComboBox.getSelectedIndex());
             int sortBy = sortByComboBox.getSelectedIndex();
 
             String sortByColumn = "";
             String sortByType = "";
 
             if (sortBy == 0) {
-                sortByColumn = "`grn`.`date_time`";
+                sortByColumn = "g.barcode";
                 sortByType = "DESC";
             } else if (sortBy == 1) {
-                sortByColumn = "`grn`.`date_time`";
+                sortByColumn = "g.barcode";
                 sortByType = "ASC";
             } else if (sortBy == 2) {
-                sortByColumn = "`grn`.`supplier_name`";
-                sortByType = "ASC";
+                sortByColumn = "g.date_time";
+                sortByType = "DESC";
             } else if (sortBy == 3) {
-                sortByColumn = "`grn`.`supplier_name`";
-                sortByType = "DESC";
+                sortByColumn = "g.date_time";
+                sortByType = "ASC";
             } else if (sortBy == 4) {
-                sortByColumn = "`grn`.`amount`";
-                sortByType = "ASC";
+                sortByColumn = "g.amount";
+                sortByType = "DESC";
             } else if (sortBy == 5) {
-                sortByColumn = "`grn`.`amount`";
-                sortByType = "DESC";
-            } else if (sortBy == 6) {
-                sortByColumn = "`grn`.`discount`";
+                sortByColumn = "g.amount";
                 sortByType = "ASC";
-            } else if (sortBy == 7) {
-                sortByColumn = "`grn`.`discount`";
+            } else if (sortBy == 6) {
+                sortByColumn = "g.discount";
                 sortByType = "DESC";
+            } else if (sortBy == 7) {
+                sortByColumn = "g.discount";
+                sortByType = "ASC";
             }
-            String searchByYearQueryPart = "";
 
-            if (year != "All Years") {
-                searchByYearQueryPart = "AND `grn`.`date_time` LIKE '" + year + "%' ";
+            String searchBySupplierQueryPart = "";
+
+            if (supplierId != null) {
+                searchBySupplierQueryPart = "AND g.supplier_id = '" + supplierId + "' ";
             }
 
             DefaultTableModel model = (DefaultTableModel) grnTable.getModel();
             model.setRowCount(0);
 
             ResultSet results = MySQL.execute(""
-                    + "SELECT * FROM `grn` "
-                    + "WHERE (`grn`.`barcode` LIKE '%" + search + "%' OR `grn`.`supplier_name` LIKE '%" + search + "%' OR `grn`.`note` LIKE '%" + search + "%' OR `grn`.`date_time` LIKE '%" + search + "%') "
-                    + searchByYearQueryPart
+                    + "SELECT * FROM grn g "
+                    + "INNER JOIN supplier s ON g.supplier_id = s.id "
+                    + "WHERE (g.barcode LIKE '%" + search + "%' OR s.name LIKE '%" + search + "%' OR g.note LIKE '%" + search + "%' ) "
+                    + searchBySupplierQueryPart
+                    + "ORDER BY " + sortByColumn + " " + sortByType + "");
+
+            System.out.println(""
+                    + "SELECT * FROM grn g "
+                    + "INNER JOIN supplier s ON g.supplier_id = s.id "
+                    + "WHERE (g.barcode LIKE '%" + search + "%' OR s.name LIKE '%" + search + "%' OR g.note LIKE '%" + search + "%' ) "
+                    + searchBySupplierQueryPart
                     + "ORDER BY " + sortByColumn + " " + sortByType + "");
 
             while (results.next()) {
-                ResultSet numOfItemsResult = MySQL.execute("SELECT COUNT(*) AS `items_count` FROM `grn_item` WHERE `grn_barcode` = '" + results.getString("grn.barcode") + "'");
-
-                if (numOfItemsResult.next()) {
-                    double amount = Double.parseDouble(results.getString("amount"));
-                    double discount = Double.parseDouble(results.getString("discount"));
-
-                    Vector v = new Vector();
-                    v.add(results.getString("barcode"));
-                    v.add(results.getString("supplier_name"));
-                    v.add(results.getString("supplier_mobile"));
-                    v.add(results.getString("date_time"));
-                    v.add(Numbers.formatPrice(amount));
-                    v.add(Numbers.formatPrice(discount));
-                    v.add(numOfItemsResult.getString("items_count"));
-                    model.addRow(v);
-                } else {
-                    JOptionPane.showMessageDialog(this, "An unexpected error has occurred. Please try again later or contact support if the issue persists.", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
-                }
+                Vector v = new Vector();
+                v.add(results.getString("g.barcode"));
+                v.add(results.getString("s.id"));
+                v.add(results.getString("s.name"));
+                v.add(Numbers.formatPrice(results.getDouble("g.amount")));
+                v.add(Numbers.formatPrice(results.getDouble("g.discount")));
+                v.add(results.getString("g.item_count"));
+                v.add(results.getString("g.date_time"));
+                v.add(results.getString("g.created_at"));
+                model.addRow(v);
 
             }
         } catch (Exception e) {
@@ -139,9 +159,8 @@ public class GrnManagement extends javax.swing.JPanel {
     private void clearSearch() {
         barcodeTextField.setText("");
         searchTextField.setText("");
-        yearComboBox.setSelectedIndex(0);
+        supplierComboBox.setSelectedIndex(0);
         sortByComboBox.setSelectedIndex(0);
-
     }
 
     private void searchByBarcode() {
@@ -155,34 +174,28 @@ public class GrnManagement extends javax.swing.JPanel {
             try {
                 //Reset Other Feilds
                 searchTextField.setText("");
-                yearComboBox.setSelectedIndex(0);
+                supplierComboBox.setSelectedIndex(0);
                 sortByComboBox.setSelectedIndex(0);
 
                 DefaultTableModel model = (DefaultTableModel) grnTable.getModel();
                 model.setRowCount(0);
 
-                ResultSet results = MySQL.execute("SELECT * FROM `grn` "
-                        + "WHERE `barcode`='" + barcode + "'");
+                ResultSet results = MySQL.execute(""
+                        + "SELECT * FROM grn g "
+                        + "INNER JOIN supplier s ON g.supplier_id = s.id "
+                        + "WHERE g.barcode = '" + barcode + "' ");
 
                 if (results.next()) {
-                    ResultSet numOfItemsResult = MySQL.execute("SELECT COUNT(*) AS `items_count` FROM `grn_item` WHERE `grn_barcode` = '" + results.getString("grn.barcode") + "'");
 
-                    if (numOfItemsResult.next()) {
-                        double amount = Double.parseDouble(results.getString("amount"));
-                        double discount = Double.parseDouble(results.getString("discount"));
-
-                        Vector v = new Vector();
-                        v.add(results.getString("barcode"));
-                        v.add(results.getString("supplier_name"));
-                        v.add(results.getString("note"));
-                        v.add(results.getString("date_time"));
-                        v.add(Numbers.formatPriceWithCurrencyCode(amount));
-                        v.add(Numbers.formatPriceWithCurrencyCode(discount));
-                        v.add(numOfItemsResult.getString("items_count"));
-                        model.addRow(v);
-                    } else {
-                        JOptionPane.showMessageDialog(this, "An unexpected error has occurred. Please try again later or contact support if the issue persists.", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
-                    }
+                    Vector v = new Vector();
+                    v.add(results.getString("g.barcode"));
+                    v.add(results.getString("s.id"));
+                    v.add(results.getString("s.name"));
+                    v.add(Numbers.formatPrice(results.getDouble("g.amount")));
+                    v.add(Numbers.formatPrice(results.getDouble("g.discount")));
+                    v.add(results.getString("g.date_time"));
+                    v.add(results.getString("g.created_at"));
+                    model.addRow(v);
 
                 } else {
                     JOptionPane.showMessageDialog(this, "Not Found This Barcode", "Warning", JOptionPane.WARNING_MESSAGE);
@@ -221,7 +234,7 @@ public class GrnManagement extends javax.swing.JPanel {
         jLabel3 = new javax.swing.JLabel();
         searchTextField = new javax.swing.JTextField();
         jPanel3 = new javax.swing.JPanel();
-        yearComboBox = new javax.swing.JComboBox<>();
+        supplierComboBox = new javax.swing.JComboBox<>();
         jLabel4 = new javax.swing.JLabel();
         jPanel4 = new javax.swing.JPanel();
         sortByComboBox = new javax.swing.JComboBox<>();
@@ -330,14 +343,14 @@ public class GrnManagement extends javax.swing.JPanel {
 
         jPanel3.setForeground(new java.awt.Color(255, 51, 51));
 
-        yearComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        yearComboBox.addItemListener(new java.awt.event.ItemListener() {
+        supplierComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        supplierComboBox.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                yearComboBoxItemStateChanged(evt);
+                supplierComboBoxItemStateChanged(evt);
             }
         });
 
-        jLabel4.setText("Year");
+        jLabel4.setText("Supplier");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -346,10 +359,10 @@ public class GrnManagement extends javax.swing.JPanel {
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(yearComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(supplierComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel4)
-                        .addGap(0, 105, Short.MAX_VALUE)))
+                        .addGap(0, 85, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -358,7 +371,7 @@ public class GrnManagement extends javax.swing.JPanel {
                 .addContainerGap()
                 .addComponent(jLabel4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(yearComboBox, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE)
+                .addComponent(supplierComboBox, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -366,7 +379,7 @@ public class GrnManagement extends javax.swing.JPanel {
 
         jPanel4.setForeground(new java.awt.Color(255, 51, 51));
 
-        sortByComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Newest to Oldest", "Oldest to Newest", "Supplier Name (A-Z)", "Supplier Name (Z-A)", "Amount (Low to High)", "Amount (High to Low)", "Discount (Low to High)", "Discount (High to Low)" }));
+        sortByComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Newest to Oldest", "Oldest to Newest", "GRN Date Time (Newest to Oldest)", "GRN Date Time (Oldest to Newest)", "Amount (High to Low)", "Amount (Low to High)", "Discount (High to Low)", "Discount (Low to High)" }));
         sortByComboBox.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 sortByComboBoxItemStateChanged(evt);
@@ -472,11 +485,11 @@ public class GrnManagement extends javax.swing.JPanel {
 
             },
             new String [] {
-                "Barcode", "Supplier", "Supplier Mobile", "Added Date Time", "Amount (Rs.)", "Discount (Rs.)", "Number Of Items"
+                "Barcode", "Supplier Id", "Supplier Name", "Amount (Rs.)", "Discount (Rs.)", "Number Of Items", "GRN Date Time", "Added Date Time"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -485,9 +498,6 @@ public class GrnManagement extends javax.swing.JPanel {
         });
         grnTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane1.setViewportView(grnTable);
-        if (grnTable.getColumnModel().getColumnCount() > 0) {
-            grnTable.getColumnModel().getColumn(3).setMinWidth(200);
-        }
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -535,11 +545,11 @@ public class GrnManagement extends javax.swing.JPanel {
         loadGRNTable();
     }//GEN-LAST:event_searchTextFieldKeyReleased
 
-    private void yearComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_yearComboBoxItemStateChanged
+    private void supplierComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_supplierComboBoxItemStateChanged
         if (evt.getStateChange() == ItemEvent.SELECTED) {
             loadGRNTable();
         }
-    }//GEN-LAST:event_yearComboBoxItemStateChanged
+    }//GEN-LAST:event_supplierComboBoxItemStateChanged
 
     private void sortByComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_sortByComboBoxItemStateChanged
         if (evt.getStateChange() == ItemEvent.SELECTED) {
@@ -593,6 +603,6 @@ public class GrnManagement extends javax.swing.JPanel {
     private javax.swing.JButton newInvoiceButton1;
     private javax.swing.JTextField searchTextField;
     private javax.swing.JComboBox<String> sortByComboBox;
-    private javax.swing.JComboBox<String> yearComboBox;
+    private javax.swing.JComboBox<String> supplierComboBox;
     // End of variables declaration//GEN-END:variables
 }

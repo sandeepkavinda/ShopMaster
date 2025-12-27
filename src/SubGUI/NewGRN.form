@@ -190,7 +190,7 @@
                                   <Component id="supplierNameTextField" max="32767" attributes="0"/>
                                   <Group type="102" attributes="0">
                                       <Component id="supplierNameLabel" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace min="0" pref="55" max="32767" attributes="0"/>
+                                      <EmptySpace min="0" pref="37" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
@@ -216,6 +216,10 @@
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JTextField" name="supplierNameTextField">
+                      <Properties>
+                        <Property name="editable" type="boolean" value="false"/>
+                        <Property name="enabled" type="boolean" value="false"/>
+                      </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="supplierNameTextFieldActionPerformed"/>
                       </Events>
@@ -235,10 +239,10 @@
                           <Group type="102" alignment="0" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="supplierMobileTextField" alignment="0" max="32767" attributes="0"/>
+                                  <Component id="supplierPhoneTextField" alignment="0" max="32767" attributes="0"/>
                                   <Group type="102" alignment="0" attributes="0">
-                                      <Component id="supplierMobileLabel" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace min="0" pref="50" max="32767" attributes="0"/>
+                                      <Component id="supplierPhoneLabel" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace min="0" pref="13" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
@@ -249,23 +253,91 @@
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" alignment="0" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="supplierMobileLabel" min="-2" max="-2" attributes="0"/>
+                              <Component id="supplierPhoneLabel" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="supplierMobileTextField" pref="37" max="32767" attributes="0"/>
+                              <Component id="supplierPhoneTextField" pref="37" max="32767" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
                   </Layout>
                   <SubComponents>
-                    <Component class="javax.swing.JLabel" name="supplierMobileLabel">
+                    <Component class="javax.swing.JLabel" name="supplierPhoneLabel">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Supplier Mobile"/>
+                        <Property name="text" type="java.lang.String" value="Supplier Phone No."/>
                       </Properties>
                     </Component>
-                    <Component class="javax.swing.JTextField" name="supplierMobileTextField">
+                    <Component class="javax.swing.JTextField" name="supplierPhoneTextField">
+                      <Properties>
+                        <Property name="editable" type="boolean" value="false"/>
+                        <Property name="enabled" type="boolean" value="false"/>
+                      </Properties>
                       <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="supplierMobileTextFieldActionPerformed"/>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="supplierPhoneTextFieldActionPerformed"/>
+                      </Events>
+                    </Component>
+                  </SubComponents>
+                </Container>
+                <Container class="javax.swing.JPanel" name="jPanel22">
+                  <Properties>
+                    <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                      <Color blue="33" green="33" red="ff" type="rgb"/>
+                    </Property>
+                  </Properties>
+
+                  <Layout>
+                    <DimensionLayout dim="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="selectSupplierButton" pref="72" max="32767" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="cleanSupplierButton" min="-2" pref="37" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                          </Group>
+                      </Group>
+                    </DimensionLayout>
+                    <DimensionLayout dim="1">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace min="-2" pref="28" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="cleanSupplierButton" max="32767" attributes="0"/>
+                                  <Component id="selectSupplierButton" pref="37" max="32767" attributes="0"/>
+                              </Group>
+                              <EmptySpace max="-2" attributes="0"/>
+                          </Group>
+                      </Group>
+                    </DimensionLayout>
+                  </Layout>
+                  <SubComponents>
+                    <Component class="javax.swing.JButton" name="selectSupplierButton">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="Select"/>
+                        <Property name="toolTipText" type="java.lang.String" value="Select Supplier"/>
+                        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                          <Border info="null"/>
+                        </Property>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="selectSupplierButtonActionPerformed"/>
+                      </Events>
+                    </Component>
+                    <Component class="javax.swing.JButton" name="cleanSupplierButton">
+                      <Properties>
+                        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                          <Color blue="66" green="66" red="66" type="rgb"/>
+                        </Property>
+                        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                          <Image iconType="3" name="/resource/clean.png"/>
+                        </Property>
+                        <Property name="toolTipText" type="java.lang.String" value="Clear Supplier"/>
+                        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                          <Border info="null"/>
+                        </Property>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cleanSupplierButtonActionPerformed"/>
                       </Events>
                     </Component>
                   </SubComponents>
@@ -286,7 +358,7 @@
                                   <Component id="noteTextField" max="32767" attributes="0"/>
                                   <Group type="102" attributes="0">
                                       <Component id="noteLabel" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace min="0" pref="102" max="32767" attributes="0"/>
+                                      <EmptySpace min="0" pref="84" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
@@ -332,7 +404,7 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" attributes="0">
-                                      <Component id="dateChooseTextField" pref="90" max="32767" attributes="0"/>
+                                      <Component id="dateChooseTextField" pref="72" max="32767" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Component id="setDateButton" min="-2" pref="37" max="-2" attributes="0"/>
                                   </Group>
@@ -394,7 +466,7 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" alignment="0" attributes="0">
-                                      <Component id="timePickerTextField" pref="90" max="32767" attributes="0"/>
+                                      <Component id="timePickerTextField" pref="72" max="32767" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Component id="setTimeButton" min="-2" pref="37" max="-2" attributes="0"/>
                                   </Group>
@@ -457,7 +529,7 @@
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="confirmGrnButton" pref="133" max="32767" attributes="0"/>
+                              <Component id="confirmGrnButton" pref="115" max="32767" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
                       </Group>
@@ -498,7 +570,7 @@
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" alignment="0" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="editDetailsButton" pref="133" max="32767" attributes="0"/>
+                              <Component id="editDetailsButton" pref="115" max="32767" attributes="0"/>
                               <EmptySpace min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>

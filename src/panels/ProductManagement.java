@@ -24,9 +24,9 @@ import utils.ToastUtils;
  */
 public class ProductManagement extends javax.swing.JPanel {
 
-    Home home;
-    HashMap<String, String> categoryMap = new HashMap<>();
-    HashMap<String, String> measUnitsMap = new HashMap<>();
+    private Home home;
+    private HashMap<String, String> categoryMap = new HashMap<>();
+    private HashMap<String, String> measUnitsMap = new HashMap<>();
 
     /**
      * Creates new form ProductManagement
