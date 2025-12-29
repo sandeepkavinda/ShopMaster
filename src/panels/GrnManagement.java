@@ -37,7 +37,7 @@ public class GrnManagement extends javax.swing.JPanel {
         initComponents();
         this.home = home;
         loadSuppliers();
-        
+
         //Table Data Alignment
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
@@ -53,8 +53,7 @@ public class GrnManagement extends javax.swing.JPanel {
         grnTable.getColumnModel().getColumn(5).setCellRenderer(centerRenderer);
         grnTable.getColumnModel().getColumn(6).setCellRenderer(centerRenderer);
         grnTable.getColumnModel().getColumn(7).setCellRenderer(centerRenderer);
-        
-        
+
         loadGRNTable();
     }
 
@@ -131,13 +130,6 @@ public class GrnManagement extends javax.swing.JPanel {
                     + searchBySupplierQueryPart
                     + "ORDER BY " + sortByColumn + " " + sortByType + "");
 
-            System.out.println(""
-                    + "SELECT * FROM grn g "
-                    + "INNER JOIN supplier s ON g.supplier_id = s.id "
-                    + "WHERE (g.barcode LIKE '%" + search + "%' OR s.name LIKE '%" + search + "%' OR g.note LIKE '%" + search + "%' ) "
-                    + searchBySupplierQueryPart
-                    + "ORDER BY " + sortByColumn + " " + sortByType + "");
-
             while (results.next()) {
                 Vector v = new Vector();
                 v.add(results.getString("g.barcode"));
@@ -193,6 +185,7 @@ public class GrnManagement extends javax.swing.JPanel {
                     v.add(results.getString("s.name"));
                     v.add(Numbers.formatPrice(results.getDouble("g.amount")));
                     v.add(Numbers.formatPrice(results.getDouble("g.discount")));
+                    v.add(results.getString("g.item_count"));
                     v.add(results.getString("g.date_time"));
                     v.add(results.getString("g.created_at"));
                     model.addRow(v);
