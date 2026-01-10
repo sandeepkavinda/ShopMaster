@@ -33,7 +33,7 @@ public class SupplierDetails extends javax.swing.JDialog {
 
             if (result.next()) {
                 titleLable.setText(result.getString("s.name"));
-                idLable.setText("ID : "+ result.getString("s.id"));
+                idLable.setText("ID : " + result.getString("s.id"));
                 nameTextField.setText(result.getString("s.name"));
                 phoneTextField.setText(result.getString("s.phone"));
                 name = result.getString("s.name");
@@ -95,9 +95,10 @@ public class SupplierDetails extends javax.swing.JDialog {
                     phoneTextField.selectAll();
                 } else {
 
-                    ResultSet resultSet = MySQL.execute("SELECT * FROM supplier WHERE name='" + name + "' AND phone = '" + phone + "' ");
+                    ResultSet resultSet = MySQL.execute("SELECT * FROM supplier WHERE name='" + name + "' ");
 
                     if (resultSet.next()) {
+                        JOptionPane.showMessageDialog(this, "A supplier with this name already exists.", "Warning", JOptionPane.WARNING_MESSAGE);
                         phoneTextField.grabFocus();
                         phoneTextField.selectAll();
                     } else {

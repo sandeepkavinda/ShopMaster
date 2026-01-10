@@ -93,10 +93,10 @@ public class AddNewSupplier extends javax.swing.JDialog {
         } else {
 
             try {
-                ResultSet resultSet = MySQL.execute("SELECT * FROM supplier WHERE name='" + name + "' AND phone = '" + phone + "' ");
+                ResultSet resultSet = MySQL.execute("SELECT * FROM supplier WHERE name='" + name + "'");
 
                 if (resultSet.next()) {
-                    JOptionPane.showMessageDialog(this, "A supplier with this name and phone number already exists.", "Warning", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "A supplier with this name already exists.", "Warning", JOptionPane.WARNING_MESSAGE);
                     nameTextField.grabFocus();
                 } else {
 
