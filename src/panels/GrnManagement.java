@@ -5,7 +5,10 @@
 package panels;
 
 import GUI.Home;
+import SubGUI.GRNPayment;
+import SubGUI.GrnPaymentHistory;
 import SubGUI.NewGRN;
+import SubGUI.SupplierDetails;
 import java.awt.event.ItemEvent;
 import java.sql.ResultSet;
 import java.util.HashMap;
@@ -15,8 +18,9 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import model.BigDecimalFormatter;
 import model.MySQL;
-import model.Numbers;
+import utils.ClipboardUtils;
 import utils.ToastUtils;
 
 /**
@@ -44,8 +48,7 @@ public class GrnManagement extends javax.swing.JPanel {
         rightRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
 
         grnTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
-        grnTable.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
-        grnTable.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
+        grnTable.getColumnModel().getColumn(2).setCellRenderer(rightRenderer);
         grnTable.getColumnModel().getColumn(3).setCellRenderer(rightRenderer);
         grnTable.getColumnModel().getColumn(4).setCellRenderer(rightRenderer);
         grnTable.getColumnModel().getColumn(5).setCellRenderer(centerRenderer);
@@ -81,16 +84,18 @@ public class GrnManagement extends javax.swing.JPanel {
 
             String search = searchTextField.getText();
             String supplierId = supplierIdMap.get(supplierComboBox.getSelectedIndex());
+            int balanceDue = balanceDueComboBox.getSelectedIndex();
             int sortBy = sortByComboBox.getSelectedIndex();
 
+            //Set Sort By Part
             String sortByColumn = "";
             String sortByType = "";
 
             if (sortBy == 0) {
-                sortByColumn = "g.barcode";
+                sortByColumn = "g.created_at";
                 sortByType = "DESC";
             } else if (sortBy == 1) {
-                sortByColumn = "g.barcode";
+                sortByColumn = "g.created_at";
                 sortByType = "ASC";
             } else if (sortBy == 2) {
                 sortByColumn = "g.date_time";
@@ -99,23 +104,33 @@ public class GrnManagement extends javax.swing.JPanel {
                 sortByColumn = "g.date_time";
                 sortByType = "ASC";
             } else if (sortBy == 4) {
-                sortByColumn = "g.amount";
+                sortByColumn = "g.grn_total";
                 sortByType = "DESC";
             } else if (sortBy == 5) {
-                sortByColumn = "g.amount";
+                sortByColumn = "g.grn_total";
                 sortByType = "ASC";
             } else if (sortBy == 6) {
-                sortByColumn = "g.discount";
+                sortByColumn = "g.balance";
                 sortByType = "DESC";
             } else if (sortBy == 7) {
-                sortByColumn = "g.discount";
+                sortByColumn = "g.balance";
                 sortByType = "ASC";
             }
 
+            //Set Filter By Supplier Part
             String searchBySupplierQueryPart = "";
 
             if (supplierId != null) {
                 searchBySupplierQueryPart = "AND g.supplier_id = '" + supplierId + "' ";
+            }
+
+            //Set filter by balance Due Search Part
+            String searchByBalanceDueQueryPart = "";
+
+            if (balanceDue == 1) {
+                searchBySupplierQueryPart = "AND g.balance > 0 ";
+            } else if (balanceDue == 2) {
+                searchBySupplierQueryPart = "AND g.balance <= 0 ";
             }
 
             DefaultTableModel model = (DefaultTableModel) grnTable.getModel();
@@ -124,17 +139,18 @@ public class GrnManagement extends javax.swing.JPanel {
             ResultSet results = MySQL.execute(""
                     + "SELECT * FROM grn g "
                     + "INNER JOIN supplier s ON g.supplier_id = s.id "
-                    + "WHERE (g.barcode LIKE '%" + search + "%' OR s.name LIKE '%" + search + "%' OR g.note LIKE '%" + search + "%' ) "
+                    + "WHERE (g.barcode LIKE '%" + search + "%' OR s.name LIKE '%" + search + "%' ) "
                     + searchBySupplierQueryPart
+                    + searchByBalanceDueQueryPart
                     + "ORDER BY " + sortByColumn + " " + sortByType + "");
 
             while (results.next()) {
                 Vector v = new Vector();
                 v.add(results.getString("g.barcode"));
-                v.add(results.getString("s.id"));
                 v.add(results.getString("s.name"));
-                v.add(Numbers.formatPrice(results.getDouble("g.sub_total")));
-                v.add(Numbers.formatPrice(results.getDouble("g.discount")));
+                v.add(BigDecimalFormatter.formatPrice(results.getBigDecimal("g.grn_total")));
+                v.add(BigDecimalFormatter.formatPrice(results.getBigDecimal("g.paid_amount")));
+                v.add(BigDecimalFormatter.formatPrice(results.getBigDecimal("g.balance")));
                 v.add(results.getString("g.item_count"));
                 v.add(results.getString("g.date_time"));
                 v.add(results.getString("g.created_at"));
@@ -165,6 +181,7 @@ public class GrnManagement extends javax.swing.JPanel {
                 //Reset Other Feilds
                 searchTextField.setText("");
                 supplierComboBox.setSelectedIndex(0);
+                balanceDueComboBox.setSelectedIndex(0);
                 sortByComboBox.setSelectedIndex(0);
 
                 DefaultTableModel model = (DefaultTableModel) grnTable.getModel();
@@ -176,13 +193,12 @@ public class GrnManagement extends javax.swing.JPanel {
                         + "WHERE g.barcode = '" + barcode + "' ");
 
                 if (results.next()) {
-
                     Vector v = new Vector();
                     v.add(results.getString("g.barcode"));
-                    v.add(results.getString("s.id"));
                     v.add(results.getString("s.name"));
-                    v.add(Numbers.formatPrice(results.getDouble("g.sub_total")));
-                    v.add(Numbers.formatPrice(results.getDouble("g.discount")));
+                    v.add(BigDecimalFormatter.formatPrice(results.getBigDecimal("g.grn_total")));
+                    v.add(BigDecimalFormatter.formatPrice(results.getBigDecimal("g.paid_amount")));
+                    v.add(BigDecimalFormatter.formatPrice(results.getBigDecimal("g.balance")));
                     v.add(results.getString("g.item_count"));
                     v.add(results.getString("g.date_time"));
                     v.add(results.getString("g.created_at"));
@@ -199,11 +215,69 @@ public class GrnManagement extends javax.swing.JPanel {
                 JOptionPane.showMessageDialog(this, "An unexpected error has occurred. Please try again later or contact support if the issue persists.", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
 
             }
-        } else {
-            JOptionPane.showMessageDialog(this, "Please Enter Barcode First", "Warning", JOptionPane.WARNING_MESSAGE);
-            loadGRNTable();
         }
 
+    }
+
+    private void payToSelectedGrn() {
+
+        int selectedRow = grnTable.getSelectedRow();
+
+        if (selectedRow != -1) {
+            String grnBarcode = String.valueOf(grnTable.getValueAt(selectedRow, 0));
+            new GRNPayment(grnBarcode, this);
+        }
+
+    }
+
+    private void openSelectedPaymentHistory() {
+
+        int selectedRow = grnTable.getSelectedRow();
+
+        if (selectedRow != -1) {
+            String grnBarcode = String.valueOf(grnTable.getValueAt(selectedRow, 0));
+            new GrnPaymentHistory(home, true, grnBarcode, this);
+        }
+
+    }
+
+    private void openSelectedGrnSuppiler() {
+
+        int selectedRow = grnTable.getSelectedRow();
+
+        if (selectedRow != -1) {
+            String grnBarcode = String.valueOf(grnTable.getValueAt(selectedRow, 0));
+
+            try {
+
+                ResultSet resultSet = MySQL.executeQuery("SELECT * FROM grn WHERE barcode = ? ",
+                        grnBarcode
+                );
+                if (resultSet.next()) {
+                    String supplierId = resultSet.getString("supplier_id");
+                    SupplierDetails supplierDetails = new SupplierDetails(home, true, supplierId, null);
+                    supplierDetails.setVisible(true);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Something Went Wrong.", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
+                }
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "An unexpected error has occurred. Please try again later or contact support if the issue persists.", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+
+        }
+
+    }
+
+    private void copySelectedGrnId() {
+        int selectedRow = grnTable.getSelectedRow();
+
+        if (selectedRow != -1) {
+            String invoiceId = String.valueOf(grnTable.getValueAt(selectedRow, 0));
+            ClipboardUtils.copyToClipboard(invoiceId);
+            ToastUtils.showBottomToast(home, "GRN Id Copied", 1500);
+        }
     }
 
     /**
@@ -216,10 +290,11 @@ public class GrnManagement extends javax.swing.JPanel {
     private void initComponents() {
 
         rightClickPopupMenu = new javax.swing.JPopupMenu();
-        jMenuItem1 = new javax.swing.JMenuItem();
-        jMenuItem2 = new javax.swing.JMenuItem();
-        jMenuItem3 = new javax.swing.JMenuItem();
-        jMenuItem4 = new javax.swing.JMenuItem();
+        viewMenuItem = new javax.swing.JMenuItem();
+        payMenuItem = new javax.swing.JMenuItem();
+        paymentHistoryMenuItem = new javax.swing.JMenuItem();
+        supplierDetailsMenuItem = new javax.swing.JMenuItem();
+        copyGrnBarcodeMenuItem = new javax.swing.JMenuItem();
         jLabel1 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jPanel7 = new javax.swing.JPanel();
@@ -246,32 +321,50 @@ public class GrnManagement extends javax.swing.JPanel {
         jScrollPane1 = new javax.swing.JScrollPane();
         grnTable = new javax.swing.JTable();
 
-        jMenuItem1.setText("Open Invoice");
-        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+        viewMenuItem.setText("View");
+        viewMenuItem.setToolTipText("View");
+        viewMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem1ActionPerformed(evt);
+                viewMenuItemActionPerformed(evt);
             }
         });
-        rightClickPopupMenu.add(jMenuItem1);
+        rightClickPopupMenu.add(viewMenuItem);
 
-        jMenuItem2.setText("Print Invoice");
-        rightClickPopupMenu.add(jMenuItem2);
-
-        jMenuItem3.setText("Copy Invoice Id");
-        jMenuItem3.addActionListener(new java.awt.event.ActionListener() {
+        payMenuItem.setText("Pay");
+        payMenuItem.setToolTipText("Pay");
+        payMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem3ActionPerformed(evt);
+                payMenuItemActionPerformed(evt);
             }
         });
-        rightClickPopupMenu.add(jMenuItem3);
+        rightClickPopupMenu.add(payMenuItem);
 
-        jMenuItem4.setText("Open Payment Summery");
-        jMenuItem4.addActionListener(new java.awt.event.ActionListener() {
+        paymentHistoryMenuItem.setText("Payment History");
+        paymentHistoryMenuItem.setToolTipText("Payment History");
+        paymentHistoryMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem4ActionPerformed(evt);
+                paymentHistoryMenuItemActionPerformed(evt);
             }
         });
-        rightClickPopupMenu.add(jMenuItem4);
+        rightClickPopupMenu.add(paymentHistoryMenuItem);
+
+        supplierDetailsMenuItem.setText("Supplier Details");
+        supplierDetailsMenuItem.setToolTipText("Supplier Details");
+        supplierDetailsMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                supplierDetailsMenuItemActionPerformed(evt);
+            }
+        });
+        rightClickPopupMenu.add(supplierDetailsMenuItem);
+
+        copyGrnBarcodeMenuItem.setText("Copy GRN Barcode");
+        copyGrnBarcodeMenuItem.setToolTipText("Copy GRN Barcode");
+        copyGrnBarcodeMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                copyGrnBarcodeMenuItemActionPerformed(evt);
+            }
+        });
+        rightClickPopupMenu.add(copyGrnBarcodeMenuItem);
 
         setMinimumSize(new java.awt.Dimension(852, 617));
         setPreferredSize(new java.awt.Dimension(852, 617));
@@ -441,7 +534,7 @@ public class GrnManagement extends javax.swing.JPanel {
 
         jPanel4.setForeground(new java.awt.Color(255, 51, 51));
 
-        sortByComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Newest to Oldest", "Oldest to Newest", "GRN Date Time (Newest to Oldest)", "GRN Date Time (Oldest to Newest)", "Amount (High to Low)", "Amount (Low to High)", "Discount (High to Low)", "Discount (Low to High)" }));
+        sortByComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Newest to Oldest", "Oldest to Newest", "GRN Date Time (Newest to Oldest)", "GRN Date Time (Oldest to Newest)", "GRN Total (High to Low)", "GRN Total (Low to High)", "Balance Due (High to Low)", "Balance Due (Low to High)" }));
         sortByComboBox.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 sortByComboBoxItemStateChanged(evt);
@@ -594,7 +687,7 @@ public class GrnManagement extends javax.swing.JPanel {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 875, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -648,14 +741,12 @@ public class GrnManagement extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_grnTableMouseClicked
 
-    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-    }//GEN-LAST:event_jMenuItem1ActionPerformed
+    private void viewMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewMenuItemActionPerformed
+    }//GEN-LAST:event_viewMenuItemActionPerformed
 
-    private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
-    }//GEN-LAST:event_jMenuItem3ActionPerformed
-
-    private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem4ActionPerformed
-    }//GEN-LAST:event_jMenuItem4ActionPerformed
+    private void supplierDetailsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_supplierDetailsMenuItemActionPerformed
+        openSelectedGrnSuppiler();
+    }//GEN-LAST:event_supplierDetailsMenuItemActionPerformed
 
     private void grnTableMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_grnTableMouseReleased
         int row = grnTable.rowAtPoint(evt.getPoint());
@@ -668,7 +759,7 @@ public class GrnManagement extends javax.swing.JPanel {
     }//GEN-LAST:event_grnTableMouseReleased
 
     private void balanceDueComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_balanceDueComboBoxItemStateChanged
-        // TODO add your handling code here:
+        loadGRNTable();
     }//GEN-LAST:event_balanceDueComboBoxItemStateChanged
 
     private void supplierComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_supplierComboBoxItemStateChanged
@@ -677,11 +768,24 @@ public class GrnManagement extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_supplierComboBoxItemStateChanged
 
+    private void payMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_payMenuItemActionPerformed
+        payToSelectedGrn();
+    }//GEN-LAST:event_payMenuItemActionPerformed
+
+    private void copyGrnBarcodeMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copyGrnBarcodeMenuItemActionPerformed
+        copySelectedGrnId();
+    }//GEN-LAST:event_copyGrnBarcodeMenuItemActionPerformed
+
+    private void paymentHistoryMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_paymentHistoryMenuItemActionPerformed
+        openSelectedPaymentHistory();
+    }//GEN-LAST:event_paymentHistoryMenuItemActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox<String> balanceDueComboBox;
     private javax.swing.JTextField barcodeTextField;
     private javax.swing.JButton clearSearchButton;
+    private javax.swing.JMenuItem copyGrnBarcodeMenuItem;
     private javax.swing.JTable grnTable;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
@@ -690,10 +794,6 @@ public class GrnManagement extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
-    private javax.swing.JMenuItem jMenuItem1;
-    private javax.swing.JMenuItem jMenuItem2;
-    private javax.swing.JMenuItem jMenuItem3;
-    private javax.swing.JMenuItem jMenuItem4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel2;
@@ -705,9 +805,13 @@ public class GrnManagement extends javax.swing.JPanel {
     private javax.swing.JPanel jPanel8;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton newInvoiceButton1;
+    private javax.swing.JMenuItem payMenuItem;
+    private javax.swing.JMenuItem paymentHistoryMenuItem;
     private javax.swing.JPopupMenu rightClickPopupMenu;
     private javax.swing.JTextField searchTextField;
     private javax.swing.JComboBox<String> sortByComboBox;
     private javax.swing.JComboBox<String> supplierComboBox;
+    private javax.swing.JMenuItem supplierDetailsMenuItem;
+    private javax.swing.JMenuItem viewMenuItem;
     // End of variables declaration//GEN-END:variables
 }

@@ -36,6 +36,7 @@ public class SupplierManagement extends javax.swing.JPanel {
         supplierTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
         supplierTable.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
         supplierTable.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
+        supplierTable.getColumnModel().getColumn(3).setCellRenderer(centerRenderer);
 
     }
 
@@ -48,10 +49,10 @@ public class SupplierManagement extends javax.swing.JPanel {
             String sortByType = "";
 
             if (sortBy == 0) {
-                sortByColumn = "s.id";
+                sortByColumn = "s.created_at";
                 sortByType = "DESC";
             } else if (sortBy == 1) {
-                sortByColumn = "s.id";
+                sortByColumn = "s.created_at";
                 sortByType = "ASC";
             } else if (sortBy == 2) {
                 sortByColumn = "s.name";
@@ -74,6 +75,7 @@ public class SupplierManagement extends javax.swing.JPanel {
                 v.add(results.getString("s.id"));
                 v.add(results.getString("s.name"));
                 v.add(results.getString("s.phone"));
+                v.add(results.getString("s.created_at"));
                 model.addRow(v);
             }
 
@@ -300,64 +302,64 @@ public class SupplierManagement extends javax.swing.JPanel {
 
         supplierTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null},
-                {null, null, null}
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
             },
             new String [] {
-                "Id", "Name", "Phone"
+                "Id", "Name", "Phone", "Created At"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false
+                false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {

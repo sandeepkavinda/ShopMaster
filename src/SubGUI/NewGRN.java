@@ -664,31 +664,43 @@ public class NewGRN extends javax.swing.JFrame {
                     note = null;
                 }
 
-                //Set Date and Time
-                Timestamp timestamp;
+                MySQL.beginTransaction();
+
+                
                 if (currentDateTimeCheckBox.isSelected()) {
-                    timestamp = new Timestamp(System.currentTimeMillis());
+
+                    //Instet to GRN Table Without Date Time
+                    MySQL.executeUpdate("INSERT INTO grn (barcode, supplier_id, note, sub_total, discount, tax, item_count) "
+                            + "VALUES (?,?,?,?,?,?,?)",
+                            grnBarcode,
+                            this.supplierId,
+                            note,
+                            totalsDTO.getSubTotal(),
+                            totalsDTO.getDiscount(),
+                            totalsDTO.getTax(),
+                            grnItemList.size()
+                    );
+
                 } else {
                     SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     Date parsedDate = format.parse(date + " " + time);
-                    timestamp = new Timestamp(parsedDate.getTime());
+                    Timestamp timestamp = new Timestamp(parsedDate.getTime());
+
+                    //Instet to GRN Table With Date Time
+                    MySQL.executeUpdate("INSERT INTO grn (barcode, supplier_id, note, date_time, sub_total, discount, tax, item_count) "
+                            + "VALUES (?,?,?,?,?,?,?,?)",
+                            grnBarcode,
+                            this.supplierId,
+                            note,
+                            timestamp,
+                            totalsDTO.getSubTotal(),
+                            totalsDTO.getDiscount(),
+                            totalsDTO.getTax(),
+                            grnItemList.size()
+                    );
                 }
 
-                MySQL.beginTransaction();
-
-                //Instet to GRN Table 
-                MySQL.executeUpdate("INSERT INTO grn (barcode, supplier_id, note, date_time, sub_total, discount, tax, item_count) "
-                        + "VALUES (?,?,?,?,?,?,?,?)",
-                        grnBarcode,
-                        this.supplierId,
-                        note,
-                        timestamp,
-                        totalsDTO.getSubTotal(),
-                        totalsDTO.getDiscount(),
-                        totalsDTO.getTax(),
-                        grnItemList.size()
-                );
-
+                
                 // GRN Items
                 for (GrnItemDTO item : grnItemList) {
 
@@ -758,7 +770,7 @@ public class NewGRN extends javax.swing.JFrame {
 
                 javax.swing.Timer timer = new javax.swing.Timer(1200, e -> {
                     this.dispose();
-                    new GRNPayment(grnBarcode);
+                    new GRNPayment(grnBarcode, grnManagement);
                 });
 
                 timer.setRepeats(false);
@@ -769,6 +781,7 @@ public class NewGRN extends javax.swing.JFrame {
                 MySQL.rollback();
                 JOptionPane.showMessageDialog(this, "Something Went Wrong", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
                 e.printStackTrace();
+                saveButton.setEnabled(true);
             }
 
         }

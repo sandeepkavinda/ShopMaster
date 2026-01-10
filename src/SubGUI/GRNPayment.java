@@ -1,6 +1,7 @@
 package SubGUI;
 
 import DTO.GrnTotalsDTO;
+import java.awt.Color;
 import java.awt.Toolkit;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
@@ -12,6 +13,7 @@ import javax.swing.JOptionPane;
 import model.BigDecimalFormatter;
 import model.MySQL;
 import model.Validation;
+import panels.GrnManagement;
 
 /**
  *
@@ -20,12 +22,14 @@ import model.Validation;
 public class GRNPayment extends javax.swing.JFrame {
 
     private String grnBarcode;
+    private GrnManagement grnManagement;
     private GrnTotalsDTO grnTotalsDTO;
     private HashMap<Integer, Integer> paymentMethodIdMap = new HashMap<>();
 
-    public GRNPayment(String grnBarcode) {
+    public GRNPayment(String grnBarcode, GrnManagement grnManagement) {
         this.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resource/icon.png")));
         this.grnBarcode = grnBarcode;
+        this.grnManagement = grnManagement;
         initComponents();
         loadPaymentMethods();
 
@@ -58,6 +62,32 @@ public class GRNPayment extends javax.swing.JFrame {
                 grnTotalValueLabel.setText(BigDecimalFormatter.formatPrice(grnTotalsDTO.getGrnTotal()));
                 paidValueLabel.setText(BigDecimalFormatter.formatPrice(grnTotalsDTO.getPaidAmount()));
                 balanceValueLabel.setText(BigDecimalFormatter.formatPrice(grnTotalsDTO.getBalance()));
+
+                if (grnTotalsDTO.getBalance().compareTo(BigDecimal.ZERO) <= 0) {
+                    paymentTextLabel.setText("Paid");
+                    paymentTextLabel.setForeground(Color.decode("#00694B"));
+                    payningAmountLabel.setEnabled(false);
+                    payingAmountFormattedTextField.setEnabled(false);
+                    paymentMethodLabel.setEnabled(false);
+                    paymentMethodComboBox.setEnabled(false);
+                    refNoLabel.setEnabled(false);
+                    referenceNoTextField.setEnabled(false);
+                    payLaterButton.setEnabled(false);
+                    payButton.setEnabled(false);
+                    payAndPrintButton.setEnabled(false);
+                } else {
+                    paymentTextLabel.setText("Payment");
+                    paymentTextLabel.setForeground(Color.decode("#000000"));
+                    payningAmountLabel.setEnabled(true);
+                    payingAmountFormattedTextField.setEnabled(true);
+                    paymentMethodLabel.setEnabled(true);
+                    paymentMethodComboBox.setEnabled(true);
+                    refNoLabel.setEnabled(true);
+                    referenceNoTextField.setEnabled(true);
+                    payLaterButton.setEnabled(true);
+                    payButton.setEnabled(true);
+                    payAndPrintButton.setEnabled(true);
+                }
 
                 this.setVisible(true);
 
@@ -97,6 +127,12 @@ public class GRNPayment extends javax.swing.JFrame {
 
     }
 
+    private void clearData() {
+        payingAmountFormattedTextField.setText("0");
+        paymentMethodComboBox.setSelectedIndex(0);
+        referenceNoTextField.setText("");
+    }
+
     private void pay() {
 
         String payingAmountText = payingAmountFormattedTextField.getText().replace(",", "");
@@ -104,12 +140,20 @@ public class GRNPayment extends javax.swing.JFrame {
         String referenceNo = referenceNoTextField.getText();
 
         if (!Validation.isValidBigDecimal(payingAmountText)) {
-            JOptionPane.showMessageDialog(null, "Invalid Cost Price", "Warning", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Invalid paying amount", "Warning", JOptionPane.WARNING_MESSAGE);
+            payingAmountFormattedTextField.grabFocus();
+            payingAmountFormattedTextField.selectAll();
+        } else if (new BigDecimal(payingAmountText).compareTo(BigDecimal.ZERO) <= 0) {
+            JOptionPane.showMessageDialog(null, "Paying amount must be greater than 0", "Warning", JOptionPane.WARNING_MESSAGE);
+            payingAmountFormattedTextField.grabFocus();
+            payingAmountFormattedTextField.selectAll();
+        } else if (new BigDecimal(payingAmountText).compareTo(grnTotalsDTO.getBalance()) > 0) {
+            JOptionPane.showMessageDialog(null, "Cannot pay more than balance", "Warning", JOptionPane.WARNING_MESSAGE);
             payingAmountFormattedTextField.grabFocus();
             payingAmountFormattedTextField.selectAll();
         } else if (selectedPaymentMethod == 0) {
             JOptionPane.showMessageDialog(null, "Please Select Payment Method", "Warning", JOptionPane.WARNING_MESSAGE);
-             paymentMethodComboBox.grabFocus();
+            paymentMethodComboBox.grabFocus();
         } else if (referenceNo.length() > 50) {
             JOptionPane.showMessageDialog(null, "Reference Number cannot exceed 50 characters", "Warning", JOptionPane.WARNING_MESSAGE);
             referenceNoTextField.grabFocus();
@@ -118,14 +162,6 @@ public class GRNPayment extends javax.swing.JFrame {
 
             int selectedPaymentMethodId = paymentMethodIdMap.get(selectedPaymentMethod);
             BigDecimal payingAmount = new BigDecimal(payingAmountText);
-
-            //Check Paid Amount greater than Grn Total
-            if (payingAmount.compareTo(grnTotalsDTO.getBalance()) > 0) {
-                JOptionPane.showMessageDialog(null, "Cannot pay more than balance", "Warning", JOptionPane.WARNING_MESSAGE);
-                payingAmountFormattedTextField.grabFocus();
-                payingAmountFormattedTextField.selectAll();
-                return;
-            }
 
             // Reference no. to null when it's blank
             if (referenceNo.isBlank()) {
@@ -159,7 +195,13 @@ public class GRNPayment extends javax.swing.JFrame {
                     MySQL.rollback();
                 } else {
                     MySQL.commit();
-                    JOptionPane.showMessageDialog(this, "Payment Successfully", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));
+                    clearData();
+                    loadGrnData();
+                    JOptionPane.showMessageDialog(this, "Paid Successfully", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));
+
+                    if (grnManagement != null) {
+                        grnManagement.loadGRNTable();
+                    }
 
                 }
 
@@ -191,17 +233,17 @@ public class GRNPayment extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
         jPanel2 = new javax.swing.JPanel();
-        netTotalTextLabel1 = new javax.swing.JLabel();
+        paymentTextLabel = new javax.swing.JLabel();
         jPanel6 = new javax.swing.JPanel();
         payLaterButton = new javax.swing.JButton();
-        saveAndPrintButton = new javax.swing.JButton();
-        saveAndPrintButton2 = new javax.swing.JButton();
+        payButton = new javax.swing.JButton();
+        payAndPrintButton = new javax.swing.JButton();
         jPanel5 = new javax.swing.JPanel();
         payingAmountFormattedTextField = new javax.swing.JFormattedTextField();
-        buyingPriceLabel = new javax.swing.JLabel();
-        jLabel7 = new javax.swing.JLabel();
+        payningAmountLabel = new javax.swing.JLabel();
+        paymentMethodLabel = new javax.swing.JLabel();
         paymentMethodComboBox = new javax.swing.JComboBox<>();
-        jLabel8 = new javax.swing.JLabel();
+        refNoLabel = new javax.swing.JLabel();
         referenceNoTextField = new javax.swing.JTextField();
         jSeparator3 = new javax.swing.JSeparator();
         grnBarcodeLabel = new javax.swing.JLabel();
@@ -255,9 +297,9 @@ public class GRNPayment extends javax.swing.JFrame {
 
         jSeparator1.setForeground(new java.awt.Color(204, 204, 204));
 
-        netTotalTextLabel1.setFont(new java.awt.Font("Poppins", 0, 14)); // NOI18N
-        netTotalTextLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        netTotalTextLabel1.setText("Payment Details");
+        paymentTextLabel.setFont(new java.awt.Font("Poppins", 1, 14)); // NOI18N
+        paymentTextLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        paymentTextLabel.setText("Payment");
 
         jPanel6.setLayout(new java.awt.GridLayout(1, 0, 7, 0));
 
@@ -272,20 +314,20 @@ public class GRNPayment extends javax.swing.JFrame {
         });
         jPanel6.add(payLaterButton);
 
-        saveAndPrintButton.setText("Pay");
-        saveAndPrintButton.setToolTipText("Add New Product");
-        saveAndPrintButton.setBorder(null);
-        saveAndPrintButton.addActionListener(new java.awt.event.ActionListener() {
+        payButton.setText("Pay");
+        payButton.setToolTipText("Add New Product");
+        payButton.setBorder(null);
+        payButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                saveAndPrintButtonActionPerformed(evt);
+                payButtonActionPerformed(evt);
             }
         });
-        jPanel6.add(saveAndPrintButton);
+        jPanel6.add(payButton);
 
-        saveAndPrintButton2.setText("Pay & Print");
-        saveAndPrintButton2.setToolTipText("Add New Product");
-        saveAndPrintButton2.setBorder(null);
-        jPanel6.add(saveAndPrintButton2);
+        payAndPrintButton.setText("Pay & Print");
+        payAndPrintButton.setToolTipText("Add New Product");
+        payAndPrintButton.setBorder(null);
+        jPanel6.add(payAndPrintButton);
 
         payingAmountFormattedTextField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.##"))));
         payingAmountFormattedTextField.setText("0");
@@ -296,9 +338,9 @@ public class GRNPayment extends javax.swing.JFrame {
             }
         });
 
-        buyingPriceLabel.setText("Paying Amount");
+        payningAmountLabel.setText("Paying Amount");
 
-        jLabel7.setText("Payment Method");
+        paymentMethodLabel.setText("Payment Method");
 
         paymentMethodComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All" }));
         paymentMethodComboBox.addActionListener(new java.awt.event.ActionListener() {
@@ -307,7 +349,7 @@ public class GRNPayment extends javax.swing.JFrame {
             }
         });
 
-        jLabel8.setText("Reference No. (Optional)");
+        refNoLabel.setText("Reference No. (Optional)");
 
         referenceNoTextField.setToolTipText("You can search using Invoice ID and issued date and time.");
         referenceNoTextField.addActionListener(new java.awt.event.ActionListener() {
@@ -328,9 +370,9 @@ public class GRNPayment extends javax.swing.JFrame {
                     .addComponent(paymentMethodComboBox, javax.swing.GroupLayout.Alignment.TRAILING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel7)
-                            .addComponent(buyingPriceLabel)
-                            .addComponent(jLabel8))
+                            .addComponent(paymentMethodLabel)
+                            .addComponent(payningAmountLabel)
+                            .addComponent(refNoLabel))
                         .addGap(0, 117, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -338,15 +380,15 @@ public class GRNPayment extends javax.swing.JFrame {
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(buyingPriceLabel)
+                .addComponent(payningAmountLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(payingAmountFormattedTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel7)
+                .addComponent(paymentMethodLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(paymentMethodComboBox, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel8)
+                .addComponent(refNoLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(referenceNoTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE)
                 .addContainerGap())
@@ -366,14 +408,14 @@ public class GRNPayment extends javax.swing.JFrame {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jPanel6, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(netTotalTextLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(paymentTextLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addContainerGap())))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(9, 9, 9)
-                .addComponent(netTotalTextLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(paymentTextLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -617,7 +659,7 @@ public class GRNPayment extends javax.swing.JFrame {
                     .addComponent(createdAtLabel))
                 .addGap(21, 21, 21)
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -649,9 +691,9 @@ public class GRNPayment extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_payLaterButtonActionPerformed
 
-    private void saveAndPrintButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveAndPrintButtonActionPerformed
+    private void payButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_payButtonActionPerformed
         pay();
-    }//GEN-LAST:event_saveAndPrintButtonActionPerformed
+    }//GEN-LAST:event_payButtonActionPerformed
 
     private void payingAmountFormattedTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_payingAmountFormattedTextFieldActionPerformed
         paymentMethodComboBox.grabFocus();
@@ -680,7 +722,6 @@ public class GRNPayment extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel balanceValueLabel;
     private javax.swing.ButtonGroup buttonGroup1;
-    private javax.swing.JLabel buyingPriceLabel;
     private javax.swing.JLabel createdAtLabel;
     private com.raven.datechooser.DateChooser dateChooser;
     private javax.swing.JLabel discountTextLabel;
@@ -693,8 +734,6 @@ public class GRNPayment extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
@@ -708,15 +747,18 @@ public class GRNPayment extends javax.swing.JFrame {
     private javax.swing.JSeparator jSeparator4;
     private javax.swing.JSeparator jSeparator5;
     private javax.swing.JLabel netTotalTextLabel;
-    private javax.swing.JLabel netTotalTextLabel1;
     private javax.swing.JLabel netTotalValueLabel;
     private javax.swing.JLabel paidValueLabel;
+    private javax.swing.JButton payAndPrintButton;
+    private javax.swing.JButton payButton;
     private javax.swing.JButton payLaterButton;
     private javax.swing.JFormattedTextField payingAmountFormattedTextField;
     private javax.swing.JComboBox<String> paymentMethodComboBox;
+    private javax.swing.JLabel paymentMethodLabel;
+    private javax.swing.JLabel paymentTextLabel;
+    private javax.swing.JLabel payningAmountLabel;
+    private javax.swing.JLabel refNoLabel;
     private javax.swing.JTextField referenceNoTextField;
-    private javax.swing.JButton saveAndPrintButton;
-    private javax.swing.JButton saveAndPrintButton2;
     private javax.swing.JLabel subTotalValueLabel;
     private javax.swing.JLabel taxTextLabel;
     private javax.swing.JLabel taxTextLabel1;

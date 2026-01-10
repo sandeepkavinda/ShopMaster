@@ -23,19 +23,20 @@ public class SupplierDetails extends javax.swing.JDialog {
         this.supplierManagement = supplierManagement;
         initComponents();
         loadData();
+        enableEditsButton.grabFocus();
     }
 
     private void loadData() {
         try {
-
             ResultSet result = MySQL.execute("SELECT * FROM supplier s "
                     + "WHERE s.id = '" + id + "'");
 
             if (result.next()) {
                 titleLable.setText(result.getString("s.name"));
-                idLable.setText("ID : " + result.getString("s.id"));
+              
                 nameTextField.setText(result.getString("s.name"));
                 phoneTextField.setText(result.getString("s.phone"));
+                createdAtLabel.setText("Created At : "+result.getString("s.created_at"));
                 name = result.getString("s.name");
                 phone = result.getString("s.phone");
             } else {
@@ -99,8 +100,8 @@ public class SupplierDetails extends javax.swing.JDialog {
 
                     if (resultSet.next()) {
                         JOptionPane.showMessageDialog(this, "A supplier with this name already exists.", "Warning", JOptionPane.WARNING_MESSAGE);
-                        phoneTextField.grabFocus();
-                        phoneTextField.selectAll();
+                        nameTextField.grabFocus();
+                        nameTextField.selectAll();
                     } else {
 
                         MySQL.execute("UPDATE supplier SET name='" + name + "', phone = '" + phone + "' "
@@ -138,7 +139,6 @@ public class SupplierDetails extends javax.swing.JDialog {
 
         jPanel1 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
-        idLable = new javax.swing.JLabel();
         titleLable = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
         jPanel2 = new javax.swing.JPanel();
@@ -150,17 +150,15 @@ public class SupplierDetails extends javax.swing.JDialog {
         jLabel10 = new javax.swing.JLabel();
         phoneTextField = new javax.swing.JTextField();
         enableEditsButton = new javax.swing.JButton();
+        createdAtLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Supplier Details");
         setResizable(false);
 
-        idLable.setFont(new java.awt.Font("Poppins", 1, 14)); // NOI18N
-        idLable.setForeground(new java.awt.Color(0, 105, 75));
-        idLable.setText("Id : 25");
-
         titleLable.setFont(new java.awt.Font("Poppins", 1, 14)); // NOI18N
         titleLable.setForeground(new java.awt.Color(0, 105, 75));
+        titleLable.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         titleLable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resource/supplier.png"))); // NOI18N
         titleLable.setText("User");
 
@@ -168,20 +166,16 @@ public class SupplierDetails extends javax.swing.JDialog {
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+            .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(titleLable, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(idLable)
-                .addGap(12, 12, 12))
+                .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                 .addContainerGap(22, Short.MAX_VALUE)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(idLable)
-                    .addComponent(titleLable))
+                .addComponent(titleLable)
                 .addContainerGap())
         );
 
@@ -228,6 +222,9 @@ public class SupplierDetails extends javax.swing.JDialog {
             }
         });
 
+        createdAtLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        createdAtLabel.setText("Created At :");
+
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
@@ -239,12 +236,13 @@ public class SupplierDetails extends javax.swing.JDialog {
                     .addComponent(phoneTextField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(updateChangesButton, javax.swing.GroupLayout.DEFAULT_SIZE, 253, Short.MAX_VALUE)
                     .addComponent(resetButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(enableEditsButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel4Layout.createSequentialGroup()
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel6)
                             .addComponent(jLabel10))
-                        .addGap(0, 219, Short.MAX_VALUE))
-                    .addComponent(enableEditsButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(createdAtLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
@@ -258,13 +256,15 @@ public class SupplierDetails extends javax.swing.JDialog {
                 .addComponent(jLabel10)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(phoneTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(createdAtLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(enableEditsButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(updateChangesButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(resetButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(9, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -392,8 +392,8 @@ public class SupplierDetails extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel createdAtLabel;
     private javax.swing.JButton enableEditsButton;
-    private javax.swing.JLabel idLable;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel1;

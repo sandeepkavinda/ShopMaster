@@ -8,33 +8,49 @@
         <Property name="useNullLayout" type="boolean" value="true"/>
       </Layout>
       <SubComponents>
-        <MenuItem class="javax.swing.JMenuItem" name="jMenuItem1">
+        <MenuItem class="javax.swing.JMenuItem" name="viewMenuItem">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Open Invoice"/>
+            <Property name="text" type="java.lang.String" value="View"/>
+            <Property name="toolTipText" type="java.lang.String" value="View"/>
           </Properties>
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItem1ActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="viewMenuItemActionPerformed"/>
           </Events>
         </MenuItem>
-        <MenuItem class="javax.swing.JMenuItem" name="jMenuItem2">
+        <MenuItem class="javax.swing.JMenuItem" name="payMenuItem">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Print Invoice"/>
-          </Properties>
-        </MenuItem>
-        <MenuItem class="javax.swing.JMenuItem" name="jMenuItem3">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Copy Invoice Id"/>
+            <Property name="text" type="java.lang.String" value="Pay"/>
+            <Property name="toolTipText" type="java.lang.String" value="Pay"/>
           </Properties>
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItem3ActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="payMenuItemActionPerformed"/>
           </Events>
         </MenuItem>
-        <MenuItem class="javax.swing.JMenuItem" name="jMenuItem4">
+        <MenuItem class="javax.swing.JMenuItem" name="paymentHistoryMenuItem">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Open Payment Summery"/>
+            <Property name="text" type="java.lang.String" value="Payment History"/>
+            <Property name="toolTipText" type="java.lang.String" value="Payment History"/>
           </Properties>
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItem4ActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="paymentHistoryMenuItemActionPerformed"/>
+          </Events>
+        </MenuItem>
+        <MenuItem class="javax.swing.JMenuItem" name="supplierDetailsMenuItem">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Supplier Details"/>
+            <Property name="toolTipText" type="java.lang.String" value="Supplier Details"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="supplierDetailsMenuItemActionPerformed"/>
+          </Events>
+        </MenuItem>
+        <MenuItem class="javax.swing.JMenuItem" name="copyGrnBarcodeMenuItem">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Copy GRN Barcode"/>
+            <Property name="toolTipText" type="java.lang.String" value="Copy GRN Barcode"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="copyGrnBarcodeMenuItemActionPerformed"/>
           </Events>
         </MenuItem>
       </SubComponents>
@@ -67,7 +83,7 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="jLabel1" max="32767" attributes="0"/>
-                  <Component id="jPanel2" pref="875" max="32767" attributes="0"/>
+                  <Component id="jPanel2" max="32767" attributes="0"/>
                   <Component id="jPanel1" alignment="0" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -397,10 +413,10 @@
                     <StringItem index="1" value="Oldest to Newest"/>
                     <StringItem index="2" value="GRN Date Time (Newest to Oldest)"/>
                     <StringItem index="3" value="GRN Date Time (Oldest to Newest)"/>
-                    <StringItem index="4" value="Amount (High to Low)"/>
-                    <StringItem index="5" value="Amount (Low to High)"/>
-                    <StringItem index="6" value="Discount (High to Low)"/>
-                    <StringItem index="7" value="Discount (Low to High)"/>
+                    <StringItem index="4" value="GRN Total (High to Low)"/>
+                    <StringItem index="5" value="GRN Total (Low to High)"/>
+                    <StringItem index="6" value="Balance Due (High to Low)"/>
+                    <StringItem index="7" value="Balance Due (Low to High)"/>
                   </StringArray>
                 </Property>
               </Properties>
