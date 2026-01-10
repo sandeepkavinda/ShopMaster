@@ -8,8 +8,6 @@ import GUI.Home;
 import SubGUI.NewGRN;
 import java.awt.event.ItemEvent;
 import java.sql.ResultSet;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Vector;
 import javax.swing.DefaultComboBoxModel;
@@ -67,7 +65,7 @@ public class GrnManagement extends javax.swing.JPanel {
 
             while (result.next()) {
                 supplierIdMap.put(comboboxIndex, result.getString("id"));
-                v.add(result.getString("id") + " - " + result.getString("name"));
+                v.add(result.getString("name"));
                 comboboxIndex++;
             }
             DefaultComboBoxModel model = new DefaultComboBoxModel(v);
@@ -135,7 +133,7 @@ public class GrnManagement extends javax.swing.JPanel {
                 v.add(results.getString("g.barcode"));
                 v.add(results.getString("s.id"));
                 v.add(results.getString("s.name"));
-                v.add(Numbers.formatPrice(results.getDouble("g.amount")));
+                v.add(Numbers.formatPrice(results.getDouble("g.sub_total")));
                 v.add(Numbers.formatPrice(results.getDouble("g.discount")));
                 v.add(results.getString("g.item_count"));
                 v.add(results.getString("g.date_time"));
@@ -183,7 +181,7 @@ public class GrnManagement extends javax.swing.JPanel {
                     v.add(results.getString("g.barcode"));
                     v.add(results.getString("s.id"));
                     v.add(results.getString("s.name"));
-                    v.add(Numbers.formatPrice(results.getDouble("g.amount")));
+                    v.add(Numbers.formatPrice(results.getDouble("g.sub_total")));
                     v.add(Numbers.formatPrice(results.getDouble("g.discount")));
                     v.add(results.getString("g.item_count"));
                     v.add(results.getString("g.date_time"));
@@ -217,6 +215,11 @@ public class GrnManagement extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        rightClickPopupMenu = new javax.swing.JPopupMenu();
+        jMenuItem1 = new javax.swing.JMenuItem();
+        jMenuItem2 = new javax.swing.JMenuItem();
+        jMenuItem3 = new javax.swing.JMenuItem();
+        jMenuItem4 = new javax.swing.JMenuItem();
         jLabel1 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jPanel7 = new javax.swing.JPanel();
@@ -229,6 +232,9 @@ public class GrnManagement extends javax.swing.JPanel {
         jPanel3 = new javax.swing.JPanel();
         supplierComboBox = new javax.swing.JComboBox<>();
         jLabel4 = new javax.swing.JLabel();
+        jPanel6 = new javax.swing.JPanel();
+        balanceDueComboBox = new javax.swing.JComboBox<>();
+        jLabel7 = new javax.swing.JLabel();
         jPanel4 = new javax.swing.JPanel();
         sortByComboBox = new javax.swing.JComboBox<>();
         jLabel5 = new javax.swing.JLabel();
@@ -239,6 +245,33 @@ public class GrnManagement extends javax.swing.JPanel {
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         grnTable = new javax.swing.JTable();
+
+        jMenuItem1.setText("Open Invoice");
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
+        rightClickPopupMenu.add(jMenuItem1);
+
+        jMenuItem2.setText("Print Invoice");
+        rightClickPopupMenu.add(jMenuItem2);
+
+        jMenuItem3.setText("Copy Invoice Id");
+        jMenuItem3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem3ActionPerformed(evt);
+            }
+        });
+        rightClickPopupMenu.add(jMenuItem3);
+
+        jMenuItem4.setText("Open Payment Summery");
+        jMenuItem4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem4ActionPerformed(evt);
+            }
+        });
+        rightClickPopupMenu.add(jMenuItem4);
 
         setMinimumSize(new java.awt.Dimension(852, 617));
         setPreferredSize(new java.awt.Dimension(852, 617));
@@ -278,7 +311,7 @@ public class GrnManagement extends javax.swing.JPanel {
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel7Layout.createSequentialGroup()
                         .addComponent(jLabel6)
-                        .addGap(0, 15, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(barcodeTextField))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(newInvoiceButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -318,8 +351,8 @@ public class GrnManagement extends javax.swing.JPanel {
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addComponent(jLabel3)
-                        .addGap(0, 93, Short.MAX_VALUE))
-                    .addComponent(searchTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 128, Short.MAX_VALUE))
+                        .addGap(0, 78, Short.MAX_VALUE))
+                    .addComponent(searchTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 113, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel5Layout.setVerticalGroup(
@@ -355,7 +388,7 @@ public class GrnManagement extends javax.swing.JPanel {
                     .addComponent(supplierComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel4)
-                        .addGap(0, 85, Short.MAX_VALUE)))
+                        .addGap(0, 70, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -369,6 +402,42 @@ public class GrnManagement extends javax.swing.JPanel {
         );
 
         jPanel2.add(jPanel3);
+
+        jPanel6.setForeground(new java.awt.Color(255, 51, 51));
+
+        balanceDueComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All", "Pending Payments", "Paid" }));
+        balanceDueComboBox.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                balanceDueComboBoxItemStateChanged(evt);
+            }
+        });
+
+        jLabel7.setText("Balance Due");
+
+        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
+        jPanel6.setLayout(jPanel6Layout);
+        jPanel6Layout.setHorizontalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(balanceDueComboBox, 0, 113, Short.MAX_VALUE)
+                    .addGroup(jPanel6Layout.createSequentialGroup()
+                        .addComponent(jLabel7)
+                        .addGap(0, 48, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        jPanel6Layout.setVerticalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel7)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(balanceDueComboBox, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        jPanel2.add(jPanel6);
 
         jPanel4.setForeground(new java.awt.Color(255, 51, 51));
 
@@ -393,7 +462,7 @@ public class GrnManagement extends javax.swing.JPanel {
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sortByComboBox, 0, 128, Short.MAX_VALUE)
+                    .addComponent(sortByComboBox, 0, 113, Short.MAX_VALUE)
                     .addGroup(jPanel4Layout.createSequentialGroup()
                         .addComponent(jLabel5)
                         .addGap(0, 0, Short.MAX_VALUE)))
@@ -429,7 +498,7 @@ public class GrnManagement extends javax.swing.JPanel {
             jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel10Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(clearSearchButton, javax.swing.GroupLayout.DEFAULT_SIZE, 122, Short.MAX_VALUE)
+                .addComponent(clearSearchButton, javax.swing.GroupLayout.DEFAULT_SIZE, 107, Short.MAX_VALUE)
                 .addGap(12, 12, 12))
         );
         jPanel10Layout.setVerticalGroup(
@@ -458,7 +527,7 @@ public class GrnManagement extends javax.swing.JPanel {
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel8Layout.createSequentialGroup()
                 .addGap(12, 12, 12)
-                .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, 121, Short.MAX_VALUE)
+                .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel8Layout.setVerticalGroup(
@@ -478,7 +547,7 @@ public class GrnManagement extends javax.swing.JPanel {
 
             },
             new String [] {
-                "Barcode", "Supplier Id", "Supplier Name", "Amount (Rs.)", "Discount (Rs.)", "Number Of Items", "GRN Date Time", "Added Date Time"
+                "Barcode", "Supplier", "GRN Total", "Paid Amount", "Balance Due", "Item Count", "GRN Date Time", "Added Date Time"
             }
         ) {
             boolean[] canEdit = new boolean [] {
@@ -490,6 +559,14 @@ public class GrnManagement extends javax.swing.JPanel {
             }
         });
         grnTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        grnTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                grnTableMouseClicked(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                grnTableMouseReleased(evt);
+            }
+        });
         jScrollPane1.setViewportView(grnTable);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -517,7 +594,7 @@ public class GrnManagement extends javax.swing.JPanel {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 875, Short.MAX_VALUE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -538,12 +615,6 @@ public class GrnManagement extends javax.swing.JPanel {
         loadGRNTable();
     }//GEN-LAST:event_searchTextFieldKeyReleased
 
-    private void supplierComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_supplierComboBoxItemStateChanged
-        if (evt.getStateChange() == ItemEvent.SELECTED) {
-            loadGRNTable();
-        }
-    }//GEN-LAST:event_supplierComboBoxItemStateChanged
-
     private void sortByComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_sortByComboBoxItemStateChanged
         if (evt.getStateChange() == ItemEvent.SELECTED) {
             loadGRNTable();
@@ -562,7 +633,7 @@ public class GrnManagement extends javax.swing.JPanel {
     }//GEN-LAST:event_barcodeTextFieldActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        new NewGRN(this).setVisible(true);
+        new NewGRN(this);
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void newInvoiceButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newInvoiceButton1ActionPerformed
@@ -573,8 +644,42 @@ public class GrnManagement extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_sortByComboBoxActionPerformed
 
+    private void grnTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_grnTableMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_grnTableMouseClicked
+
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+    }//GEN-LAST:event_jMenuItem1ActionPerformed
+
+    private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
+    }//GEN-LAST:event_jMenuItem3ActionPerformed
+
+    private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem4ActionPerformed
+    }//GEN-LAST:event_jMenuItem4ActionPerformed
+
+    private void grnTableMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_grnTableMouseReleased
+        int row = grnTable.rowAtPoint(evt.getPoint());
+        if (row >= 0) {
+            grnTable.setRowSelectionInterval(row, row);
+            if (evt.isPopupTrigger()) {
+                rightClickPopupMenu.show(evt.getComponent(), evt.getX(), evt.getY());
+            }
+        }
+    }//GEN-LAST:event_grnTableMouseReleased
+
+    private void balanceDueComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_balanceDueComboBoxItemStateChanged
+        // TODO add your handling code here:
+    }//GEN-LAST:event_balanceDueComboBoxItemStateChanged
+
+    private void supplierComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_supplierComboBoxItemStateChanged
+        if (evt.getStateChange() == ItemEvent.SELECTED) {
+            loadGRNTable();
+        }
+    }//GEN-LAST:event_supplierComboBoxItemStateChanged
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JComboBox<String> balanceDueComboBox;
     private javax.swing.JTextField barcodeTextField;
     private javax.swing.JButton clearSearchButton;
     private javax.swing.JTable grnTable;
@@ -584,16 +689,23 @@ public class GrnManagement extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItem2;
+    private javax.swing.JMenuItem jMenuItem3;
+    private javax.swing.JMenuItem jMenuItem4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton newInvoiceButton1;
+    private javax.swing.JPopupMenu rightClickPopupMenu;
     private javax.swing.JTextField searchTextField;
     private javax.swing.JComboBox<String> sortByComboBox;
     private javax.swing.JComboBox<String> supplierComboBox;

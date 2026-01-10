@@ -8,17 +8,17 @@ package DTO;
  *
  * @author HP
  */
-public class UserEditableData {
+public class UserEditableDataDTO {
 
     private String fullName;
     private String email;
     private String userTypeId;
 
-    public UserEditableData() {
+    public UserEditableDataDTO() {
 
     }
 
-    public UserEditableData(String fullName, String email, String userTypeId) {
+    public UserEditableDataDTO(String fullName, String email, String userTypeId) {
         this.fullName = fullName;
         this.email = email;
         this.userTypeId = userTypeId;

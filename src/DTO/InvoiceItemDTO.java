@@ -8,7 +8,7 @@ package DTO;
  *
  * @author HP
  */
-public class InvoiceItem {
+public class InvoiceItemDTO {
     
     private String stockBarcode;
     private String productName;

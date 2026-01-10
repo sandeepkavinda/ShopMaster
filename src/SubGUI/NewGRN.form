@@ -13,7 +13,7 @@
         </Property>
       </Properties>
     </Component>
-    <Component class="javax.swing.ButtonGroup" name="buttonGroup1">
+    <Component class="javax.swing.ButtonGroup" name="discountButtonGroup">
     </Component>
     <Component class="com.raven.swing.TimePicker" name="timePicker">
       <Properties>
@@ -35,6 +35,17 @@
         <Property name="useNullLayout" type="boolean" value="true"/>
       </Layout>
     </Container>
+    <Component class="com.raven.datechooser.DateChooser" name="expDateChooser">
+      <Properties>
+        <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+          <Color blue="4b" green="69" red="0" type="rgb"/>
+        </Property>
+        <Property name="dateFormat" type="java.lang.String" value="yyyy-MM-dd"/>
+        <Property name="textRefernce" type="javax.swing.JTextField" editor="org.netbeans.modules.form.ComponentChooserEditor">
+          <ComponentRef name="expDateChooseTextField"/>
+        </Property>
+      </Properties>
+    </Component>
     <Menu class="javax.swing.JMenuBar" name="jMenuBar1">
       <SubComponents>
         <Menu class="javax.swing.JMenu" name="jMenu2">
@@ -111,9 +122,23 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="jPanel2" max="32767" attributes="0"/>
-                      <Component id="jPanel9" pref="1030" max="32767" attributes="0"/>
+                      <Component id="jPanel9" max="32767" attributes="0"/>
+                      <Component id="jSeparator6" alignment="0" max="32767" attributes="0"/>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Component id="jLabel3" min="-2" pref="699" max="-2" attributes="0"/>
+                          <EmptySpace type="separate" max="-2" attributes="0"/>
+                          <Component id="currentDateTimeCheckBox" min="-2" pref="307" max="-2" attributes="0"/>
+                          <EmptySpace min="0" pref="6" max="32767" attributes="0"/>
+                      </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
+              </Group>
+              <Group type="103" rootIndex="1" groupAlignment="0" attributes="0">
+                  <Group type="102" attributes="0">
+                      <EmptySpace min="-2" pref="290" max="-2" attributes="0"/>
+                      <Component id="jSeparator5" max="32767" attributes="0"/>
+                      <EmptySpace min="-2" pref="290" max="-2" attributes="0"/>
+                  </Group>
               </Group>
           </Group>
         </DimensionLayout>
@@ -122,9 +147,23 @@
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace min="-2" pref="15" max="-2" attributes="0"/>
                   <Component id="jPanel9" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace type="separate" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="jLabel3" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="currentDateTimeCheckBox" alignment="3" max="32767" attributes="0"/>
+                  </Group>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="jSeparator6" min="-2" pref="3" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="jPanel2" max="32767" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
+              </Group>
+              <Group type="103" rootIndex="1" groupAlignment="0" attributes="0">
+                  <Group type="102" alignment="0" attributes="0">
+                      <EmptySpace min="-2" pref="336" max="-2" attributes="0"/>
+                      <Component id="jSeparator5" min="-2" pref="3" max="-2" attributes="0"/>
+                      <EmptySpace pref="306" max="32767" attributes="0"/>
+                  </Group>
               </Group>
           </Group>
         </DimensionLayout>
@@ -138,8 +177,8 @@
                   <Group type="102" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="jPanel11" alignment="1" pref="1018" max="32767" attributes="0"/>
-                          <Component id="jPanel3" alignment="1" pref="1018" max="32767" attributes="0"/>
+                          <Component id="jPanel11" alignment="1" max="32767" attributes="0"/>
+                          <Component id="jPanel3" alignment="1" pref="0" max="32767" attributes="0"/>
                           <Component id="jPanel5" alignment="1" max="32767" attributes="0"/>
                           <Component id="jScrollPane1" alignment="0" max="32767" attributes="0"/>
                           <Component id="jSeparator1" alignment="0" max="32767" attributes="0"/>
@@ -158,7 +197,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jPanel11" min="-2" pref="71" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jScrollPane1" pref="205" max="32767" attributes="0"/>
+                      <Component id="jScrollPane1" pref="126" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jPanel5" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
@@ -313,6 +352,12 @@
                   <SubComponents>
                     <Component class="javax.swing.JButton" name="selectSupplierButton">
                       <Properties>
+                        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                          <Color blue="66" green="66" red="66" type="rgb"/>
+                        </Property>
+                        <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                          <Color blue="ff" green="ff" red="ff" type="rgb"/>
+                        </Property>
                         <Property name="text" type="java.lang.String" value="Select"/>
                         <Property name="toolTipText" type="java.lang.String" value="Select Supplier"/>
                         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
@@ -335,6 +380,7 @@
                         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                           <Border info="null"/>
                         </Property>
+                        <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cleanSupplierButtonActionPerformed"/>
@@ -358,7 +404,7 @@
                                   <Component id="noteTextField" max="32767" attributes="0"/>
                                   <Group type="102" attributes="0">
                                       <Component id="noteLabel" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace min="0" pref="84" max="32767" attributes="0"/>
+                                      <EmptySpace min="0" pref="27" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
@@ -380,7 +426,7 @@
                   <SubComponents>
                     <Component class="javax.swing.JLabel" name="noteLabel">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Notes"/>
+                        <Property name="text" type="java.lang.String" value="Notes (Optional)"/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JTextField" name="noteTextField">
@@ -666,7 +712,7 @@
                         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                           <Image iconType="3" name="/resource/add.png"/>
                         </Property>
-                        <Property name="toolTipText" type="java.lang.String" value="Select Product"/>
+                        <Property name="toolTipText" type="java.lang.String" value="Select Stock"/>
                         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                           <Border info="null"/>
                         </Property>
@@ -681,7 +727,6 @@
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                       <Events>
-                        <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="stockBarcodeTextFieldFocusLost"/>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="stockBarcodeTextFieldActionPerformed"/>
                       </Events>
                     </Component>
@@ -689,6 +734,13 @@
                 </Container>
                 <Container class="javax.swing.JPanel" name="jPanel13">
                   <Properties>
+                    <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                      <Border info="org.netbeans.modules.form.compat2.border.MatteColorBorderInfo">
+                        <MatteColorBorder bottom="0" left="0" right="1" top="0">
+                          <Color PropertyName="color" blue="cc" green="cc" red="cc" type="rgb"/>
+                        </MatteColorBorder>
+                      </Border>
+                    </Property>
                     <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                       <Color blue="33" green="33" red="ff" type="rgb"/>
                     </Property>
@@ -703,10 +755,10 @@
                                   <Component id="productNameTextField" max="32767" attributes="0"/>
                                   <Group type="102" attributes="0">
                                       <Component id="productLabel" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace min="0" pref="91" max="32767" attributes="0"/>
+                                      <EmptySpace min="0" pref="84" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
-                              <EmptySpace max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -734,9 +786,6 @@
                         <Property name="editable" type="boolean" value="false"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
-                      <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="productNameTextFieldActionPerformed"/>
-                      </Events>
                     </Component>
                   </SubComponents>
                 </Container>
@@ -750,14 +799,14 @@
                   <Layout>
                     <DimensionLayout dim="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" attributes="0">
-                              <EmptySpace max="-2" attributes="0"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Group type="102" alignment="0" attributes="0">
+                                  <Component id="costPriceFormattedTextField" alignment="1" max="32767" attributes="0"/>
+                                  <Group type="102" attributes="0">
                                       <Component id="buyingPriceLabel" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace min="0" pref="67" max="32767" attributes="0"/>
+                                      <EmptySpace min="0" pref="48" max="32767" attributes="0"/>
                                   </Group>
-                                  <Component id="buyingPriceTextField" alignment="0" max="32767" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
@@ -769,7 +818,7 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="buyingPriceLabel" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="buyingPriceTextField" min="-2" pref="37" max="-2" attributes="0"/>
+                              <Component id="costPriceFormattedTextField" pref="37" max="32767" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
                       </Group>
@@ -778,15 +827,19 @@
                   <SubComponents>
                     <Component class="javax.swing.JLabel" name="buyingPriceLabel">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Buying Price"/>
+                        <Property name="text" type="java.lang.String" value="Cost Price (Rs.)"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                     </Component>
-                    <Component class="javax.swing.JTextField" name="buyingPriceTextField">
+                    <Component class="javax.swing.JFormattedTextField" name="costPriceFormattedTextField">
                       <Properties>
-                        <Property name="editable" type="boolean" value="false"/>
-                        <Property name="enabled" type="boolean" value="false"/>
+                        <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
+                          <Format format="#,##0.##" subtype="-1" type="0"/>
+                        </Property>
                       </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="costPriceFormattedTextFieldActionPerformed"/>
+                      </Events>
                     </Component>
                   </SubComponents>
                 </Container>
@@ -803,11 +856,11 @@
                           <Group type="102" alignment="0" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Group type="102" alignment="0" attributes="0">
-                                      <Component id="sellingPriceLabel" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace min="0" pref="69" max="32767" attributes="0"/>
+                                  <Component id="markedPriceFormattedTextField" max="32767" attributes="0"/>
+                                  <Group type="102" attributes="0">
+                                      <Component id="markedPriceLabel" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace min="0" pref="38" max="32767" attributes="0"/>
                                   </Group>
-                                  <Component id="sellingPriceTextField" alignment="0" max="32767" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
@@ -817,26 +870,30 @@
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" alignment="0" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="sellingPriceLabel" min="-2" max="-2" attributes="0"/>
+                              <Component id="markedPriceLabel" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="sellingPriceTextField" min="-2" pref="37" max="-2" attributes="0"/>
+                              <Component id="markedPriceFormattedTextField" min="-2" pref="37" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
                   </Layout>
                   <SubComponents>
-                    <Component class="javax.swing.JLabel" name="sellingPriceLabel">
+                    <Component class="javax.swing.JLabel" name="markedPriceLabel">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Selling Price"/>
+                        <Property name="text" type="java.lang.String" value="Marked Price (Rs.)"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                     </Component>
-                    <Component class="javax.swing.JTextField" name="sellingPriceTextField">
+                    <Component class="javax.swing.JFormattedTextField" name="markedPriceFormattedTextField">
                       <Properties>
-                        <Property name="editable" type="boolean" value="false"/>
-                        <Property name="enabled" type="boolean" value="false"/>
+                        <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
+                          <Format format="#,##0.##" subtype="-1" type="0"/>
+                        </Property>
                       </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="markedPriceFormattedTextFieldActionPerformed"/>
+                      </Events>
                     </Component>
                   </SubComponents>
                 </Container>
@@ -853,11 +910,11 @@
                           <Group type="102" alignment="0" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Group type="102" alignment="0" attributes="0">
+                                  <Component id="quantityFormattedTextField" max="32767" attributes="0"/>
+                                  <Group type="102" attributes="0">
                                       <Component id="quantityLabel" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace min="0" pref="87" max="32767" attributes="0"/>
                                   </Group>
-                                  <Component id="quantityTextField" alignment="0" max="32767" attributes="0"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
@@ -868,8 +925,8 @@
                           <Group type="102" alignment="0" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="quantityLabel" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Component id="quantityTextField" min="-2" pref="37" max="-2" attributes="0"/>
+                              <EmptySpace max="32767" attributes="0"/>
+                              <Component id="quantityFormattedTextField" min="-2" pref="37" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
                       </Group>
@@ -882,12 +939,14 @@
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                     </Component>
-                    <Component class="javax.swing.JTextField" name="quantityTextField">
+                    <Component class="javax.swing.JFormattedTextField" name="quantityFormattedTextField">
                       <Properties>
-                        <Property name="enabled" type="boolean" value="false"/>
+                        <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
+                          <Format format="#,##0.###" subtype="-1" type="0"/>
+                        </Property>
                       </Properties>
                       <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="quantityTextFieldActionPerformed"/>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="quantityFormattedTextFieldActionPerformed"/>
                       </Events>
                     </Component>
                   </SubComponents>
@@ -906,10 +965,14 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" alignment="0" attributes="0">
-                                      <Component id="itemDiscountLabel" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace min="0" pref="60" max="32767" attributes="0"/>
+                                      <Component id="expDateChooseTextField" pref="90" max="32767" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="setExpDateButton" min="-2" pref="37" max="-2" attributes="0"/>
                                   </Group>
-                                  <Component id="rowDiscountTextField" alignment="0" max="32767" attributes="0"/>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Component id="expDateCheckBox" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                                  </Group>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
@@ -919,27 +982,40 @@
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" alignment="0" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="itemDiscountLabel" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Component id="rowDiscountTextField" pref="37" max="32767" attributes="0"/>
+                              <Component id="expDateCheckBox" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="2" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="expDateChooseTextField" alignment="0" pref="37" max="32767" attributes="0"/>
+                                  <Component id="setExpDateButton" alignment="0" max="32767" attributes="0"/>
+                              </Group>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
                   </Layout>
                   <SubComponents>
-                    <Component class="javax.swing.JLabel" name="itemDiscountLabel">
+                    <Component class="javax.swing.JTextField" name="expDateChooseTextField">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Discount (Rs.)"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                     </Component>
-                    <Component class="javax.swing.JTextField" name="rowDiscountTextField">
+                    <Component class="javax.swing.JButton" name="setExpDateButton">
                       <Properties>
+                        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                          <Image iconType="3" name="/resource/calendar.png"/>
+                        </Property>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                       <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="rowDiscountTextFieldActionPerformed"/>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="setExpDateButtonActionPerformed"/>
+                      </Events>
+                    </Component>
+                    <Component class="javax.swing.JCheckBox" name="expDateCheckBox">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="Exp Date"/>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="expDateCheckBoxItemStateChanged"/>
                       </Events>
                     </Component>
                   </SubComponents>
@@ -979,7 +1055,7 @@
                   <SubComponents>
                     <Component class="javax.swing.JButton" name="addRowButton">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Add Row"/>
+                        <Property name="text" type="java.lang.String" value="Add Item"/>
                         <Property name="toolTipText" type="java.lang.String" value="Add New Product"/>
                         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                           <Border info="null"/>
@@ -1021,7 +1097,11 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="jPanel7" min="-2" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                              <Component id="jPanel7" max="32767" attributes="0"/>
+                              <Component id="jPanel23" max="32767" attributes="0"/>
+                              <Component id="jSeparator4" max="32767" attributes="0"/>
+                          </Group>
                           <EmptySpace max="32767" attributes="0"/>
                           <Component id="jPanel16" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
@@ -1030,13 +1110,21 @@
                 </DimensionLayout>
                 <DimensionLayout dim="1">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" alignment="0" attributes="0">
-                          <EmptySpace max="-2" attributes="0"/>
+                      <Group type="102" attributes="0">
+                          <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="jPanel7" min="-2" max="-2" attributes="0"/>
-                              <Component id="jPanel16" min="-2" max="-2" attributes="0"/>
+                              <Group type="102" attributes="0">
+                                  <Component id="jPanel16" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                              </Group>
+                              <Group type="102" attributes="0">
+                                  <Component id="jPanel7" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Component id="jSeparator4" min="-2" pref="3" max="-2" attributes="0"/>
+                                  <EmptySpace max="32767" attributes="0"/>
+                                  <Component id="jPanel23" min="-2" max="-2" attributes="0"/>
+                              </Group>
                           </Group>
-                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1051,22 +1139,25 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" alignment="0" attributes="0">
-                                      <Component id="grnDiscountFromattedTextField" min="-2" pref="138" max="-2" attributes="0"/>
-                                      <EmptySpace max="32767" attributes="0"/>
-                                      <Component id="grnSetDiscountButton" min="-2" pref="81" max="-2" attributes="0"/>
-                                  </Group>
-                                  <Group type="102" attributes="0">
-                                      <Component id="grnDiscountLabel" min="-2" pref="127" max="-2" attributes="0"/>
-                                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                                  </Group>
-                                  <Group type="102" alignment="0" attributes="0">
                                       <Component id="presentageDiscountRadioButton" max="32767" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Component id="amountDiscountRadioButton" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
                                   </Group>
+                                  <Group type="102" attributes="0">
+                                      <Group type="103" groupAlignment="0" attributes="0">
+                                          <Component id="grnDiscountLabel" min="-2" pref="127" max="-2" attributes="0"/>
+                                          <Group type="102" alignment="0" attributes="0">
+                                              <Component id="grnDiscountFromattedTextField" min="-2" pref="138" max="-2" attributes="0"/>
+                                              <EmptySpace max="-2" attributes="0"/>
+                                              <Component id="setDiscountButton" min="-2" pref="69" max="-2" attributes="0"/>
+                                              <EmptySpace min="-2" max="-2" attributes="0"/>
+                                              <Component id="clearDiscountButton" min="-2" pref="37" max="-2" attributes="0"/>
+                                          </Group>
+                                      </Group>
+                                      <EmptySpace max="32767" attributes="0"/>
+                                  </Group>
                               </Group>
-                              <EmptySpace max="-2" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -1074,13 +1165,16 @@
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" alignment="0" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="grnDiscountLabel" max="32767" attributes="0"/>
-                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="grnDiscountLabel" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                  <Component id="grnSetDiscountButton" pref="35" max="32767" attributes="0"/>
-                                  <Component id="grnDiscountFromattedTextField" max="32767" attributes="0"/>
+                                  <Group type="103" groupAlignment="3" attributes="0">
+                                      <Component id="grnDiscountFromattedTextField" alignment="3" min="-2" pref="35" max="-2" attributes="0"/>
+                                      <Component id="setDiscountButton" alignment="3" min="-2" pref="35" max="-2" attributes="0"/>
+                                  </Group>
+                                  <Component id="clearDiscountButton" max="32767" attributes="0"/>
                               </Group>
-                              <EmptySpace max="-2" attributes="0"/>
+                              <EmptySpace max="32767" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
                                   <Component id="presentageDiscountRadioButton" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="amountDiscountRadioButton" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -1094,36 +1188,39 @@
                     <Component class="javax.swing.JLabel" name="grnDiscountLabel">
                       <Properties>
                         <Property name="horizontalAlignment" type="int" value="2"/>
-                        <Property name="text" type="java.lang.String" value="GRN Discount"/>
+                        <Property name="text" type="java.lang.String" value="Discount"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                     </Component>
-                    <Component class="javax.swing.JButton" name="grnSetDiscountButton">
+                    <Component class="javax.swing.JButton" name="setDiscountButton">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Set"/>
-                        <Property name="toolTipText" type="java.lang.String" value="Add New Product"/>
+                        <Property name="toolTipText" type="java.lang.String" value="Set Discount"/>
                         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                           <Border info="null"/>
                         </Property>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                       <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="grnSetDiscountButtonActionPerformed"/>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="setDiscountButtonActionPerformed"/>
                       </Events>
                     </Component>
                     <Component class="javax.swing.JRadioButton" name="amountDiscountRadioButton">
                       <Properties>
                         <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                          <ComponentRef name="buttonGroup1"/>
+                          <ComponentRef name="discountButtonGroup"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="Amount (Rs.)"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
+                      <Events>
+                        <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="amountDiscountRadioButtonItemStateChanged"/>
+                      </Events>
                     </Component>
                     <Component class="javax.swing.JRadioButton" name="presentageDiscountRadioButton">
                       <Properties>
                         <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                          <ComponentRef name="buttonGroup1"/>
+                          <ComponentRef name="discountButtonGroup"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="Presentage (%)"/>
                         <Property name="enabled" type="boolean" value="false"/>
@@ -1135,12 +1232,30 @@
                     <Component class="javax.swing.JFormattedTextField" name="grnDiscountFromattedTextField">
                       <Properties>
                         <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
-                          <Format format="0.00" subtype="-1" type="4"/>
+                          <Format format="#,##0.##" subtype="-1" type="4"/>
                         </Property>
-                        <Property name="text" type="java.lang.String" value="0.00"/>
+                        <Property name="text" type="java.lang.String" value="0"/>
                       </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="grnDiscountFromattedTextFieldActionPerformed"/>
+                      </Events>
+                    </Component>
+                    <Component class="javax.swing.JButton" name="clearDiscountButton">
+                      <Properties>
+                        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                          <Color blue="66" green="66" red="66" type="rgb"/>
+                        </Property>
+                        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                          <Image iconType="3" name="/resource/clean.png"/>
+                        </Property>
+                        <Property name="toolTipText" type="java.lang.String" value="Clear Supplier"/>
+                        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                          <Border info="null"/>
+                        </Property>
+                        <Property name="enabled" type="boolean" value="false"/>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="clearDiscountButtonActionPerformed"/>
                       </Events>
                     </Component>
                   </SubComponents>
@@ -1150,34 +1265,48 @@
                   <Layout>
                     <DimensionLayout dim="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" alignment="1" attributes="0">
+                          <Group type="102" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="1" attributes="0">
-                                  <Group type="102" attributes="0">
-                                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                                      <Component id="removeSelectedButton" min="-2" pref="124" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Group type="102" alignment="1" attributes="0">
+                                      <Component id="discountTextLabel" max="32767" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="removeAllButton" min="-2" pref="124" max="-2" attributes="0"/>
-                                      <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="saveOnlyButton" min="-2" pref="141" max="-2" attributes="0"/>
-                                      <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="saveAndPrintButton" min="-2" pref="141" max="-2" attributes="0"/>
-                                  </Group>
-                                  <Group type="102" attributes="0">
-                                      <Group type="103" groupAlignment="0" attributes="0">
-                                          <Component id="discountTextLabel" max="32767" attributes="0"/>
-                                          <Component id="netTotalTextLabel" max="32767" attributes="0"/>
-                                      </Group>
-                                      <EmptySpace max="-2" attributes="0"/>
-                                      <Group type="103" groupAlignment="0" attributes="0">
-                                          <Component id="discountValueLabel" alignment="1" min="-2" pref="133" max="-2" attributes="0"/>
-                                          <Component id="netTotalValueLabel" alignment="1" min="-2" pref="133" max="-2" attributes="0"/>
-                                      </Group>
+                                      <Component id="discountValueLabel" min="-2" pref="133" max="-2" attributes="0"/>
                                   </Group>
                                   <Group type="102" alignment="1" attributes="0">
                                       <Component id="totalTextLabel" max="32767" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Component id="totalValueLabel" min="-2" pref="133" max="-2" attributes="0"/>
+                                  </Group>
+                                  <Group type="102" alignment="1" attributes="0">
+                                      <Component id="netTotalTextLabel" max="32767" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="netTotalValueLabel" min="-2" pref="133" max="-2" attributes="0"/>
+                                  </Group>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Component id="taxTextLabel" max="32767" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="taxValueLabel" min="-2" pref="133" max="-2" attributes="0"/>
+                                  </Group>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Component id="grnTotalTextLabel" max="32767" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="grnTotalValueLabel" min="-2" pref="133" max="-2" attributes="0"/>
+                                  </Group>
+                                  <Group type="102" alignment="1" attributes="0">
+                                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                                      <Group type="103" groupAlignment="0" attributes="0">
+                                          <Component id="jSeparator2" alignment="1" min="-2" pref="133" max="-2" attributes="0"/>
+                                          <Component id="jSeparator3" alignment="1" min="-2" pref="133" max="-2" attributes="0"/>
+                                          <Group type="102" alignment="1" attributes="0">
+                                              <Component id="removeSelectedButton" min="-2" pref="140" max="-2" attributes="0"/>
+                                              <EmptySpace min="-2" max="-2" attributes="0"/>
+                                              <Component id="removeAllButton" min="-2" pref="140" max="-2" attributes="0"/>
+                                              <EmptySpace max="-2" attributes="0"/>
+                                              <Component id="saveButton" min="-2" pref="140" max="-2" attributes="0"/>
+                                              <EmptySpace min="-2" pref="2" max="-2" attributes="0"/>
+                                          </Group>
+                                      </Group>
                                   </Group>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
@@ -1194,21 +1323,31 @@
                               </Group>
                               <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Group type="102" alignment="1" attributes="0">
-                                      <Component id="discountTextLabel" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
-                                      <Component id="netTotalTextLabel" min="-2" max="-2" attributes="0"/>
-                                  </Group>
-                                  <Group type="102" alignment="0" attributes="0">
-                                      <Component id="discountValueLabel" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
-                                      <Component id="netTotalValueLabel" min="-2" max="-2" attributes="0"/>
-                                  </Group>
+                                  <Component id="discountTextLabel" alignment="1" min="-2" max="-2" attributes="0"/>
+                                  <Component id="discountValueLabel" alignment="0" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
+                              <Component id="jSeparator2" min="-2" pref="3" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="netTotalTextLabel" alignment="1" min="-2" max="-2" attributes="0"/>
+                                  <Component id="netTotalValueLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="taxTextLabel" alignment="1" min="-2" max="-2" attributes="0"/>
+                                  <Component id="taxValueLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="jSeparator3" min="-2" pref="3" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="grnTotalTextLabel" alignment="1" min="-2" max="-2" attributes="0"/>
+                                  <Component id="grnTotalValueLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                  <Component id="saveAndPrintButton" pref="37" max="32767" attributes="0"/>
-                                  <Component id="saveOnlyButton" alignment="0" max="32767" attributes="0"/>
+                                  <Component id="saveButton" alignment="0" pref="37" max="32767" attributes="0"/>
                                   <Component id="removeAllButton" alignment="0" max="32767" attributes="0"/>
                                   <Component id="removeSelectedButton" alignment="0" max="32767" attributes="0"/>
                               </Group>
@@ -1221,76 +1360,81 @@
                     <Component class="javax.swing.JLabel" name="totalValueLabel">
                       <Properties>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                          <Font name="Poppins" size="12" style="1"/>
+                          <Font name="Poppins" size="12" style="0"/>
                         </Property>
                         <Property name="horizontalAlignment" type="int" value="4"/>
                         <Property name="text" type="java.lang.String" value="0.00"/>
+                        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                          <Border info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
+                            <EmptyBorder bottom="0" left="0" right="5" top="0"/>
+                          </Border>
+                        </Property>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JLabel" name="discountValueLabel">
                       <Properties>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                          <Font name="Poppins" size="12" style="1"/>
+                          <Font name="Poppins" size="12" style="0"/>
                         </Property>
                         <Property name="horizontalAlignment" type="int" value="4"/>
-                        <Property name="text" type="java.lang.String" value="0.00"/>
+                        <Property name="text" type="java.lang.String" value="- 0.00"/>
+                        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                          <Border info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
+                            <EmptyBorder bottom="0" left="0" right="5" top="0"/>
+                          </Border>
+                        </Property>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JLabel" name="netTotalValueLabel">
                       <Properties>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                          <Font name="Poppins" size="12" style="1"/>
+                          <Font name="Poppins" size="12" style="0"/>
                         </Property>
                         <Property name="horizontalAlignment" type="int" value="4"/>
                         <Property name="text" type="java.lang.String" value="0.00"/>
+                        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                          <Border info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
+                            <EmptyBorder bottom="0" left="0" right="5" top="0"/>
+                          </Border>
+                        </Property>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JLabel" name="netTotalTextLabel">
                       <Properties>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                          <Font name="Poppins" size="12" style="1"/>
+                          <Font name="Poppins" size="12" style="0"/>
                         </Property>
                         <Property name="horizontalAlignment" type="int" value="4"/>
-                        <Property name="text" type="java.lang.String" value="Net Total (Rs.) :"/>
+                        <Property name="text" type="java.lang.String" value="Net Total :"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JLabel" name="discountTextLabel">
                       <Properties>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                          <Font name="Poppins" size="12" style="1"/>
+                          <Font name="Poppins" size="12" style="0"/>
                         </Property>
                         <Property name="horizontalAlignment" type="int" value="4"/>
-                        <Property name="text" type="java.lang.String" value="Disount (Rs.) :"/>
+                        <Property name="text" type="java.lang.String" value="Discount :"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JLabel" name="totalTextLabel">
                       <Properties>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                          <Font name="Poppins" size="12" style="1"/>
+                          <Font name="Poppins" size="12" style="0"/>
                         </Property>
                         <Property name="horizontalAlignment" type="int" value="4"/>
-                        <Property name="text" type="java.lang.String" value="Total (Rs.) :"/>
+                        <Property name="text" type="java.lang.String" value="Sub Total :"/>
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                     </Component>
-                    <Component class="javax.swing.JButton" name="saveAndPrintButton">
+                    <Component class="javax.swing.JButton" name="saveButton">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="Save &amp; Print"/>
-                        <Property name="toolTipText" type="java.lang.String" value="Add New Product"/>
-                        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
-                          <Border info="null"/>
-                        </Property>
-                        <Property name="enabled" type="boolean" value="false"/>
-                      </Properties>
-                    </Component>
-                    <Component class="javax.swing.JButton" name="saveOnlyButton">
-                      <Properties>
-                        <Property name="text" type="java.lang.String" value="Save Only"/>
+                        <Property name="text" type="java.lang.String" value="Save GRN"/>
                         <Property name="toolTipText" type="java.lang.String" value="Add New Product"/>
                         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                           <Border info="null"/>
@@ -1298,7 +1442,7 @@
                         <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                       <Events>
-                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="saveOnlyButtonActionPerformed"/>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="saveButtonActionPerformed"/>
                       </Events>
                     </Component>
                     <Component class="javax.swing.JButton" name="removeAllButton">
@@ -1327,7 +1471,7 @@
                         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                           <Color blue="ff" green="ff" red="ff" type="rgb"/>
                         </Property>
-                        <Property name="text" type="java.lang.String" value="Remove Selected"/>
+                        <Property name="text" type="java.lang.String" value="Remove"/>
                         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                           <Border info="null"/>
                         </Property>
@@ -1337,8 +1481,165 @@
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="removeSelectedButtonActionPerformed"/>
                       </Events>
                     </Component>
+                    <Component class="javax.swing.JLabel" name="taxTextLabel">
+                      <Properties>
+                        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                          <Font name="Poppins" size="12" style="0"/>
+                        </Property>
+                        <Property name="horizontalAlignment" type="int" value="4"/>
+                        <Property name="text" type="java.lang.String" value="Tax :"/>
+                        <Property name="enabled" type="boolean" value="false"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JLabel" name="taxValueLabel">
+                      <Properties>
+                        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                          <Font name="Poppins" size="12" style="0"/>
+                        </Property>
+                        <Property name="horizontalAlignment" type="int" value="4"/>
+                        <Property name="text" type="java.lang.String" value="0.00"/>
+                        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                          <Border info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
+                            <EmptyBorder bottom="0" left="0" right="5" top="0"/>
+                          </Border>
+                        </Property>
+                        <Property name="enabled" type="boolean" value="false"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JLabel" name="grnTotalTextLabel">
+                      <Properties>
+                        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                          <Font name="Poppins" size="12" style="1"/>
+                        </Property>
+                        <Property name="horizontalAlignment" type="int" value="4"/>
+                        <Property name="text" type="java.lang.String" value="GRN Total :"/>
+                        <Property name="enabled" type="boolean" value="false"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JLabel" name="grnTotalValueLabel">
+                      <Properties>
+                        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                          <Font name="Poppins" size="12" style="1"/>
+                        </Property>
+                        <Property name="horizontalAlignment" type="int" value="4"/>
+                        <Property name="text" type="java.lang.String" value="0.00"/>
+                        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                          <Border info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
+                            <EmptyBorder bottom="0" left="0" right="5" top="0"/>
+                          </Border>
+                        </Property>
+                        <Property name="enabled" type="boolean" value="false"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JSeparator" name="jSeparator2">
+                      <Properties>
+                        <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                          <Color blue="33" green="33" red="33" type="rgb"/>
+                        </Property>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JSeparator" name="jSeparator3">
+                      <Properties>
+                        <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                          <Color blue="33" green="33" red="33" type="rgb"/>
+                        </Property>
+                      </Properties>
+                    </Component>
                   </SubComponents>
                 </Container>
+                <Container class="javax.swing.JPanel" name="jPanel23">
+
+                  <Layout>
+                    <DimensionLayout dim="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="grnTaxLabel" alignment="0" min="-2" pref="127" max="-2" attributes="0"/>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Component id="taxFromattedTextField" min="-2" pref="138" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="setTaxButton" min="-2" pref="69" max="-2" attributes="0"/>
+                                      <EmptySpace min="-2" max="-2" attributes="0"/>
+                                      <Component id="clearTaxButton" min="-2" pref="37" max="-2" attributes="0"/>
+                                  </Group>
+                              </Group>
+                              <EmptySpace max="32767" attributes="0"/>
+                          </Group>
+                      </Group>
+                    </DimensionLayout>
+                    <DimensionLayout dim="1">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="grnTaxLabel" min="-2" pref="16" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Group type="103" alignment="0" groupAlignment="3" attributes="0">
+                                      <Component id="taxFromattedTextField" alignment="3" min="-2" pref="35" max="-2" attributes="0"/>
+                                      <Component id="setTaxButton" alignment="3" min="-2" pref="35" max="-2" attributes="0"/>
+                                  </Group>
+                                  <Component id="clearTaxButton" alignment="0" max="32767" attributes="0"/>
+                              </Group>
+                              <EmptySpace min="-2" max="-2" attributes="0"/>
+                          </Group>
+                      </Group>
+                    </DimensionLayout>
+                  </Layout>
+                  <SubComponents>
+                    <Component class="javax.swing.JLabel" name="grnTaxLabel">
+                      <Properties>
+                        <Property name="horizontalAlignment" type="int" value="2"/>
+                        <Property name="text" type="java.lang.String" value="Tax Percentage (%)"/>
+                        <Property name="enabled" type="boolean" value="false"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JButton" name="setTaxButton">
+                      <Properties>
+                        <Property name="text" type="java.lang.String" value="Set"/>
+                        <Property name="toolTipText" type="java.lang.String" value="Set Tax Percentage"/>
+                        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                          <Border info="null"/>
+                        </Property>
+                        <Property name="enabled" type="boolean" value="false"/>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="setTaxButtonActionPerformed"/>
+                      </Events>
+                    </Component>
+                    <Component class="javax.swing.JFormattedTextField" name="taxFromattedTextField">
+                      <Properties>
+                        <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
+                          <Format format="#,##0.##" subtype="-1" type="4"/>
+                        </Property>
+                        <Property name="text" type="java.lang.String" value="0"/>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="taxFromattedTextFieldActionPerformed"/>
+                      </Events>
+                    </Component>
+                    <Component class="javax.swing.JButton" name="clearTaxButton">
+                      <Properties>
+                        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                          <Color blue="66" green="66" red="66" type="rgb"/>
+                        </Property>
+                        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                          <Image iconType="3" name="/resource/clean.png"/>
+                        </Property>
+                        <Property name="toolTipText" type="java.lang.String" value="Clear Supplier"/>
+                        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                          <Border info="null"/>
+                        </Property>
+                        <Property name="enabled" type="boolean" value="false"/>
+                      </Properties>
+                      <Events>
+                        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="clearTaxButtonActionPerformed"/>
+                      </Events>
+                    </Component>
+                  </SubComponents>
+                </Container>
+                <Component class="javax.swing.JSeparator" name="jSeparator4">
+                </Component>
               </SubComponents>
             </Container>
             <Container class="javax.swing.JScrollPane" name="jScrollPane1">
@@ -1360,26 +1661,20 @@
                 <Component class="javax.swing.JTable" name="grnItemsTable">
                   <Properties>
                     <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-                      <Table columnCount="9" rowCount="0">
+                      <Table columnCount="8" rowCount="0">
                         <Column editable="false" title="No" type="java.lang.Object"/>
                         <Column editable="false" title="Stock Barcode" type="java.lang.Object"/>
                         <Column editable="false" title="Product Name" type="java.lang.Object"/>
-                        <Column editable="false" title="Buying Price" type="java.lang.Object"/>
-                        <Column editable="false" title="Selling Price" type="java.lang.Object"/>
+                        <Column editable="false" title="Cost Price (Rs.)" type="java.lang.Object"/>
+                        <Column editable="false" title="Marked Price (Rs.)" type="java.lang.Object"/>
                         <Column editable="false" title="Quantity" type="java.lang.Object"/>
-                        <Column editable="false" title="Measurement Unit" type="java.lang.Object"/>
-                        <Column editable="false" title="Discount" type="java.lang.Object"/>
-                        <Column editable="false" title="Item Total" type="java.lang.Object"/>
+                        <Column editable="false" title="Expiry Date" type="java.lang.Object"/>
+                        <Column editable="false" title="Amount (Rs.)" type="java.lang.Object"/>
                       </Table>
                     </Property>
                     <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor">
                       <TableColumnModel selectionModel="0">
                         <Column maxWidth="40" minWidth="40" prefWidth="40" resizable="true">
-                          <Title/>
-                          <Editor/>
-                          <Renderer/>
-                        </Column>
-                        <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
                           <Title/>
                           <Editor/>
                           <Renderer/>
@@ -1428,12 +1723,8 @@
                     </Property>
                   </Properties>
                   <Events>
-                    <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="grnItemsTableMouseClicked"/>
                     <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="grnItemsTableKeyReleased"/>
                   </Events>
-                  <AuxValues>
-                    <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="grnItemsTable.getTableHeader().setReorderingAllowed(false);&#xd;&#xa;&#xd;&#xa;// Center-align the first column (index 0)&#xd;&#xa;DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();&#xd;&#xa;centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);&#xd;&#xa;grnItemsTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);&#xd;&#xa;grnItemsTable.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);&#xd;&#xa;grnItemsTable.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);&#xd;&#xa;grnItemsTable.getColumnModel().getColumn(3).setCellRenderer(centerRenderer);&#xd;&#xa;grnItemsTable.getColumnModel().getColumn(4).setCellRenderer(centerRenderer);&#xd;&#xa;grnItemsTable.getColumnModel().getColumn(5).setCellRenderer(centerRenderer);&#xd;&#xa;grnItemsTable.getColumnModel().getColumn(6).setCellRenderer(centerRenderer);&#xd;&#xa;grnItemsTable.getColumnModel().getColumn(7).setCellRenderer(centerRenderer);&#xd;&#xa;&#xd;&#xa;// Right-align the second column (index 1)&#xd;&#xa;DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();&#xd;&#xa;rightRenderer.setHorizontalAlignment(SwingConstants.RIGHT);&#xd;&#xa;grnItemsTable.getColumnModel().getColumn(8).setCellRenderer(rightRenderer);"/>
-                  </AuxValues>
                 </Component>
               </SubComponents>
             </Container>
@@ -1465,33 +1756,15 @@
               <Layout>
                 <DimensionLayout dim="0">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" attributes="0">
-                          <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
-                          <Component id="currentDateTimeCheckBox" pref="325" max="32767" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
-                      </Group>
+                      <EmptySpace min="0" pref="343" max="32767" attributes="0"/>
                   </Group>
                 </DimensionLayout>
                 <DimensionLayout dim="1">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" alignment="0" attributes="0">
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Component id="currentDateTimeCheckBox" min="-2" pref="20" max="-2" attributes="0"/>
-                          <EmptySpace max="32767" attributes="0"/>
-                      </Group>
+                      <EmptySpace min="0" pref="32" max="32767" attributes="0"/>
                   </Group>
                 </DimensionLayout>
               </Layout>
-              <SubComponents>
-                <Component class="javax.swing.JCheckBox" name="currentDateTimeCheckBox">
-                  <Properties>
-                    <Property name="text" type="java.lang.String" value="Use Current Date Time To GRN"/>
-                  </Properties>
-                  <Events>
-                    <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="currentDateTimeCheckBoxItemStateChanged"/>
-                  </Events>
-                </Component>
-              </SubComponents>
             </Container>
             <Component class="javax.swing.JLabel" name="jLabel2">
               <Properties>
@@ -1540,6 +1813,45 @@
             </Container>
           </SubComponents>
         </Container>
+        <Component class="javax.swing.JSeparator" name="jSeparator5">
+          <Properties>
+            <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+              <Color blue="cc" green="cc" red="cc" type="rgb"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JSeparator" name="jSeparator6">
+          <Properties>
+            <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+              <Color blue="cc" green="cc" red="cc" type="rgb"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabel3">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+              <Font name="Poppins" size="14" style="1"/>
+            </Property>
+            <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+              <Color blue="33" green="33" red="33" type="rgb"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="New GRN"/>
+            <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+              <Border info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
+                <EmptyBorder bottom="0" left="20" right="0" top="0"/>
+              </Border>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="currentDateTimeCheckBox">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Use Current Date Time To GRN"/>
+            <Property name="horizontalAlignment" type="int" value="0"/>
+          </Properties>
+          <Events>
+            <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="currentDateTimeCheckBoxItemStateChanged"/>
+          </Events>
+        </Component>
       </SubComponents>
     </Container>
   </SubComponents>

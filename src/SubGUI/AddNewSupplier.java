@@ -4,12 +4,9 @@
  */
 package SubGUI;
 
-import DTO.VerificationCodeData;
 import java.awt.Toolkit;
 import java.sql.ResultSet;
-import java.util.HashMap;
 import java.util.Vector;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
@@ -25,24 +22,26 @@ import panels.SupplierManagement;
 public class AddNewSupplier extends javax.swing.JDialog {
 
     private SupplierManagement supplierManagement;
+    private NewGRN newGRN;
 
     /**
      * Creates new form AddNewProduct
      */
-    public AddNewSupplier(java.awt.Frame parent, boolean modal, SupplierManagement supplierManagement) {
+    public AddNewSupplier(java.awt.Frame parent, boolean modal, SupplierManagement supplierManagement, NewGRN newGRN) {
         super(parent, modal);
         this.supplierManagement = supplierManagement;
+        this.newGRN = newGRN;
         this.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/resource/icon.png")));
         initComponents();
         loadSupplierTable();
-        
+
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
 
         supplierTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
         supplierTable.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
         supplierTable.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
-        
+
     }
 
     private void loadSupplierTable() {
@@ -61,7 +60,7 @@ public class AddNewSupplier extends javax.swing.JDialog {
                 v.add(results.getString("s.phone"));
                 model.addRow(v);
             }
-            supplierManagement.loadSupplierTable();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -105,9 +104,25 @@ public class AddNewSupplier extends javax.swing.JDialog {
                             + "VALUES ('" + name + "', '" + phone + "')");
                     JOptionPane.showMessageDialog(this, "Supplier Added Successfully", "Success", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/resource/success.png")));
                     loadSupplierTable();
+                    if (supplierManagement != null) {
+                        supplierManagement.loadSupplierTable();
+                    }
+
+                    if (newGRN != null) {
+                        ResultSet supplierRes = MySQL.execute("SELECT id FROM supplier "
+                                + "WHERE name ='" + name + "' AND phone = '" + phone + "' ");
+                        if (supplierRes.next()) {
+                            newGRN.setSupplier(supplierRes.getString("id"));
+                            this.dispose();
+                        } else {
+                            JOptionPane.showMessageDialog(this, "An unexpected error has occurred. Please try again later or contact support if the issue persists.", "Unexpected Error", JOptionPane.ERROR_MESSAGE);
+                        }
+
+                    }
+
                     resetFields();
                 }
-                
+
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "An error occurred: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 e.printStackTrace();

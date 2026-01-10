@@ -950,7 +950,6 @@ public class Home extends javax.swing.JFrame {
     private javax.swing.JPanel quatationsActiveBar;
     private javax.swing.JButton quatationsButton;
     private javax.swing.JPanel reportsActiveBar;
-    private javax.swing.JPanel reportsActiveBar1;
     private javax.swing.JButton reportsButton;
     private javax.swing.JPanel returnManagementActiveBar;
     private javax.swing.JButton returnManagementButton;

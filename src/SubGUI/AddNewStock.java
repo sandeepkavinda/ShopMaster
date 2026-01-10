@@ -156,6 +156,7 @@ public class AddNewStock extends javax.swing.JDialog {
         }
 
     }
+    
     private void addStock() {
 
         String stockBarcode = stockBarcodeFormattedTextField.getText();

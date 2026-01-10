@@ -4,9 +4,12 @@
  */
 package SubGUI;
 
+import java.awt.event.KeyEvent;
 import java.sql.ResultSet;
 import java.util.Vector;
+import javax.swing.JComponent;
 import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -34,8 +37,11 @@ public class SelectSupplier extends javax.swing.JDialog {
 
         loadSupplierTable();
 
-    }
+        supplierTable.grabFocus();
+        supplierTable.setRowSelectionInterval(0, 0);
+        supplierTable.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke("ENTER"), "none");
 
+    }
 
     public void loadSupplierTable() {
         try {
@@ -47,7 +53,7 @@ public class SelectSupplier extends javax.swing.JDialog {
             ResultSet results = MySQL.execute(""
                     + "SELECT * FROM supplier "
                     + "WHERE (name LIKE '%" + search + "%' OR id LIKE '" + search + "%')"
-                    + "ORDER BY p.id DESC");
+                    + "ORDER BY id DESC");
 
             while (results.next()) {
                 Vector v = new Vector();
@@ -66,6 +72,23 @@ public class SelectSupplier extends javax.swing.JDialog {
         loadSupplierTable();
     }
 
+    private void setSelectedSupplier() {
+        int selectedRow = supplierTable.getSelectedRow();
+
+        if (selectedRow != -1) {
+            String id = String.valueOf(supplierTable.getValueAt(selectedRow, 0));
+            //Set to add new stock
+            if (newGRN != null) {
+                newGRN.setSupplier(id);
+            } else {
+                JOptionPane.showMessageDialog(this, "Something Went Wrong", "Warning", JOptionPane.WARNING_MESSAGE);
+            }
+            this.dispose();
+        } else {
+            JOptionPane.showMessageDialog(this, "Please select a row to add", "Warning", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -82,10 +105,12 @@ public class SelectSupplier extends javax.swing.JDialog {
         searchTextField = new javax.swing.JTextField();
         jPanel10 = new javax.swing.JPanel();
         clearSearchButton = new javax.swing.JButton();
+        jPanel11 = new javax.swing.JPanel();
+        jButton2 = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         supplierTable = new javax.swing.JTable();
-        jLabel1 = new javax.swing.JLabel();
+        selectStockButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Select Supplier");
@@ -113,7 +138,7 @@ public class SelectSupplier extends javax.swing.JDialog {
                     .addGroup(jPanel7Layout.createSequentialGroup()
                         .addComponent(jLabel6)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(searchTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 209, Short.MAX_VALUE))
+                    .addComponent(searchTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 135, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel7Layout.setVerticalGroup(
@@ -146,7 +171,7 @@ public class SelectSupplier extends javax.swing.JDialog {
             jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel10Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(clearSearchButton, javax.swing.GroupLayout.DEFAULT_SIZE, 209, Short.MAX_VALUE)
+                .addComponent(clearSearchButton, javax.swing.GroupLayout.DEFAULT_SIZE, 135, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel10Layout.setVerticalGroup(
@@ -158,6 +183,34 @@ public class SelectSupplier extends javax.swing.JDialog {
         );
 
         jPanel2.add(jPanel10);
+
+        jPanel11.setForeground(new java.awt.Color(255, 51, 51));
+
+        jButton2.setText("New Supplier");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel11Layout = new javax.swing.GroupLayout(jPanel11);
+        jPanel11.setLayout(jPanel11Layout);
+        jPanel11Layout.setHorizontalGroup(
+            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel11Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, 135, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel11Layout.setVerticalGroup(
+            jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel11Layout.createSequentialGroup()
+                .addGap(28, 28, 28)
+                .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        jPanel2.add(jPanel11);
 
         jScrollPane1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
 
@@ -183,6 +236,11 @@ public class SelectSupplier extends javax.swing.JDialog {
                 supplierTableMouseClicked(evt);
             }
         });
+        supplierTable.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                supplierTableKeyReleased(evt);
+            }
+        });
         jScrollPane1.setViewportView(supplierTable);
         if (supplierTable.getColumnModel().getColumnCount() > 0) {
             supplierTable.getColumnModel().getColumn(0).setMinWidth(50);
@@ -192,9 +250,14 @@ public class SelectSupplier extends javax.swing.JDialog {
             supplierTable.getColumnModel().getColumn(2).setPreferredWidth(100);
         }
 
-        jLabel1.setFont(new java.awt.Font("Poppins", 2, 12)); // NOI18N
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("(Double Click To Select a Supplier)");
+        selectStockButton1.setForeground(new java.awt.Color(255, 255, 255));
+        selectStockButton1.setText("Select Supplier");
+        selectStockButton1.setBorder(null);
+        selectStockButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectStockButton1ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -204,7 +267,9 @@ public class SelectSupplier extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(selectStockButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -212,9 +277,9 @@ public class SelectSupplier extends javax.swing.JDialog {
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 375, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel1)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(selectStockButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)
+                .addGap(9, 9, 9))
         );
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -234,8 +299,8 @@ public class SelectSupplier extends javax.swing.JDialog {
                 .addContainerGap()
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -263,23 +328,28 @@ public class SelectSupplier extends javax.swing.JDialog {
     }//GEN-LAST:event_clearSearchButtonActionPerformed
 
     private void supplierTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_supplierTableMouseClicked
-        if (evt.getClickCount() == 2) {
-            int selectedRow = supplierTable.getSelectedRow();
 
-            if (selectedRow != -1) {
-                String id = String.valueOf(supplierTable.getValueAt(selectedRow, 0));
-                //Set to add new stock
-                if (newGRN != null) {
-                    newGRN.setSupplier(id);
-                } else {
-                    JOptionPane.showMessageDialog(this, "Something Went Wrong", "Warning", JOptionPane.WARNING_MESSAGE);
-                }
-                this.dispose();
-            } else {
-                JOptionPane.showMessageDialog(this, "Please select a row to add", "Warning", JOptionPane.WARNING_MESSAGE);
-            }
+        if (evt.getClickCount() == 2) {
+            setSelectedSupplier();
         }
+
     }//GEN-LAST:event_supplierTableMouseClicked
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        AddNewSupplier addNewSupplier = new AddNewSupplier(newGRN, true, null, newGRN);
+        this.dispose();
+        addNewSupplier.setVisible(true);
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void supplierTableKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_supplierTableKeyReleased
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            setSelectedSupplier();
+        }
+    }//GEN-LAST:event_supplierTableKeyReleased
+
+    private void selectStockButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectStockButton1ActionPerformed
+        setSelectedSupplier();
+    }//GEN-LAST:event_selectStockButton1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -319,15 +389,18 @@ public class SelectSupplier extends javax.swing.JDialog {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton clearSearchButton;
-    private javax.swing.JLabel jLabel1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
+    private javax.swing.JPanel jPanel11;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextField searchTextField;
+    private javax.swing.JButton selectStockButton;
+    private javax.swing.JButton selectStockButton1;
     private javax.swing.JTable supplierTable;
     // End of variables declaration//GEN-END:variables
 }

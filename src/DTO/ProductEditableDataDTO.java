@@ -8,20 +8,20 @@ package DTO;
  *
  * @author HP
  */
-public class ProductEditableData {
+public class ProductEditableDataDTO {
     private String productName;
     private int categoryId;
     private String category;
     private int measurementUnitId;
 
-    public ProductEditableData(String productName, int categoryId, String category, int measurementUnitId) {
+    public ProductEditableDataDTO(String productName, int categoryId, String category, int measurementUnitId) {
         this.productName = productName;
         this.categoryId = categoryId;
         this.category = category;
         this.measurementUnitId = measurementUnitId;
     }
 
-    public ProductEditableData() {
+    public ProductEditableDataDTO() {
     }
 
     public String getProductName() {

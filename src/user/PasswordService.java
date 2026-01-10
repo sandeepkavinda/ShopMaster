@@ -4,7 +4,7 @@
  */
 package user;
 
-import DTO.VerificationCodeData;
+import DTO.VerificationCodeDataDTO;
 import SubGUI.UserOtpDetails;
 import java.security.SecureRandom;
 import java.sql.Timestamp;
@@ -19,7 +19,7 @@ import panels.UserManagement;
  */
 public class PasswordService {
 
-    public static VerificationCodeData generateVerificationCode() {
+    public static VerificationCodeDataDTO generateVerificationCode() {
 
         LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(30);
         Timestamp expiryTimestamp = Timestamp.valueOf(expiresAt);
@@ -27,7 +27,7 @@ public class PasswordService {
         SecureRandom random = new SecureRandom();
         String verificationCode = String.valueOf(100000 + random.nextInt(900000));
 
-        return new VerificationCodeData(verificationCode, expiryTimestamp);
+        return new VerificationCodeDataDTO(verificationCode, expiryTimestamp);
     }
     
     
@@ -42,7 +42,7 @@ public class PasswordService {
 
         if (result == JOptionPane.YES_OPTION) {
 
-            VerificationCodeData verificationCodeData = generateVerificationCode();
+            VerificationCodeDataDTO verificationCodeData = generateVerificationCode();
             MySQL.execute("UPDATE user SET is_verified = 0, "
                     + "verification_code='" + verificationCodeData.getVerificationCode() + "', "
                     + "verification_code_expiry='" + verificationCodeData.getExpiryTimestamp() + "', "

@@ -1,7 +1,7 @@
 package SubGUI;
 
-import DTO.InvoiceItem;
-import DTO.InvoicePaymentData;
+import DTO.InvoiceItemDTO;
+import DTO.InvoicePaymentDataDTO;
 import java.awt.Toolkit;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
@@ -31,7 +31,7 @@ public class NewInvoice extends javax.swing.JFrame {
     //Inisilize Varables
     private HashMap<String, Integer> rowNumberMap = new HashMap<String, Integer>();
 
-    private InvoiceItem selectedInoviceItem;
+    private InvoiceItemDTO selectedInoviceItem;
 
     private double invoiceTotal;
     private double invoiceDiscount;
@@ -59,7 +59,7 @@ public class NewInvoice extends javax.swing.JFrame {
                 double sellingDiscount = Double.parseDouble(results.getString("selling_discount"));
                 double sellingPrice = Double.parseDouble(results.getString("selling_price"));
 
-                selectedInoviceItem = new InvoiceItem();
+                selectedInoviceItem = new InvoiceItemDTO();
 
                 selectedInoviceItem.setStockBarcode(results.getString("s.barcode"));
                 selectedInoviceItem.setProductName(results.getString("p.name"));
@@ -395,7 +395,7 @@ public class NewInvoice extends javax.swing.JFrame {
         if (rowCount < 1) {
             JOptionPane.showMessageDialog(this, "No Items in the Invoice", "Warning", JOptionPane.WARNING_MESSAGE);
         } else {
-            InvoicePaymentData invoicePaymentData = new InvoicePaymentData(invoiceTotal, invoiceDiscount, invoiceNetTotal, null);
+            InvoicePaymentDataDTO invoicePaymentData = new InvoicePaymentDataDTO(invoiceTotal, invoiceDiscount, invoiceNetTotal, null);
             InvoicePayment invoicePayment = new InvoicePayment(this, true, invoicePaymentData, this);
             invoicePayment.setVisible(true);
         }
@@ -408,7 +408,7 @@ public class NewInvoice extends javax.swing.JFrame {
         if (rowCount < 1) {
             JOptionPane.showMessageDialog(this, "No Items in the Invoice", "Warning", JOptionPane.WARNING_MESSAGE);
         } else {
-            InvoicePaymentData invoicePaymentData = new InvoicePaymentData(invoiceTotal, invoiceDiscount, invoiceNetTotal, null);
+            InvoicePaymentDataDTO invoicePaymentData = new InvoicePaymentDataDTO(invoiceTotal, invoiceDiscount, invoiceNetTotal, null);
             ReturnIdInputToInvoicePayment returnIdInputToInvoicePayment = new ReturnIdInputToInvoicePayment(this, true, invoicePaymentData, this);
             returnIdInputToInvoicePayment.setVisible(true);
         }
@@ -421,7 +421,7 @@ public class NewInvoice extends javax.swing.JFrame {
 
         rowNumberMap = new HashMap<String, Integer>();
 
-        InvoiceItem selectedInoviceItem = null;
+        InvoiceItemDTO selectedInoviceItem = null;
 
         invoiceTotal = 0.00;
         invoiceDiscount = 0.00;

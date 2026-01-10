@@ -1,5 +1,8 @@
 package model;
 
+import java.math.BigDecimal;
+import javax.swing.JOptionPane;
+
 public class Validation {
 
     public static boolean isEmailVaild(String email) {
@@ -49,6 +52,18 @@ public class Validation {
         // Regular expression to match valid price formats
         String pricePattern = "^\\d+(\\.\\d{1,2})?$";
         return price.matches(pricePattern);
+    }
+
+    public static boolean isValidBigDecimal(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return false;
+        }
+        try {
+            new BigDecimal(value);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
 }

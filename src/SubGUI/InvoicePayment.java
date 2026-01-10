@@ -4,7 +4,7 @@
  */
 package SubGUI;
 
-import DTO.InvoicePaymentData;
+import DTO.InvoicePaymentDataDTO;
 import model.Numbers;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,7 +19,7 @@ import javax.swing.JOptionPane;
  */
 public class InvoicePayment extends javax.swing.JDialog {
 
-    private InvoicePaymentData invoicePaymentData;
+    private InvoicePaymentDataDTO invoicePaymentData;
     private NewInvoice newInvoice;
     private String returnVoucherId;
     private double returnedAmount;
@@ -28,7 +28,7 @@ public class InvoicePayment extends javax.swing.JDialog {
     // 1- Cash, 2- Card
     private String paymentMethodId = "1";
 
-    public InvoicePayment(java.awt.Frame parent, boolean modal, InvoicePaymentData invoicePaymentData, NewInvoice newInvoice) {
+    public InvoicePayment(java.awt.Frame parent, boolean modal, InvoicePaymentDataDTO invoicePaymentData, NewInvoice newInvoice) {
         super(parent, modal);
         this.invoicePaymentData = invoicePaymentData;
         this.newInvoice = newInvoice;

@@ -5,7 +5,6 @@ import SubGUI.AddNewSupplier;
 import SubGUI.SupplierDetails;
 import java.awt.event.ItemEvent;
 import java.sql.ResultSet;
-import java.util.HashMap;
 import java.util.Vector;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -443,7 +442,7 @@ public class SupplierManagement extends javax.swing.JPanel {
     }//GEN-LAST:event_supplierTableMouseClicked
 
     private void addNewSupplierButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addNewSupplierButtonActionPerformed
-        AddNewSupplier addNewSupplier = new AddNewSupplier(home, true, this);
+        AddNewSupplier addNewSupplier = new AddNewSupplier(home, true, this,null);
         addNewSupplier.setVisible(true);
     }//GEN-LAST:event_addNewSupplierButtonActionPerformed
 

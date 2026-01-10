@@ -1,6 +1,6 @@
 package SubGUI;
 
-import DTO.InvoicePaymentData;
+import DTO.InvoicePaymentDataDTO;
 import java.sql.ResultSet;
 import javax.swing.JOptionPane;
 import model.MySQL;
@@ -11,10 +11,10 @@ import model.MySQL;
  */
 public class ReturnIdInputToInvoicePayment extends javax.swing.JDialog {
 
-    private InvoicePaymentData invoicePaymentData;
+    private InvoicePaymentDataDTO invoicePaymentData;
     private NewInvoice newInvoice;
 
-    public ReturnIdInputToInvoicePayment(java.awt.Frame parent, boolean modal, InvoicePaymentData invoicePaymentData, NewInvoice newInvoice) {
+    public ReturnIdInputToInvoicePayment(java.awt.Frame parent, boolean modal, InvoicePaymentDataDTO invoicePaymentData, NewInvoice newInvoice) {
         super(parent, modal);
         this.invoicePaymentData = invoicePaymentData;
         this.newInvoice = newInvoice;

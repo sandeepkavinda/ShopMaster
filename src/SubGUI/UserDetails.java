@@ -1,6 +1,6 @@
 package SubGUI;
 
-import DTO.UserEditableData;
+import DTO.UserEditableDataDTO;
 import constants.UserStatusConstants;
 import java.awt.Color;
 import java.sql.ResultSet;
@@ -23,7 +23,7 @@ public class UserDetails extends javax.swing.JDialog {
     private UserManagement userManagement;
     private String username;
 
-    private UserEditableData userEditableData = new UserEditableData();
+    private UserEditableDataDTO userEditableData = new UserEditableDataDTO();
 
     private int userStatusId;
 

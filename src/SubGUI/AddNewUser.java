@@ -4,7 +4,7 @@
  */
 package SubGUI;
 
-import DTO.VerificationCodeData;
+import DTO.VerificationCodeDataDTO;
 import java.awt.Toolkit;
 import java.sql.ResultSet;
 import java.util.HashMap;
@@ -28,7 +28,7 @@ public class AddNewUser extends javax.swing.JDialog {
 
     UserManagement userManagement;
 
-    HashMap<String, String> userTypeMap = new HashMap<>();
+    private HashMap<String, String> userTypeMap = new HashMap<>();
 
     /**
      * Creates new form AddNewProduct
@@ -140,7 +140,7 @@ public class AddNewUser extends javax.swing.JDialog {
                     usernameTextField.selectAll();
                 } else {
 
-                    VerificationCodeData verificationCodeData = PasswordService.generateVerificationCode();
+                    VerificationCodeDataDTO verificationCodeData = PasswordService.generateVerificationCode();
 
                     MySQL.execute("INSERT INTO user (full_name, username, email, password, user_type_id, user_status_id, is_verified, verification_code, verification_code_expiry) "
                             + "VALUES ('" + fullName + "', '" + userName + "', '" + email + "', " + null + ", '" + userTypeId + "', '1', '0', '" + verificationCodeData.getVerificationCode() + "', '" + verificationCodeData.getExpiryTimestamp()+ "')");

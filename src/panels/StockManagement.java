@@ -29,7 +29,7 @@ import utils.ToastUtils;
 public class StockManagement extends javax.swing.JPanel {
 
     public Home home;
-    HashMap<String, String> productMap = new HashMap<>();
+    private HashMap<Integer, String> productIdMap = new HashMap<>();
 
     /**
      * Creates new form ProductManagement
@@ -37,6 +37,7 @@ public class StockManagement extends javax.swing.JPanel {
     public StockManagement(Home home) {
         this.home = home;
         initComponents();
+        loadProducts();
         loadStockTable();
         
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
@@ -51,9 +52,32 @@ public class StockManagement extends javax.swing.JPanel {
         stockTable.getColumnModel().getColumn(3).setCellRenderer(centerRenderer);
         stockTable.getColumnModel().getColumn(4).setCellRenderer(centerRenderer);
         stockTable.getColumnModel().getColumn(5).setCellRenderer(centerRenderer);
+        stockTable.getColumnModel().getColumn(6).setCellRenderer(centerRenderer);
         
     }
 
+    private void loadProducts() {
+        try {
+            ResultSet result = MySQL.execute("SELECT * FROM product p "
+                    + "INNER JOIN measurement_unit mu ON p.measurement_unit_id = mu.id");
+            Vector v = new Vector();
+            v.add("All Products");
+
+            int comboboxIndex = 1;
+
+            while (result.next()) {
+                v.add(result.getString("p.id")+" - "+result.getString("p.name"));
+                productIdMap.put(comboboxIndex, result.getString("p.id"));
+                comboboxIndex++;
+            }
+
+            DefaultComboBoxModel model = new DefaultComboBoxModel(v);
+            productComboBox.setModel(model);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 
     public void loadStockTable() {
@@ -61,6 +85,7 @@ public class StockManagement extends javax.swing.JPanel {
 
             barcodeTextField.setText("");
             String searchText = searchTextField.getText();
+            String productId = productIdMap.get(productComboBox.getSelectedIndex());
 
             int sortBy = sortByComboBox.getSelectedIndex();
 
@@ -82,6 +107,10 @@ public class StockManagement extends javax.swing.JPanel {
             }
 
             String searchByProductQueryPart = "";
+            
+            if(productId != null){
+                searchByProductQueryPart = "AND p.id = '"+productId+"' ";
+            }
 
             DefaultTableModel model = (DefaultTableModel) stockTable.getModel();
             model.setRowCount(0);
@@ -90,13 +119,15 @@ public class StockManagement extends javax.swing.JPanel {
                     + "SELECT * FROM stock s "
                     + "INNER JOIN product p ON s.product_id = p.id "
                     + "INNER JOIN measurement_unit mu ON p.measurement_unit_id=mu.id "
-                    + "WHERE p.name LIKE '%" + searchText + "%' OR s.barcode LIKE '%" + searchText + "%' OR s.created_at LIKE '%" + searchText + "%' "
+                    + "WHERE (p.name LIKE '%" + searchText + "%' OR s.barcode LIKE '%" + searchText + "%' OR s.created_at LIKE '%" + searchText + "%') "
+                    + searchByProductQueryPart       
                     + "ORDER BY " + sortByColumn + " " + sortByType + "");
 
             while (results.next()) {
 
                 Vector v = new Vector();
                 v.add(results.getString("s.barcode"));
+                v.add(results.getString("p.id"));
                 v.add(results.getString("p.name"));
                 v.add(Numbers.formatQuantity(results.getDouble("s.current_quantity")));
                 v.add(Numbers.formatQuantity(results.getDouble("s.reorder_level")));
@@ -113,6 +144,7 @@ public class StockManagement extends javax.swing.JPanel {
     private void clearSearch() {
         barcodeTextField.setText("");
         searchTextField.setText("");
+        productComboBox.setSelectedIndex(0);
         sortByComboBox.setSelectedIndex(0);
 
         loadStockTable();
@@ -179,6 +211,7 @@ public class StockManagement extends javax.swing.JPanel {
                 if (results.next()) {
                     Vector v = new Vector();
                     v.add(results.getString("s.barcode"));
+                    v.add(results.getString("p.id"));
                     v.add(results.getString("p.name"));
                     v.add(Numbers.formatQuantity(results.getDouble("s.current_quantity")));
                     v.add(Numbers.formatQuantity(results.getDouble("s.reorder_level")));
@@ -219,6 +252,9 @@ public class StockManagement extends javax.swing.JPanel {
         jPanel5 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         searchTextField = new javax.swing.JTextField();
+        jPanel6 = new javax.swing.JPanel();
+        productComboBox = new javax.swing.JComboBox<>();
+        jLabel7 = new javax.swing.JLabel();
         jPanel4 = new javax.swing.JPanel();
         sortByComboBox = new javax.swing.JComboBox<>();
         jLabel5 = new javax.swing.JLabel();
@@ -226,8 +262,6 @@ public class StockManagement extends javax.swing.JPanel {
         addNewProductButton1 = new javax.swing.JButton();
         jPanel8 = new javax.swing.JPanel();
         addNewProductButton = new javax.swing.JButton();
-        jPanel6 = new javax.swing.JPanel();
-        deleteButton = new javax.swing.JButton();
         jPanel9 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         stockTable = new javax.swing.JTable();
@@ -316,6 +350,41 @@ public class StockManagement extends javax.swing.JPanel {
         );
 
         jPanel2.add(jPanel5);
+
+        jPanel6.setForeground(new java.awt.Color(255, 51, 51));
+
+        productComboBox.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                productComboBoxItemStateChanged(evt);
+            }
+        });
+
+        jLabel7.setText("Product");
+
+        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
+        jPanel6.setLayout(jPanel6Layout);
+        jPanel6Layout.setHorizontalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(productComboBox, 0, 128, Short.MAX_VALUE)
+                    .addGroup(jPanel6Layout.createSequentialGroup()
+                        .addComponent(jLabel7)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        jPanel6Layout.setVerticalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel7)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(productComboBox, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        jPanel2.add(jPanel6);
 
         jPanel4.setForeground(new java.awt.Color(255, 51, 51));
 
@@ -415,36 +484,6 @@ public class StockManagement extends javax.swing.JPanel {
 
         jPanel2.add(jPanel8);
 
-        jPanel6.setForeground(new java.awt.Color(255, 51, 51));
-
-        deleteButton.setText("Delete");
-        deleteButton.setToolTipText("Delete Selected Product");
-        deleteButton.setBorder(null);
-        deleteButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                deleteButtonActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
-        jPanel6.setLayout(jPanel6Layout);
-        jPanel6Layout.setHorizontalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel6Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(deleteButton, javax.swing.GroupLayout.DEFAULT_SIZE, 128, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-        jPanel6Layout.setVerticalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel6Layout.createSequentialGroup()
-                .addGap(28, 28, 28)
-                .addComponent(deleteButton, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-
-        jPanel2.add(jPanel6);
-
         jScrollPane1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
 
         stockTable.setModel(new javax.swing.table.DefaultTableModel(
@@ -452,11 +491,11 @@ public class StockManagement extends javax.swing.JPanel {
 
             },
             new String [] {
-                "Barcode", "Product Name", "Current Quantity", "Reorder Level", "Quantity Unit", "Added Date Time"
+                "Barcode", "Product Id", "Product Name", "Current Quantity", "Reorder Level", "Quantity Unit", "Added Date Time"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false
+                false, false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -471,8 +510,8 @@ public class StockManagement extends javax.swing.JPanel {
         });
         jScrollPane1.setViewportView(stockTable);
         if (stockTable.getColumnModel().getColumnCount() > 0) {
-            stockTable.getColumnModel().getColumn(1).setMinWidth(200);
-            stockTable.getColumnModel().getColumn(1).setPreferredWidth(200);
+            stockTable.getColumnModel().getColumn(2).setMinWidth(200);
+            stockTable.getColumnModel().getColumn(2).setPreferredWidth(200);
         }
 
         javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
@@ -553,12 +592,6 @@ public class StockManagement extends javax.swing.JPanel {
         searchByBarcode();
     }//GEN-LAST:event_barcodeTextFieldActionPerformed
 
-    private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
-        // TODO add your handling code here:
-        deleteSelectedStock();
-
-    }//GEN-LAST:event_deleteButtonActionPerformed
-
     private void stockTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_stockTableMouseClicked
         if (evt.getClickCount() == 3) {
             deleteSelectedStock();
@@ -584,16 +617,20 @@ public class StockManagement extends javax.swing.JPanel {
         loadStockTable();
     }//GEN-LAST:event_searchTextFieldKeyReleased
 
+    private void productComboBoxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_productComboBoxItemStateChanged
+        loadStockTable();
+    }//GEN-LAST:event_productComboBoxItemStateChanged
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addNewProductButton;
     private javax.swing.JButton addNewProductButton1;
     private javax.swing.JTextField barcodeTextField;
-    private javax.swing.JButton deleteButton;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel2;
@@ -604,6 +641,7 @@ public class StockManagement extends javax.swing.JPanel {
     private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel9;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JComboBox<String> productComboBox;
     private javax.swing.JTextField searchTextField;
     private javax.swing.JComboBox<String> sortByComboBox;
     private javax.swing.JTable stockTable;

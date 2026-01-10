@@ -2,18 +2,18 @@ package DTO;
 
 import java.sql.ResultSet;
 
-public class InvoicePaymentData {
+public class InvoicePaymentDataDTO {
 
     private double invoiceTotal;
     private double invoiceDiscount;
     private double invoiceNetTotal;
     private ResultSet returnResultset;
 
-    public InvoicePaymentData() {
+    public InvoicePaymentDataDTO() {
 
     }
 
-    public InvoicePaymentData(double invoiceTotal, double invoiceDiscount, double invoiceNetTotal, ResultSet returnResultset) {
+    public InvoicePaymentDataDTO(double invoiceTotal, double invoiceDiscount, double invoiceNetTotal, ResultSet returnResultset) {
         this.invoiceTotal = invoiceTotal;
         this.invoiceDiscount = invoiceDiscount;
         this.invoiceNetTotal = invoiceNetTotal;

@@ -2,12 +2,12 @@ package DTO;
 
 import java.sql.Timestamp;
 
-public class VerificationCodeData {
+public class VerificationCodeDataDTO {
     
     private String verificationCode;
     private Timestamp expiryTimestamp;
 
-    public VerificationCodeData(String verificationCode, Timestamp expiryTimestamp) {
+    public VerificationCodeDataDTO(String verificationCode, Timestamp expiryTimestamp) {
         this.verificationCode = verificationCode;
         this.expiryTimestamp = expiryTimestamp;
     }

@@ -1,6 +1,6 @@
 package SubGUI;
 
-import DTO.ProductEditableData;
+import DTO.ProductEditableDataDTO;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Vector;
@@ -18,7 +18,7 @@ public class ProductDetails extends javax.swing.JDialog {
 
     private ProductManagement productManagement;
     private String productId;
-    private ProductEditableData productEditableData;
+    private ProductEditableDataDTO productEditableData;
 
     HashMap<String, Integer> categoryIdMap = new HashMap<>();
 
@@ -70,7 +70,7 @@ public class ProductDetails extends javax.swing.JDialog {
                 categoryComboBox.setSelectedItem(result.getString("c.name"));
                 MeasurementUnitTextField.setText(result.getString("mu.name"));
 
-                productEditableData = new ProductEditableData(
+                productEditableData = new ProductEditableDataDTO(
                         result.getString("p.name"),
                         result.getInt("c.id"),
                         result.getString("c.name"),
