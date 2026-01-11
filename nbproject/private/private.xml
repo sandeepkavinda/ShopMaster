@@ -15,9 +15,11 @@
             <file>file:/C:/Users/techn/Documents/Dev/Netbeans%20Projects/ShopMaster/src/SubGUI/NewGRN.java</file>
             <file>file:/C:/Users/techn/Documents/Dev/Netbeans%20Projects/ShopMaster/src/SubGUI/AddNewUser.java</file>
             <file>file:/C:/Users/techn/Documents/Dev/Netbeans%20Projects/ShopMaster/src/panels/GrnManagement.java</file>
-            <file>file:/C:/Users/techn/Documents/Dev/Netbeans%20Projects/ShopMaster/src/model/MySQL.java</file>
-            <file>file:/C:/Users/techn/Documents/Dev/Netbeans%20Projects/ShopMaster/src/SubGUI/GRNPayment.java</file>
-            <file>file:/C:/Users/techn/Documents/Dev/Netbeans%20Projects/ShopMaster/src/SubGUI/GRNPaymentD.java</file>
+            <file>file:/C:/Users/techn/Documents/Dev/Netbeans%20Projects/ShopMaster/src/panels/InvoiceManagement.java</file>
+            <file>file:/C:/Users/techn/Documents/Dev/Netbeans%20Projects/ShopMaster/src/SubGUI/UserDetails.java</file>
+            <file>file:/C:/Users/techn/Documents/Dev/Netbeans%20Projects/ShopMaster/src/SubGUI/InvoiceDetails.java</file>
+            <file>file:/C:/Users/techn/Documents/Dev/Netbeans%20Projects/ShopMaster/src/SubGUI/ProductDetails.java</file>
+            <file>file:/C:/Users/techn/Documents/Dev/Netbeans%20Projects/ShopMaster/src/SubGUI/GrnPaymentHistory.java</file>
         </group>
     </open-files>
 </project-private>

@@ -162,7 +162,6 @@ public class GrnPaymentHistory extends javax.swing.JDialog {
         grnTotalTextLabel1 = new javax.swing.JLabel();
         balanceValueLabel = new javax.swing.JLabel();
         jSeparator5 = new javax.swing.JSeparator();
-        jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         payButton = new javax.swing.JButton();
         jPanel6 = new javax.swing.JPanel();
@@ -338,11 +337,6 @@ public class GrnPaymentHistory extends javax.swing.JDialog {
                 .addContainerGap(9, Short.MAX_VALUE))
         );
 
-        jLabel4.setFont(new java.awt.Font("Poppins", 1, 14)); // NOI18N
-        jLabel4.setForeground(new java.awt.Color(0, 105, 75));
-        jLabel4.setText("GRN Payment History");
-        jLabel4.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 10, 1, 1));
-
         jLabel5.setFont(new java.awt.Font("Poppins", 1, 12)); // NOI18N
         jLabel5.setText("Summery");
         jLabel5.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 10, 1, 1));
@@ -369,11 +363,6 @@ public class GrnPaymentHistory extends javax.swing.JDialog {
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
-            .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(jPanel4Layout.createSequentialGroup()
-                    .addGap(0, 0, Short.MAX_VALUE)
-                    .addComponent(jLabel4)
-                    .addGap(0, 0, Short.MAX_VALUE)))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -385,11 +374,6 @@ public class GrnPaymentHistory extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(payButton, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
-            .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(jPanel4Layout.createSequentialGroup()
-                    .addGap(0, 0, Short.MAX_VALUE)
-                    .addComponent(jLabel4)
-                    .addGap(0, 0, Short.MAX_VALUE)))
         );
 
         jScrollPane1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(204, 204, 204)));
@@ -430,8 +414,8 @@ public class GrnPaymentHistory extends javax.swing.JDialog {
         jLabel6.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 0, 0));
 
         paidAmountSummeryLabel.setFont(new java.awt.Font("Poppins", 1, 12)); // NOI18N
-        paidAmountSummeryLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        paidAmountSummeryLabel.setText("Paid Amount : 2500.00");
+        paidAmountSummeryLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        paidAmountSummeryLabel.setText("Paid Amount : ");
         paidAmountSummeryLabel.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 5));
 
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
@@ -505,7 +489,7 @@ public class GrnPaymentHistory extends javax.swing.JDialog {
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(12, 12, 12)
+                .addGap(18, 18, 18)
                 .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -515,7 +499,7 @@ public class GrnPaymentHistory extends javax.swing.JDialog {
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 9, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(12, Short.MAX_VALUE))
+                .addContainerGap(15, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -594,7 +578,6 @@ public class GrnPaymentHistory extends javax.swing.JDialog {
     private javax.swing.JLabel grnTotalValueLabel;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel1;

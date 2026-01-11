@@ -202,7 +202,8 @@ public class GRNPayment extends javax.swing.JFrame {
                     if (grnManagement != null) {
                         grnManagement.loadGRNTable();
                     }
-
+                    
+                    this.dispose();
                 }
 
             } catch (Exception e) {

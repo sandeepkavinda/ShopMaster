@@ -5,6 +5,7 @@
 package panels;
 
 import GUI.Home;
+import SubGUI.GRNDetails;
 import SubGUI.GRNPayment;
 import SubGUI.GrnPaymentHistory;
 import SubGUI.NewGRN;
@@ -16,6 +17,7 @@ import java.util.Vector;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import model.BigDecimalFormatter;
@@ -219,6 +221,17 @@ public class GrnManagement extends javax.swing.JPanel {
 
     }
 
+    private void viewSelectedGrn() {
+
+        int selectedRow = grnTable.getSelectedRow();
+
+        if (selectedRow != -1) {
+            String grnBarcode = String.valueOf(grnTable.getValueAt(selectedRow, 0));
+            new GRNDetails(grnBarcode,this);
+        }
+
+    }
+    
     private void payToSelectedGrn() {
 
         int selectedRow = grnTable.getSelectedRow();
@@ -444,8 +457,8 @@ public class GrnManagement extends javax.swing.JPanel {
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addComponent(jLabel3)
-                        .addGap(0, 78, Short.MAX_VALUE))
-                    .addComponent(searchTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 113, Short.MAX_VALUE))
+                        .addGap(0, 73, Short.MAX_VALUE))
+                    .addComponent(searchTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 108, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel5Layout.setVerticalGroup(
@@ -481,7 +494,7 @@ public class GrnManagement extends javax.swing.JPanel {
                     .addComponent(supplierComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel4)
-                        .addGap(0, 70, Short.MAX_VALUE)))
+                        .addGap(0, 65, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -514,10 +527,10 @@ public class GrnManagement extends javax.swing.JPanel {
             .addGroup(jPanel6Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(balanceDueComboBox, 0, 113, Short.MAX_VALUE)
+                    .addComponent(balanceDueComboBox, 0, 108, Short.MAX_VALUE)
                     .addGroup(jPanel6Layout.createSequentialGroup()
                         .addComponent(jLabel7)
-                        .addGap(0, 48, Short.MAX_VALUE)))
+                        .addGap(0, 43, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel6Layout.setVerticalGroup(
@@ -555,7 +568,7 @@ public class GrnManagement extends javax.swing.JPanel {
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sortByComboBox, 0, 113, Short.MAX_VALUE)
+                    .addComponent(sortByComboBox, 0, 108, Short.MAX_VALUE)
                     .addGroup(jPanel4Layout.createSequentialGroup()
                         .addComponent(jLabel5)
                         .addGap(0, 0, Short.MAX_VALUE)))
@@ -591,7 +604,7 @@ public class GrnManagement extends javax.swing.JPanel {
             jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel10Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(clearSearchButton, javax.swing.GroupLayout.DEFAULT_SIZE, 107, Short.MAX_VALUE)
+                .addComponent(clearSearchButton, javax.swing.GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE)
                 .addGap(12, 12, 12))
         );
         jPanel10Layout.setVerticalGroup(
@@ -620,7 +633,7 @@ public class GrnManagement extends javax.swing.JPanel {
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel8Layout.createSequentialGroup()
                 .addGap(12, 12, 12)
-                .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE)
+                .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, 101, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel8Layout.setVerticalGroup(
@@ -668,7 +681,7 @@ public class GrnManagement extends javax.swing.JPanel {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 828, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -686,9 +699,9 @@ public class GrnManagement extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -738,10 +751,13 @@ public class GrnManagement extends javax.swing.JPanel {
     }//GEN-LAST:event_sortByComboBoxActionPerformed
 
     private void grnTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_grnTableMouseClicked
-        // TODO add your handling code here:
+          if (evt.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(evt)) {
+            viewSelectedGrn();
+        }
     }//GEN-LAST:event_grnTableMouseClicked
 
     private void viewMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewMenuItemActionPerformed
+        viewSelectedGrn();
     }//GEN-LAST:event_viewMenuItemActionPerformed
 
     private void supplierDetailsMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_supplierDetailsMenuItemActionPerformed
